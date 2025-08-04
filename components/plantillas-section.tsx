@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -204,9 +205,11 @@ export function PlantillasSection() {
         {filteredPlantillas.map((plantilla) => (
           <Card key={plantilla.id} className="overflow-hidden border-0 shadow-sm bg-white">
             <div className="aspect-video bg-muted">
-              <img
+              <Image
                 src={plantilla.preview || "/placeholder.svg"}
                 alt={plantilla.nombre}
+                width={400}
+                height={225}
                 className="h-full w-full object-cover"
               />
             </div>
