@@ -69,127 +69,176 @@ export function OrganizacionesSection() {
   const getStatusBadge = (estado: string) => {
     switch (estado) {
       case "Activa":
-        return <Badge className="bg-booster-green/10 text-booster-green border-booster-green/20">Activa</Badge>
+        return <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 shadow-sm">✓ Activa</Badge>
       case "Pendiente":
-        return <Badge className="bg-booster-orange/10 text-booster-orange border-booster-orange/20">Pendiente</Badge>
+        return <Badge className="bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 border-orange-200 shadow-sm">⏳ Pendiente</Badge>
       case "Inactiva":
-        return <Badge className="bg-booster-red/10 text-booster-red border-booster-red/20">Inactiva</Badge>
+        return <Badge className="bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border-red-200 shadow-sm">✕ Inactiva</Badge>
       default:
-        return <Badge>{estado}</Badge>
+        return <Badge className="bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200">{estado}</Badge>
     }
   }
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-0 shadow-sm bg-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 card-hover-effect overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full -translate-y-10 translate-x-10"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
             <CardTitle className="text-sm font-medium text-gray-700">Total Organizaciones</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-booster-blue/10 flex items-center justify-center">
-              <Building2 className="h-4 w-4 text-booster-blue" />
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+              <Building2 className="h-5 w-5 text-white" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{organizaciones.length}</div>
-            <p className="text-xs text-booster-green">+2 desde el mes pasado</p>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              {organizaciones.length}
+            </div>
+            <p className="text-sm text-green-600 font-medium flex items-center mt-1">
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              +2 desde el mes pasado
+            </p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-green-100 card-hover-effect overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-emerald-400/20 to-green-400/20 rounded-full -translate-y-10 translate-x-10"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
             <CardTitle className="text-sm font-medium text-gray-700">Organizaciones Activas</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-booster-green/10 flex items-center justify-center">
-              <Users className="h-4 w-4 text-booster-green" />
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
+              <Users className="h-5 w-5 text-white" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
               {organizaciones.filter((org) => org.estado === "Activa").length}
             </div>
-            <p className="text-xs text-booster-green">80% del total</p>
+            <p className="text-sm text-emerald-600 font-medium flex items-center mt-1">
+              <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
+              80% del total
+            </p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-pink-100 card-hover-effect overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full -translate-y-10 translate-x-10"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
             <CardTitle className="text-sm font-medium text-gray-700">Total Empleados</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-booster-orange/10 flex items-center justify-center">
-              <Calendar className="h-4 w-4 text-booster-orange" />
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+              <Calendar className="h-5 w-5 text-white" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               {organizaciones.reduce((sum, org) => sum + org.empleados, 0)}
             </div>
-            <p className="text-xs text-gray-600">Across all organizations</p>
+            <p className="text-sm text-purple-600 font-medium flex items-center mt-1">
+              <span className="inline-block w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+              En todas las organizaciones
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content */}
-      <Card className="border-0 shadow-sm bg-white">
-        <CardHeader>
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 card-hover-effect">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-gray-900">Gestión de Organizaciones</CardTitle>
-              <CardDescription className="text-gray-600">
-                Administra y supervisa todas las organizaciones registradas
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                🏢 Gestión de Organizaciones
+              </CardTitle>
+              <CardDescription className="text-gray-600 mt-1">
+                Administra y supervisa todas las organizaciones registradas en el sistema
               </CardDescription>
             </div>
-            <Button>
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
               <Plus className="mr-2 h-4 w-4" />
               Nueva Organización
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-2 mb-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Buscar organizaciones..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                className="pl-10 bg-white border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 shadow-sm"
               />
             </div>
+            <Button variant="outline" className="border-gray-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100">
+              Filtros
+            </Button>
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-lg border border-gray-200 shadow-sm overflow-hidden bg-white">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-gray-700">Organización</TableHead>
-                  <TableHead className="text-gray-700">Tipo</TableHead>
-                  <TableHead className="text-gray-700">Empleados</TableHead>
-                  <TableHead className="text-gray-700">Estado</TableHead>
-                  <TableHead className="text-gray-700">Fecha Creación</TableHead>
-                  <TableHead className="text-right text-gray-700">Acciones</TableHead>
+              <TableHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <TableRow className="border-gray-200">
+                  <TableHead className="text-gray-700 font-semibold">🏢 Organización</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">🏷️ Tipo</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">👥 Empleados</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">📊 Estado</TableHead>
+                  <TableHead className="text-gray-700 font-semibold">📅 Fecha Creación</TableHead>
+                  <TableHead className="text-right text-gray-700 font-semibold">⚙️ Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrganizaciones.map((org) => (
-                  <TableRow key={org.id}>
+                {filteredOrganizaciones.map((org, index) => (
+                  <TableRow 
+                    key={org.id} 
+                    className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-colors duration-200 ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                    }`}
+                  >
                     <TableCell>
-                      <div>
-                        <div className="font-medium text-gray-900">{org.nombre}</div>
-                        <div className="text-sm text-gray-600">{org.contacto}</div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
+                          <Building2 className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900">{org.nombre}</div>
+                          <div className="text-sm text-gray-500">{org.contacto}</div>
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-700">{org.tipo}</TableCell>
-                    <TableCell className="text-gray-700">{org.empleados}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
+                        {org.tipo}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4 text-gray-400" />
+                        <span className="font-medium text-gray-700">{org.empleados}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>{getStatusBadge(org.estado)}</TableCell>
-                    <TableCell className="text-gray-700">{org.fechaCreacion}</TableCell>
+                    <TableCell className="text-gray-600 font-medium">{org.fechaCreacion}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button 
+                            variant="ghost" 
+                            className="h-9 w-9 p-0 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200 rounded-lg"
+                          >
+                            <MoreHorizontal className="h-4 w-4 text-gray-600" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-                          <DropdownMenuItem>Editar</DropdownMenuItem>
-                          <DropdownMenuItem>Desactivar</DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm border-gray-200">
+                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">
+                            👁️ Ver detalles
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50">
+                            ✏️ Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50">
+                            🚫 Desactivar
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

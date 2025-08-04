@@ -27,26 +27,61 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 items-center gap-4 border-b border-gray-200 bg-booster-gray-800 px-6">
-        <SidebarTrigger className="text-white hover:bg-booster-gray-700" />
+    <div className="flex flex-col min-h-screen relative overflow-hidden">
+      {/* Fondo decorativo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 opacity-60"></div>
+      <div className="absolute inset-0" style={{
+        backgroundImage: `
+          radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%)
+        `,
+        backgroundSize: '100% 100%'
+      }}></div>
+      
+      <header className="relative z-10 flex h-16 items-center gap-4 border-b border-purple-200/50 bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 px-6 shadow-lg">
+        <SidebarTrigger className="text-white hover:bg-white/20 rounded-lg transition-colors duration-200" />
         <div className="flex-1">
-          <h1 className="text-lg font-semibold text-white">
-            {activeSection === "organizaciones" && "Lista de Organizaciones"}
-            {activeSection === "estadisticas" && "Estadísticas"}
-            {activeSection === "plantillas" && "Plantillas"}
-            {activeSection === "formularios" && "Formularios"}
+          <h1 className="text-lg font-semibold text-white drop-shadow-sm">
+            {activeSection === "organizaciones" && "📊 Lista de Organizaciones"}
+            {activeSection === "estadisticas" && "📈 Estadísticas"}
+            {activeSection === "plantillas" && "📋 Plantillas"}
+            {activeSection === "formularios" && "📝 Formularios"}
           </h1>
         </div>
+        <div className="hidden md:flex items-center space-x-4 text-white/90">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-sm">Sistema Activo</span>
+          </div>
+        </div>
       </header>
-      <div className="flex-1 p-6 bg-booster-gray-50">{renderSection()}</div>
-      <footer className="border-t border-gray-200 bg-booster-gray-800 px-6 py-4">
-        <div className="flex items-center justify-between text-sm text-gray-300">
-          <span>© 2024 AdminPanel Dashboard. Todos los derechos reservados.</span>
-          <div className="flex items-center space-x-4">
-            <span>Versión 1.0.0</span>
+      
+      <div className="relative z-10 flex-1 p-6" style={{
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)'
+      }}>
+        <div className="max-w-7xl mx-auto">
+          {renderSection()}
+        </div>
+      </div>
+      
+      <footer className="relative z-10 border-t border-purple-200/50 bg-gradient-to-r from-gray-800 via-gray-900 to-black px-6 py-4 shadow-lg">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs">DM</span>
+              </div>
+              <span className="text-gray-300 font-medium">© 2025 Desarrollo en Movimiento. Todos los derechos reservados.</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4 text-gray-400">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+              <span>Versión 1.0.0</span>
+            </div>
             <span>•</span>
-            <span>Soporte: admin@empresa.com</span>
+            <span>Soporte: info@desarrolloenmovimiento.org</span>
           </div>
         </div>
       </footer>
