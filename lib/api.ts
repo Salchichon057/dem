@@ -106,9 +106,7 @@ export interface NuevoFormulario {
 }
 
 // Configuración base para las llamadas
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://tu-dominio.com/api' 
-  : '/api'
+const API_BASE_URL = '/api'
 
 /**
  * Función helper para hacer llamadas HTTP con manejo de errores
