@@ -1,40 +1,37 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/auth-context'
 
 interface AuthWrapperProps {
   children: React.ReactNode
 }
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    // Verificar autenticación en el cliente
-    const authenticated = localStorage.getItem("authenticated") === "true"
-    setIsAuthenticated(authenticated)
-    
-    if (!authenticated) {
-      router.push("/auth")
+    if (!loading && !user) {
+      router.push('/auth')
     }
-  }, [router])
+  }, [user, loading, router])
 
   // Mostrar loading mientras verifica
-  if (isAuthenticated === null) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Verificando autenticación...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Verificando autenticación...</p>
         </div>
       </div>
     )
   }
 
   // Si no está autenticado, no mostrar nada (se redirige)
-  if (!isAuthenticated) {
+  if (!user) {
     return null
   }
 

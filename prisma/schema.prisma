@@ -1,0 +1,202 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(USER)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  organizaciones OrganizacionMember[]
+  formularios    Formulario[]
+  plantillas     Plantilla[]
+  estadisticas   Estadistica[]
+
+  @@map("users")
+}
+
+model Organizacion {
+  id          String   @id @default(cuid())
+  nombre      String
+  descripcion String?
+  logo        String?
+  estado      EstadoOrganizacion @default(ACTIVA)
+  direccion   String?
+  telefono    String?
+  email       String?
+  sitioWeb    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  miembros     OrganizacionMember[]
+  formularios  Formulario[]
+  plantillas   Plantilla[]
+  estadisticas Estadistica[]
+
+  @@map("organizaciones")
+}
+
+model OrganizacionMember {
+  id             String @id @default(cuid())
+  userId         String
+  organizacionId String
+  rol            RolOrganizacion @default(MIEMBRO)
+  fechaIngreso   DateTime @default(now())
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizacion Organizacion @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizacionId])
+  @@map("organizacion_members")
+}
+
+model Formulario {
+  id             String @id @default(cuid())
+  titulo         String
+  descripcion    String?
+  contenido      Json   // Almacena la estructura del formulario
+  estado         EstadoFormulario @default(BORRADOR)
+  fechaPublicacion DateTime?
+  fechaVencimiento DateTime?
+  permiteMultiples Boolean @default(true)
+  requiereLogin    Boolean @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Foreign Keys
+  creadorId      String
+  organizacionId String?
+
+  // Relations
+  creador      User          @relation(fields: [creadorId], references: [id])
+  organizacion Organizacion? @relation(fields: [organizacionId], references: [id])
+  respuestas   RespuestaFormulario[]
+  plantilla    Plantilla?
+
+  @@map("formularios")
+}
+
+model RespuestaFormulario {
+  id          String   @id @default(cuid())
+  formularioId String
+  respuestas  Json     // Almacena las respuestas del formulario
+  emailContacto String?
+  nombreContacto String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  formulario Formulario @relation(fields: [formularioId], references: [id], onDelete: Cascade)
+
+  @@map("respuestas_formulario")
+}
+
+model Plantilla {
+  id          String @id @default(cuid())
+  nombre      String
+  descripcion String?
+  contenido   Json   // Estructura del formulario template
+  categoria   CategoriaPlantilla @default(GENERAL)
+  esPublica   Boolean @default(false)
+  usoCount    Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Foreign Keys
+  creadorId      String
+  organizacionId String?
+  formularioId   String? @unique
+
+  // Relations
+  creador      User          @relation(fields: [creadorId], references: [id])
+  organizacion Organizacion? @relation(fields: [organizacionId], references: [id])
+  formulario   Formulario?   @relation(fields: [formularioId], references: [id])
+
+  @@map("plantillas")
+}
+
+model Estadistica {
+  id       String @id @default(cuid())
+  tipo     TipoEstadistica
+  valor    Float
+  metadatos Json?
+  fecha    DateTime @default(now())
+
+  // Foreign Keys
+  userId         String?
+  organizacionId String?
+
+  // Relations
+  user         User?         @relation(fields: [userId], references: [id])
+  organizacion Organizacion? @relation(fields: [organizacionId], references: [id])
+
+  @@map("estadisticas")
+}
+
+// Enums
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum EstadoOrganizacion {
+  ACTIVA
+  INACTIVA
+  SUSPENDIDA
+}
+
+enum RolOrganizacion {
+  ADMIN
+  EDITOR
+  MIEMBRO
+  INVITADO
+}
+
+enum EstadoFormulario {
+  BORRADOR
+  PUBLICADO
+  CERRADO
+  ARCHIVADO
+}
+
+enum CategoriaPlantilla {
+  GENERAL
+  EDUCACION
+  SALUD
+  EVENTOS
+  ENCUESTAS
+  CONTACTO
+  FEEDBACK
+  OTROS
+}
+
+enum TipoEstadistica {
+  FORMULARIOS_CREADOS
+  RESPUESTAS_RECIBIDAS
+  USUARIOS_ACTIVOS
+  ORGANIZACIONES_NUEVAS
+  PLANTILLAS_UTILIZADAS
+  TASA_CONVERSION
+  TIEMPO_RESPUESTA
+}

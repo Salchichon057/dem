@@ -1,8 +1,14 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { verifyToken } from '@/lib/auth'
+
+// Rutas que requieren autenticación
+const protectedRoutes = ['/dashboard', '/']
+
+// Rutas que solo pueden acceder usuarios no autenticados
+const authRoutes = ['/auth']
 
 export function middleware(request: NextRequest) {
-  // Solo permitir acceso a archivos estáticos y API
   const { pathname } = request.nextUrl
   
   // Permitir acceso a archivos estáticos y rutas de API
@@ -15,6 +21,40 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
+  const token = request.cookies.get('auth-token')?.value
+
+  // Verificar si la ruta requiere autenticación
+  const isProtectedRoute = protectedRoutes.some(route => 
+    pathname.startsWith(route) && pathname !== '/auth'
+  )
+  
+  // Verificar si es una ruta de autenticación
+  const isAuthRoute = authRoutes.some(route => 
+    pathname.startsWith(route)
+  )
+
+  // Si es una ruta protegida y no hay token, redirigir a auth
+  if (isProtectedRoute && !token) {
+    return NextResponse.redirect(new URL('/auth', request.url))
+  }
+
+  // Si hay token, verificarlo
+  if (token) {
+    const decoded = verifyToken(token)
+    
+    // Si el token es inválido y está en ruta protegida, redirigir a auth
+    if (!decoded && isProtectedRoute) {
+      const response = NextResponse.redirect(new URL('/auth', request.url))
+      response.cookies.delete('auth-token')
+      return response
+    }
+    
+    // Si el token es válido y está en ruta de auth, redirigir al dashboard
+    if (decoded && isAuthRoute) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+  }
+
   return NextResponse.next()
 }
 

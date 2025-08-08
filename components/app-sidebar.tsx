@@ -1,7 +1,8 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut } from "lucide-react"
+import Image from 'next/image'
+import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut } from 'lucide-react'
+import { useAuth } from '@/contexts/auth-context'
 
 import {
   Sidebar,
@@ -14,29 +15,29 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from '@/components/ui/sidebar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const menuItems = [
   {
-    id: "organizaciones",
-    title: "Lista de Organizaciones",
+    id: 'organizaciones',
+    title: 'Lista de Organizaciones',
     icon: Building2,
   },
   {
-    id: "estadisticas",
-    title: "Estadísticas",
+    id: 'estadisticas',
+    title: 'Estadísticas',
     icon: BarChart3,
   },
   {
-    id: "plantillas",
-    title: "Plantillas",
+    id: 'plantillas',
+    title: 'Plantillas',
     icon: FileTemplate,
   },
   {
-    id: "formularios",
-    title: "Formularios",
+    id: 'formularios',
+    title: 'Formularios',
     icon: FileText,
   },
 ]
@@ -47,10 +48,15 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
+  const { user, logout } = useAuth()
+
   const handleLogout = () => {
-    localStorage.removeItem("authenticated")
-    localStorage.removeItem("user")
-    window.location.href = "/auth"
+    logout()
+  }
+
+  const getUserInitials = (name: string | undefined | null) => {
+    if (!name) return 'U'
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   }
 
   return (
@@ -119,14 +125,14 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="w-full text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 rounded-lg transition-all duration-300">
                   <Avatar className="h-6 w-6 ring-2 ring-purple-200">
-                    <AvatarImage src="/placeholder.svg?height=24&width=24" />
+                    <AvatarImage src={user?.avatar || '/placeholder.svg?height=24&width=24'} />
                     <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold">
-                      DM
+                      {getUserInitials(user?.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-medium text-gray-900">Usuario Demo</span>
-                    <span className="text-xs text-gray-500">demo@desarrolloenmovimiento.org</span>
+                    <span className="text-sm font-medium text-gray-900">{user?.name || 'Usuario'}</span>
+                    <span className="text-xs text-gray-500">{user?.email}</span>
                   </div>
                   <ChevronDown className="ml-auto h-4 w-4 text-gray-500" />
                 </SidebarMenuButton>
