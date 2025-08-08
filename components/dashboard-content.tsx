@@ -1,16 +1,21 @@
 "use client"
 
+import { useAuth } from "@/contexts/auth-context"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { OrganizacionesSection } from "@/components/organizaciones-section"
 import { EstadisticasSection } from "@/components/estadisticas-section"
 import { PlantillasSection } from "@/components/plantillas-section"
 import { FormulariosSection } from "@/components/formularios-section"
+import { PerfilSection } from "@/components/perfil-section"
+import { ConfiguracionSection } from "@/components/configuracion-section"
 
 interface DashboardContentProps {
   activeSection: string
 }
 
 export function DashboardContent({ activeSection }: DashboardContentProps) {
+  const { user } = useAuth()
+
   const renderSection = () => {
     switch (activeSection) {
       case "organizaciones":
@@ -21,8 +26,31 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return <PlantillasSection />
       case "formularios":
         return <FormulariosSection />
+      case "perfil":
+        return <PerfilSection />
+      case "configuracion":
+        return <ConfiguracionSection />
       default:
         return <OrganizacionesSection />
+    }
+  }
+
+  const getSectionTitle = () => {
+    switch (activeSection) {
+      case "organizaciones":
+        return "📊 Lista de Organizaciones"
+      case "estadisticas":
+        return "📈 Estadísticas"
+      case "plantillas":
+        return "📋 Plantillas"
+      case "formularios":
+        return "📝 Formularios"
+      case "perfil":
+        return "👤 Perfil de Usuario"
+      case "configuracion":
+        return "⚙️ Configuración"
+      default:
+        return "📊 Lista de Organizaciones"
     }
   }
 
@@ -43,16 +71,15 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         <SidebarTrigger className="text-white hover:bg-white/20 rounded-lg transition-colors duration-200" />
         <div className="flex-1">
           <h1 className="text-lg font-semibold text-white drop-shadow-sm">
-            {activeSection === "organizaciones" && "📊 Lista de Organizaciones"}
-            {activeSection === "estadisticas" && "📈 Estadísticas"}
-            {activeSection === "plantillas" && "📋 Plantillas"}
-            {activeSection === "formularios" && "📝 Formularios"}
+            {getSectionTitle()}
           </h1>
         </div>
         <div className="hidden md:flex items-center space-x-4 text-white/90">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-sm">Sistema Activo</span>
+            <span className="text-sm">
+              Bienvenido, {user?.name || user?.email || 'Usuario'}
+            </span>
           </div>
         </div>
       </header>

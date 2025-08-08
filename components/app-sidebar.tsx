@@ -54,6 +54,14 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
     logout()
   }
 
+  const handleProfile = () => {
+    setActiveSection('perfil')
+  }
+
+  const handleSettings = () => {
+    setActiveSection('configuracion')
+  }
+
   const getUserInitials = (name: string | undefined | null) => {
     if (!name) return 'U'
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -76,7 +84,7 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
         </div>
         <div className="mt-2 text-xs text-gray-600">
           <span className="font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Desarrollo en Movimiento
+            Bienvenido, {user?.email || 'Usuario'}
           </span>
         </div>
       </SidebarHeader>
@@ -138,17 +146,23 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width] backdrop-blur-sm bg-white/95 border-purple-200">
-                <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100">
+                <DropdownMenuItem 
+                  onClick={handleProfile}
+                  className="hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 cursor-pointer"
+                >
                   <User className="mr-2 h-4 w-4 text-purple-600" />
                   <span className="text-gray-700">Perfil</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100">
+                <DropdownMenuItem 
+                  onClick={handleSettings}
+                  className="hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100 cursor-pointer"
+                >
                   <Settings className="mr-2 h-4 w-4 text-blue-600" />
                   <span className="text-gray-700">Configuración</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleLogout}
-                  className="hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100"
+                  className="hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 cursor-pointer"
                 >
                   <LogOut className="mr-2 h-4 w-4 text-red-600" />
                   <span className="text-gray-700">Cerrar Sesión</span>

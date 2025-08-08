@@ -25,51 +25,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SafeUser | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Verificar si hay un token al cargar la aplicación
   useEffect(() => {
-    // Verificar si hay un token guardado al cargar
-    const token = localStorage.getItem('auth-token')
-    if (token) {
-      // Aquí podrías verificar el token con el servidor
-      // Por ahora, simplemente verificamos si existe
-      verifyToken()
-    } else {
-      setLoading(false)
-    }
-  }, [])
-
-  const verifyToken = async () => {
-    try {
+    const initializeAuth = async () => {
       const token = localStorage.getItem('auth-token')
-      if (!token) {
-        setLoading(false)
-        return
-      }
-
-      // Verificar token con el servidor
-      const response = await fetch('/api/auth/verify', {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      if (token) {
+        try {
+          const response = await fetch('/api/auth/verify', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          
+          if (response.ok) {
+            const data = await response.json()
+            setUser(data.user)
+          } else {
+            // Token inválido, limpiarlo
+            localStorage.removeItem('auth-token')
+            document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+          }
+        } catch (error) {
+          console.error('Error verificando token:', error)
+          localStorage.removeItem('auth-token')
+          document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
         }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setUser(data.user)
-        // Actualizar cookie
-        document.cookie = `auth-token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`
-      } else {
-        // Token inválido
-        localStorage.removeItem('auth-token')
-        document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
       }
-    } catch (error) {
-      console.error('Error verificando token:', error)
-      localStorage.removeItem('auth-token')
-      document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-    } finally {
       setLoading(false)
     }
-  }
+
+    initializeAuth()
+  }, [])
 
   const login = async (email: string, password: string) => {
     const response = await fetch('/api/auth/login', {
@@ -90,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('auth-token', data.token)
     document.cookie = `auth-token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}`
     
+    // Actualizar el estado del usuario
     setUser(data.user)
   }
 
@@ -112,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('auth-token', data.token)
     document.cookie = `auth-token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}`
     
+    // Actualizar el estado del usuario
     setUser(data.user)
   }
 
@@ -119,10 +107,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('auth-token')
     document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
     setUser(null)
+    // Redirigir a la página principal
+    window.location.href = '/'
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
