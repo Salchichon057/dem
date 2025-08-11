@@ -8,6 +8,10 @@ import { PlantillasSection } from "@/components/plantillas-section"
 import { FormulariosSection } from "@/components/formularios-section"
 import { PerfilSection } from "@/components/perfil-section"
 import { ConfiguracionSection } from "@/components/configuracion-section"
+import { ListaComunidadesSection } from "@/components/lista-comunidades-section"
+import { PerfilComunitarioSection } from "@/components/perfil-comunitario-section"
+import { EstadisticasComunidadesSection } from "@/components/estadisticas-comunidades-section"
+import { PlantillasComunidadesSection } from "@/components/plantillas-comunidades-section"
 
 interface DashboardContentProps {
   activeSection: string
@@ -30,6 +34,15 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return <PerfilSection />
       case "configuracion":
         return <ConfiguracionSection />
+      // Secciones de Comunidades
+      case "lista-comunidades":
+        return <ListaComunidadesSection />
+      case "perfil-comunitario":
+        return <PerfilComunitarioSection />
+      case "estadisticas-comunidades":
+        return <EstadisticasComunidadesSection />
+      case "plantillas-comunidades":
+        return <PlantillasComunidadesSection />
       default:
         return <OrganizacionesSection />
     }
@@ -49,6 +62,15 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return "👤 Perfil de Usuario"
       case "configuracion":
         return "⚙️ Configuración"
+      // Títulos para Comunidades
+      case "lista-comunidades":
+        return "🏘️ Lista de Comunidades"
+      case "perfil-comunitario":
+        return "👥 Perfil Comunitario"
+      case "estadisticas-comunidades":
+        return "📊 Estadísticas de Comunidades"
+      case "plantillas-comunidades":
+        return "📋 Plantillas de Comunidades"
       default:
         return "📊 Lista de Organizaciones"
     }

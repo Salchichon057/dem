@@ -7,9 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, Plus, MoreHorizontal, Building2, Users } from "lucide-react"
+import { Search, Plus, MoreHorizontal, Building2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 import { obtenerOrganizaciones, crearOrganizacion, type Organizacion, type NuevaOrganizacion, manejarErrorApi } from "@/lib/api"
@@ -17,6 +16,8 @@ import { obtenerOrganizaciones, crearOrganizacion, type Organizacion, type Nueva
 export function OrganizacionesSection() {
   const [searchTerm, setSearchTerm] = useState("")
   const [showNewModal, setShowNewModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [selectedOrg, setSelectedOrg] = useState<Organizacion | null>(null)
   const [organizacionesList, setOrganizacionesList] = useState<Organizacion[]>([])
   const [loading, setLoading] = useState(true)
   const [creatingOrg, setCreatingOrg] = useState(false)
@@ -92,34 +93,17 @@ export function OrganizacionesSection() {
     }))
   }
 
+  const handleViewDetails = (org: Organizacion) => {
+    setSelectedOrg(org)
+    setShowDetailsModal(true)
+  }
+
   const filteredOrganizaciones = organizacionesList.filter(
     (org) =>
       org.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (org.descripcion && org.descripcion.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (org.email && org.email.toLowerCase().includes(searchTerm.toLowerCase()))
   )
-
-  const getStatusBadge = (estado: string) => {
-    switch (estado) {
-      case "ACTIVA":
-        return <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 shadow-sm">✓ Activa</Badge>
-      case "INACTIVA":
-        return <Badge className="bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200 shadow-sm">⏸ Inactiva</Badge>
-      case "SUSPENDIDA":
-        return <Badge className="bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border-red-200 shadow-sm">🚫 Suspendida</Badge>
-      default:
-        return <Badge className="bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200 shadow-sm">? Desconocido</Badge>
-    }
-  }
-
-  // Función para formatear fecha
-  const formatearFecha = (fecha: string) => {
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
 
   // Mostrar loading mientras cargan los datos
   if (loading) {
@@ -173,12 +157,16 @@ export function OrganizacionesSection() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100">
-                  <TableHead className="font-semibold text-gray-700">Organización</TableHead>
-                  <TableHead className="font-semibold text-gray-700">Descripción</TableHead>
-                  <TableHead className="font-semibold text-gray-700">Miembros</TableHead>
-                  <TableHead className="font-semibold text-gray-700">Estado</TableHead>
-                  <TableHead className="font-semibold text-gray-700">Fecha Creación</TableHead>
-                  <TableHead className="text-right font-semibold text-gray-700">Acciones</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Nombre Comercial</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Nombre Fiscal</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Proyección Social</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Ubicación</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Nombre Encargado</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Correo Electrónico</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Número de Contacto</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Departamento</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Municipio</TableHead>
+                  <TableHead className="text-right font-semibold text-gray-700">Opciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -189,36 +177,51 @@ export function OrganizacionesSection() {
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <TableCell className="py-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md">
-                            {org.nombre.charAt(0).toUpperCase()}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">{org.nombre}</div>
-                          <div className="text-sm text-gray-500">{org.email || 'Sin email'}</div>
-                        </div>
+                      <div className="font-semibold text-gray-900">
+                        {org.nombreComercial || org.nombre}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-gray-600">
+                        {org.nombreFiscal || 'No especificado'}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="max-w-xs">
                         <p className="text-sm text-gray-600 truncate">
-                          {org.descripcion || 'Sin descripción'}
+                          {org.proyeccionSocial || 'No especificada'}
                         </p>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-4 w-4 text-gray-400" />
-                        <span className="font-medium text-gray-700">
-                          {org.miembros?.length || 0}
-                        </span>
+                      <div className="text-sm text-gray-600">
+                        {org.ubicacion || 'No especificada'}
                       </div>
                     </TableCell>
-                    <TableCell>{getStatusBadge(org.estado)}</TableCell>
-                    <TableCell className="text-gray-600 font-medium">
-                      {formatearFecha(org.createdAt)}
+                    <TableCell>
+                      <div className="text-sm text-gray-600">
+                        {org.nombreEncargado || 'No especificado'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-gray-600">
+                        {org.correoElectronico || org.email || 'No especificado'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-gray-600">
+                        {org.numeroContacto || org.telefono || 'No especificado'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-gray-600">
+                        {org.departamento || 'No especificado'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-gray-600">
+                        {org.municipio || 'No especificado'}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -231,13 +234,16 @@ export function OrganizacionesSection() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm border-gray-200">
-                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">
-                            👁️ Ver detalles
+                          <DropdownMenuItem 
+                            onClick={() => handleViewDetails(org)}
+                            className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer"
+                          >
+                            👁️ Ver detalles completos
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50">
-                            ✏️ Editar
+                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 cursor-pointer">
+                            ✏️ Editar organización
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50">
+                          <DropdownMenuItem className="hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 cursor-pointer">
                             🚫 Desactivar
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -368,6 +374,159 @@ export function OrganizacionesSection() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para Ver Detalles Completos */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white to-purple-50 border-purple-200">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-purple-600" />
+              Detalles Completos de la Organización
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Información detallada de {selectedOrg?.nombre || 'la organización seleccionada'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOrg && (
+            <div className="space-y-6 py-4">
+              {/* Información General */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-800 border-b border-purple-200 pb-2">
+                  Información General
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Nombre Completo de la Organización</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.nombreCompletoOrg || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">¿A qué se dedica la organización?</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.dedicacionOrg || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Clasificación</Label>
+                    <p className="text-sm text-gray-600 mt-1 capitalize">{selectedOrg.clasificacion || 'No especificada'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Estatus</Label>
+                    <p className="text-sm text-gray-600 mt-1 capitalize">{selectedOrg.estatus || 'No especificado'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ubicación */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-800 border-b border-purple-200 pb-2">
+                  Ubicación
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Departamento</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.departamento || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Municipio</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.municipio || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Zona</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.zona || 'No especificada'}</p>
+                  </div>
+                  <div className="col-span-3">
+                    <Label className="text-sm font-medium text-gray-700">Dirección</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.direccion || 'No especificada'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contactos */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-800 border-b border-purple-200 pb-2">
+                  Información de Contacto
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Contacto Principal - Nombre</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.nombreContactoPrincipal || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Cargo del Contacto Principal</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.cargoContactoPrincipal || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Teléfono del Contacto Principal</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.telefonoContactoPrincipal || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Correo del Contacto Principal</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.correoContactoPrincipal || 'No especificado'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Poblaciones Atendidas */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-800 border-b border-purple-200 pb-2">
+                  Poblaciones Atendidas
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Población Total DEM</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.poblacionTotalDEM || 0}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Primera Infancia (M)</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.primeraInfanciaMujeres || 0}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Primera Infancia (H)</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.primeraInfanciaHombres || 0}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Familias Atendidas</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.familiasAtendidas || 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Información Adicional */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-800 border-b border-purple-200 pb-2">
+                  Información Adicional
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Tipo de Labor Social</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.tipoLaborSocial || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Tipo de Financiamiento</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.tipoFinanciamiento || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Página Web/Redes Sociales</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.paginaWeb || 'No especificada'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">NIT</Label>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrg.nit || 'No especificado'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              onClick={() => setShowDetailsModal(false)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            >
+              Cerrar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

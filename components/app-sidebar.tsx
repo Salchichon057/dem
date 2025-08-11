@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
-import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut } from 'lucide-react'
+import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut, MapPin, List, Users } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 
 import {
@@ -21,24 +22,58 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const menuItems = [
   {
-    id: 'organizaciones',
-    title: 'Lista de Organizaciones',
+    id: 'organizacion',
+    title: 'Organización',
     icon: Building2,
+    children: [
+      {
+        id: 'organizaciones',
+        title: 'Lista de Organizaciones',
+        icon: Building2,
+      },
+      {
+        id: 'estadisticas',
+        title: 'Estadísticas',
+        icon: BarChart3,
+      },
+      {
+        id: 'plantillas',
+        title: 'Plantillas',
+        icon: FileTemplate,
+      },
+      {
+        id: 'formularios',
+        title: 'Formularios',
+        icon: FileText,
+      },
+    ]
   },
   {
-    id: 'estadisticas',
-    title: 'Estadísticas',
-    icon: BarChart3,
-  },
-  {
-    id: 'plantillas',
-    title: 'Plantillas',
-    icon: FileTemplate,
-  },
-  {
-    id: 'formularios',
-    title: 'Formularios',
-    icon: FileText,
+    id: 'comunidades',
+    title: 'Comunidades',
+    icon: MapPin,
+    children: [
+      {
+        id: 'lista-comunidades',
+        title: 'Lista de Comunidades',
+        icon: List,
+      },
+      {
+        id: 'perfil-comunitario',
+        title: 'Perfil Comunitario',
+        icon: Users,
+      },
+      {
+        id: 'estadistica-comunidades',
+        title: 'Estadística',
+        icon: BarChart3,
+      },
+      {
+        id: 'plantilla-comunidades',
+        title: 'Plantilla',
+        icon: FileTemplate,
+      },
+    ]
   },
 ]
 
@@ -49,6 +84,15 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
   const { user, logout } = useAuth()
+  const [expandedItems, setExpandedItems] = useState<string[]>(['organizacion', 'comunidades'])
+
+  const toggleExpanded = (itemId: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    )
+  }
 
   const handleLogout = () => {
     logout()
@@ -99,26 +143,65 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
             <SidebarMenu>
               {menuItems.map((item, index) => (
                 <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    isActive={activeSection === item.id}
-                    onClick={() => setActiveSection(item.id)}
-                    className={`
-                      w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1
-                      ${activeSection === item.id 
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:from-purple-600 hover:to-pink-600' 
-                        : ''
-                      }
-                    `}
-                    style={{
-                      animationDelay: `${index * 0.1}s`
-                    }}
-                  >
-                    <item.icon className={`h-4 w-4 ${activeSection === item.id ? 'text-white' : 'text-gray-600'}`} />
-                    <span className="font-medium">{item.title}</span>
-                    {activeSection === item.id && (
-                      <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    )}
-                  </SidebarMenuButton>
+                  {item.children ? (
+                    <div>
+                      <SidebarMenuButton
+                        onClick={() => toggleExpanded(item.id)}
+                        className="w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1"
+                      >
+                        <item.icon className="h-4 w-4 text-gray-600" />
+                        <span className="font-medium">{item.title}</span>
+                        <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${
+                          expandedItems.includes(item.id) ? 'rotate-180' : ''
+                        }`} />
+                      </SidebarMenuButton>
+                      {expandedItems.includes(item.id) && (
+                        <div className="ml-6 mt-1 space-y-1">
+                          {item.children.map((subItem) => (
+                            <SidebarMenuButton
+                              key={subItem.id}
+                              isActive={activeSection === subItem.id}
+                              onClick={() => setActiveSection(subItem.id)}
+                              className={`
+                                w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
+                                ${activeSection === subItem.id 
+                                  ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
+                                  : ''
+                                }
+                              `}
+                            >
+                              <subItem.icon className={`h-3 w-3 ${activeSection === subItem.id ? 'text-white' : 'text-gray-500'}`} />
+                              <span className="text-sm font-medium">{subItem.title}</span>
+                              {activeSection === subItem.id && (
+                                <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                              )}
+                            </SidebarMenuButton>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <SidebarMenuButton
+                      isActive={activeSection === item.id}
+                      onClick={() => setActiveSection(item.id)}
+                      className={`
+                        w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1
+                        ${activeSection === item.id 
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:from-purple-600 hover:to-pink-600' 
+                          : ''
+                        }
+                      `}
+                      style={{
+                        animationDelay: `${index * 0.1}s`
+                      }}
+                    >
+                      <item.icon className={`h-4 w-4 ${activeSection === item.id ? 'text-white' : 'text-gray-600'}`} />
+                      <span className="font-medium">{item.title}</span>
+                      {activeSection === item.id && (
+                        <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      )}
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

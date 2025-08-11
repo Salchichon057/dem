@@ -7,10 +7,63 @@
 export interface Organizacion {
   id: string
   nombre: string
+  nombreComercial?: string
+  nombreFiscal?: string
+  proyeccionSocial?: string
+  ubicacion?: string
+  nombreEncargado?: string
+  correoElectronico?: string
+  numeroContacto?: string
+  departamento?: string
+  municipio?: string
+  nombreCompletoOrg?: string
+  dedicacionOrg?: string
+  clasificacion?: 'pequeña' | 'mediana' | 'grande'
+  estatus?: 'activa' | 'inactiva'
+  productosConsumen?: string
+  capacidadAlmacenamiento?: string
+  visitaInstitucional?: string
+  categorizacion?: string
+  personasIngresosDEM?: string
+  nombreContactoPrincipal?: string
+  cargoContactoPrincipal?: string
+  telefonoContactoPrincipal?: string
+  correoContactoPrincipal?: string
+  nombreContactoSecundario?: string
+  telefonoContactoSecundario?: string
+  correoContactoSecundario?: string
+  zona?: string
+  direccion?: string
+  telefonoHorarios?: string
+  tipoLaborSocial?: string
+  tipoFinanciamiento?: string
+  tiposProgramasAlimentacion?: string
+  paginaWeb?: string
+  logoOrganizacion?: string
+  rangoEdad?: string
+  poblacionTotalDEM?: number
+  poblacionTotalProgramas?: number
+  primeraInfanciaMujeres?: number
+  primeraInfanciaHombres?: number
+  ninezMujeres?: number
+  ninezHombres?: number
+  jovenesMujeres?: number
+  jovenesHombres?: number
+  adultosMujeres?: number
+  adultosHombres?: number
+  adultosMayoresMujeres?: number
+  adultosMayoresHombres?: number
+  familiasAtendidas?: number
+  ninasMadres?: number
+  ninasLactantes?: number
+  personasFemenino?: number
+  personasMasculino?: number
+  departamentosAtendidos?: string
+  municipiosAtendidos?: string
+  nit?: string
   descripcion?: string
   logo?: string
   estado: 'ACTIVA' | 'INACTIVA' | 'SUSPENDIDA'
-  direccion?: string
   telefono?: string
   email?: string
   sitioWeb?: string
@@ -51,6 +104,89 @@ export interface Usuario {
   name: string
   email: string
   role: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Comunidad {
+  id: string
+  fechaInscripcion: string
+  departamento: string
+  municipio: string
+  aldeas: string
+  caseriosAtienden: string[]
+  qtyCaserios: number
+  ubicacionGoogleMaps?: string
+  lider: string
+  numeroLider: string
+  asistenteGrupoLideres: string
+  comiteComunitario: string
+  activa: boolean
+  cantidadFamilias: number
+  cantidadFamRA: number
+  primeraInfanciaMujeres: number
+  primeraInfanciaHombres: number
+  ninez3a5Mujeres: number
+  ninez3a5Hombres: number
+  jovenes6a10Mujeres: number
+  jovenes6a10Hombres: number
+  adultos11a18Mujeres: number
+  adultos11a18Hombres: number
+  adultos19a60Mujeres: number
+  adultos19a60Hombres: number
+  adultoMayor61Mujeres: number
+  adultoMayor61Hombres: number
+  mujeresGestantes: number
+  mujeresLactantes: number
+  clasificacion: 'PEQUEÑA' | 'MEDIANA' | 'GRANDE'
+  capacidadAlmacenamiento: string
+  formasColocacionInteres: string[]
+  fotografiaReferencia?: string
+  tipoColocacion: string
+  grupoWhatsapp?: string
+  book?: string
+  bolsasMaximo: number
+  bolsasCortesia: number
+  fechaBaja?: string
+  motivoSuspension?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PerfilComunitario {
+  id: string
+  fechaFormulario: string
+  nombreLider: string
+  telefonoLider: string
+  ubicacionWhatsApp: boolean
+  fotoComite: boolean
+  direccionExacta: string
+  departamento: string
+  municipio: string
+  beneficiaOtrasComunidades: string
+  actividadEconomica: string
+  tiposCultivos: string
+  poblacionGeneral: number
+  familiasInscritas: number
+  etniaMayoritaria: string
+  accesoAgua: boolean
+  origenAgua: string
+  tratamientoAgua: string
+  escuelaCercana: boolean
+  distanciaEscuela: string
+  puestoSaludCercano: boolean
+  distanciaPuestoSalud: string
+  frecuenciaVisitas: string
+  semanaEntrega: string
+  espacioFisico: boolean
+  bazarMovil: boolean
+  bazarAgricola: boolean
+  voluntariado: boolean
+  tallerPresencial: boolean
+  temasTalleres: string
+  gestionTransporte: boolean
+  contactosAntiguos?: string
+  contactosComite: string
   createdAt: string
   updatedAt: string
 }
@@ -346,6 +482,117 @@ export async function crearFormulario(formulario: NuevoFormulario): Promise<Form
     return data.formulario
   } catch (error) {
     console.error('Error creando formulario:', error)
+    throw error
+  }
+}
+
+// ===== COMUNIDADES =====
+
+/**
+ * Obtener todas las comunidades
+ */
+export async function obtenerComunidades(): Promise<Comunidad[]> {
+  try {
+    const data = await apiCall<{ comunidades: Comunidad[] }>('/comunidades', {
+      method: 'GET',
+    })
+    return data.comunidades
+  } catch (error) {
+    console.error('Error obteniendo comunidades:', error)
+    throw error
+  }
+}
+
+/**
+ * Obtener una comunidad por ID
+ */
+export async function obtenerComunidadPorId(id: string): Promise<Comunidad> {
+  try {
+    const data = await apiCall<{ comunidad: Comunidad }>(`/comunidades/${id}`, {
+      method: 'GET',
+    })
+    return data.comunidad
+  } catch (error) {
+    console.error('Error obteniendo comunidad:', error)
+    throw error
+  }
+}
+
+/**
+ * Crear nueva comunidad
+ */
+export async function crearComunidad(comunidad: Omit<Comunidad, 'id' | 'createdAt' | 'updatedAt'>): Promise<Comunidad> {
+  try {
+    const data = await apiCall<{ comunidad: Comunidad }>('/comunidades', {
+      method: 'POST',
+      body: JSON.stringify(comunidad),
+    })
+    return data.comunidad
+  } catch (error) {
+    console.error('Error creando comunidad:', error)
+    throw error
+  }
+}
+
+/**
+ * Actualizar comunidad
+ */
+export async function actualizarComunidad(id: string, comunidad: Partial<Comunidad>): Promise<Comunidad> {
+  try {
+    const data = await apiCall<{ comunidad: Comunidad }>(`/comunidades/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(comunidad),
+    })
+    return data.comunidad
+  } catch (error) {
+    console.error('Error actualizando comunidad:', error)
+    throw error
+  }
+}
+
+/**
+ * Eliminar comunidad
+ */
+export async function eliminarComunidad(id: string): Promise<void> {
+  try {
+    await apiCall(`/comunidades/${id}`, {
+      method: 'DELETE',
+    })
+  } catch (error) {
+    console.error('Error eliminando comunidad:', error)
+    throw error
+  }
+}
+
+// ===== PERFIL COMUNITARIO =====
+
+/**
+ * Obtener todos los perfiles comunitarios
+ */
+export async function obtenerPerfilesComunitarios(): Promise<PerfilComunitario[]> {
+  try {
+    const data = await apiCall<{ perfiles: PerfilComunitario[] }>('/perfiles-comunitarios', {
+      method: 'GET',
+    })
+    return data.perfiles
+  } catch (error) {
+    console.error('Error obteniendo perfiles comunitarios:', error)
+    throw error
+  }
+}
+
+/**
+ * Crear nuevo perfil comunitario
+ */
+export async function crearPerfilComunitario(perfil: Omit<PerfilComunitario, 'id' | 'createdAt' | 'updatedAt'>): Promise<PerfilComunitario> {
+  try {
+    const data = await apiCall<{ perfil: PerfilComunitario }>('/perfiles-comunitarios', {
+      method: 'POST',
+      body: JSON.stringify(perfil),
+    })
+    return data.perfil
+  } catch (error) {
+    console.error('Error creando perfil comunitario:', error)
     throw error
   }
 }
