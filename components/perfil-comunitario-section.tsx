@@ -9,16 +9,94 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Calendar, MapPin, Users, Phone, FileText, Plus } from "lucide-react"
-import { obtenerPerfilesComunidades, crearPerfilComunidad, type PerfilComunidad, type NuevoPerfilComunidad, manejarErrorApi } from "@/lib/api"
+import { obtenerPerfilesComunitarios, type PerfilComunitario, manejarErrorApi } from "@/lib/api"
 import { toast } from "sonner"
 
+// Tipo para datos del formulario
+interface FormularioPerfilComunitario {
+  fecha: string
+  nombreLider: string
+  telefonoLider: string
+  ubicacionWhatsApp: string
+  direccionExacta: string
+  departamento: string
+  municipio: string
+  beneficiaOtrasComunidades: string
+  actividadEconomica: string
+  tiposCultivos: string
+  poblacionGeneral: number
+  familiasInscritas: number
+  etniaMyoritaria: string
+  accesoAgua: string
+  origenAgua: string
+  tratamientoAgua: string
+  escuelaCercana: string
+  distanciaEscuela: string
+  puestoSaludCercano: string
+  distanciaPuestoSalud: string
+  frecuenciaVisitas: string
+  semanaEntrega: string
+  espacioFisicoAmplio: string
+  bazarMovil: string
+  bazarAgricola: string
+  voluntariado: string
+  talleresComunidad: string
+  temasTalleres: string
+  transporteGrande: string
+  contactosAntiguos: string
+  contactosComite: string
+}
+
+// Función temporal para crear perfil comunitario
+const crearPerfilComunidad = async (data: FormularioPerfilComunitario): Promise<PerfilComunitario> => {
+  // TODO: Implementar en el API real
+  console.log('Creando perfil comunitario:', data)
+  return { 
+    id: '1', 
+    fechaFormulario: new Date().toISOString(),
+    nombreLider: data.nombreLider,
+    telefonoLider: data.telefonoLider,
+    ubicacionWhatsApp: data.ubicacionWhatsApp === 'Si',
+    fotoComite: false,
+    direccionExacta: data.direccionExacta,
+    departamento: data.departamento,
+    municipio: data.municipio,
+    beneficiaOtrasComunidades: data.beneficiaOtrasComunidades,
+    actividadEconomica: data.actividadEconomica,
+    tiposCultivos: data.tiposCultivos,
+    poblacionGeneral: data.poblacionGeneral,
+    familiasInscritas: data.familiasInscritas,
+    etniaMayoritaria: data.etniaMyoritaria,
+    accesoAgua: data.accesoAgua === 'Sí',
+    origenAgua: data.origenAgua,
+    tratamientoAgua: data.tratamientoAgua,
+    escuelaCercana: data.escuelaCercana === 'Sí',
+    distanciaEscuela: data.distanciaEscuela,
+    puestoSaludCercano: data.puestoSaludCercano === 'Sí',
+    distanciaPuestoSalud: data.distanciaPuestoSalud,
+    frecuenciaVisitas: data.frecuenciaVisitas,
+    semanaEntrega: data.semanaEntrega,
+    espacioFisico: data.espacioFisicoAmplio === 'Si',
+    bazarMovil: data.bazarMovil === 'Si',
+    bazarAgricola: data.bazarAgricola === 'Sí',
+    voluntariado: data.voluntariado === 'Sí',
+    tallerPresencial: data.talleresComunidad === 'Sí',
+    temasTalleres: data.temasTalleres,
+    gestionTransporte: data.transporteGrande === 'Si',
+    contactosAntiguos: data.contactosAntiguos,
+    contactosComite: data.contactosComite,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+}
+
 export function PerfilComunitarioSection() {
-  const [perfiles, setPerfiles] = useState<PerfilComunidad[]>([])
+  const [perfiles, setPerfiles] = useState<PerfilComunitario[]>([])
   const [loading, setLoading] = useState(true)
   const [showFormModal, setShowFormModal] = useState(false)
   const [creatingProfile, setCreatingProfile] = useState(false)
-  const [selectedProfile, setSelectedProfile] = useState<PerfilComunidad | null>(null)
-  const [formData, setFormData] = useState<NuevoPerfilComunidad>({
+  const [selectedProfile, setSelectedProfile] = useState<PerfilComunitario | null>(null)
+  const [formData, setFormData] = useState<FormularioPerfilComunitario>({
     fecha: "",
     nombreLider: "",
     telefonoLider: "",
@@ -59,7 +137,7 @@ export function PerfilComunitarioSection() {
   const cargarPerfiles = async () => {
     try {
       setLoading(true)
-      const data = await obtenerPerfilesComunidades()
+      const data = await obtenerPerfilesComunitarios()
       setPerfiles(data)
     } catch (error) {
       toast.error(`Error cargando perfiles: ${manejarErrorApi(error)}`)
@@ -624,7 +702,7 @@ export function PerfilComunitarioSection() {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="h-4 w-4" />
-                {new Date(perfil.fecha).toLocaleDateString('es-ES')}
+                {new Date(perfil.fechaFormulario).toLocaleDateString('es-ES')}
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Users className="h-4 w-4" />
@@ -682,7 +760,7 @@ export function PerfilComunitarioSection() {
                 <CardContent className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Fecha</Label>
-                    <p className="mt-1">{new Date(selectedProfile.fecha).toLocaleDateString('es-ES')}</p>
+                    <p className="mt-1">{new Date(selectedProfile.fechaFormulario).toLocaleDateString('es-ES')}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Teléfono</Label>
@@ -715,7 +793,7 @@ export function PerfilComunitarioSection() {
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Etnia Mayoritaria</Label>
-                    <p className="mt-1">{selectedProfile.etniaMyoritaria}</p>
+                    <p className="mt-1">{selectedProfile.etniaMayoritaria}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Actividad Económica</Label>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart3, Users, MapPin, TrendingUp, Home, Baby } from "lucide-react"
-import { obtenerComunidades, obtenerEstadisticas, type Comunidad, type Estadistica, manejarErrorApi } from "@/lib/api"
+import { obtenerComunidades, type Comunidad, manejarErrorApi } from "@/lib/api"
 import { toast } from "sonner"
 
 export function EstadisticasComunidadesSection() {
@@ -29,7 +29,7 @@ export function EstadisticasComunidadesSection() {
   // Calcular estadísticas
   const totalComunidades = comunidades.length
   const comunidadesActivas = comunidades.filter(c => c.activa === true).length
-  const totalFamilias = comunidades.reduce((acc, c) => acc + (c.cantidadFamiliasComunidad || 0), 0)
+  const totalFamilias = comunidades.reduce((acc, c) => acc + (c.cantidadFamilias || 0), 0)
   const totalFamiliasRA = comunidades.reduce((acc, c) => acc + (c.cantidadFamRA || 0), 0)
   const totalPoblacion = comunidades.reduce((acc, c) => acc + 
     (c.primeraInfanciaMujeres || 0) + 
@@ -285,7 +285,7 @@ export function EstadisticasComunidadesSection() {
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-medium text-gray-900">
-                    {comunidad.cantidadFamiliasComunidad || 0} familias
+                    {comunidad.cantidadFamilias || 0} familias
                   </div>
                   <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                     comunidad.activa 
