@@ -153,6 +153,123 @@ model Estadistica {
   @@map("estadisticas")
 }
 
+// Nuevos modelos para las funcionalidades adicionales
+
+model Comunidad {
+  id                     String   @id @default(cuid())
+  fechaInscripcion       String
+  departamento           String
+  municipio              String
+  aldeas                 String
+  caseriosAtienden       String[] // Array de strings
+  qtyCaserios            Int
+  ubicacionGoogleMaps    String?
+  lider                  String
+  numeroLider            String
+  asistenteGrupoLideres  String?
+  comiteComunitario      String?
+  activa                 Boolean  @default(true)
+  cantidadFamilias       Int
+  cantidadFamRA          Int
+  primeraInfanciaMujeres Int      @default(0)
+  primeraInfanciaHombres Int      @default(0)
+  ninez3a5Mujeres        Int      @default(0)
+  ninez3a5Hombres        Int      @default(0)
+  jovenes6a10Mujeres     Int      @default(0)
+  jovenes6a10Hombres     Int      @default(0)
+  adultos11a18Mujeres    Int      @default(0)
+  adultos11a18Hombres    Int      @default(0)
+  adultos19a60Mujeres    Int      @default(0)
+  adultos19a60Hombres    Int      @default(0)
+  adultoMayor61Mujeres   Int      @default(0)
+  adultoMayor61Hombres   Int      @default(0)
+  mujeresGestantes       Int      @default(0)
+  mujeresLactantes       Int      @default(0)
+  clasificacion          String
+  capacidadAlmacenamiento String?
+  formasColocacionInteres String[] // Array de strings
+  tipoColocacion         String?
+  grupoWhatsapp          String?
+  book                   String?
+  bolsasMaximo           Int      @default(0)
+  bolsasCortesia         Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("comunidades")
+}
+
+model FormularioAuditoria {
+  id           String               @id @default(cuid())
+  nombre       String
+  descripcion  String?
+  organizacion String
+  responsable  String
+  campos       Int                  @default(0)
+  respuestas   Int                  @default(0)
+  estado       EstadoAuditoria      @default(ACTIVO)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@map("formularios_auditoria")
+}
+
+model BaseDatos {
+  id                  String        @id @default(cuid())
+  nombre              String
+  descripcion         String?
+  tipo                TipoBaseDatos @default(POSTGRESQL)
+  tamaño              String
+  registros           Int           @default(0)
+  estado              EstadoBD      @default(ACTIVA)
+  ultimaActualizacion DateTime      @default(now())
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@map("bases_datos")
+}
+
+model Beneficiario {
+  id            String           @id @default(cuid())
+  nombre        String
+  apellidos     String
+  edad          Int
+  genero        Genero
+  telefono      String
+  direccion     String
+  comunidad     String
+  fechaIngreso  DateTime
+  tipoApoyo     String[]         // Array de strings
+  estado        EstadoBeneficiario @default(ACTIVO)
+  responsable   String
+  observaciones String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("beneficiarios")
+}
+
+model Voluntario {
+  id           String          @id @default(cuid())
+  nombre       String
+  apellidos    String
+  edad         Int
+  telefono     String
+  email        String?
+  direccion    String?
+  area         String
+  experiencia  String?
+  disponibilidad String[]      // Array de strings
+  estado       EstadoVoluntario @default(ACTIVO)
+  fechaIngreso DateTime
+  supervisor   String?
+  observaciones String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@map("voluntarios")
+}
+
 // Enums
 enum Role {
   USER
@@ -199,4 +316,41 @@ enum TipoEstadistica {
   PLANTILLAS_UTILIZADAS
   TASA_CONVERSION
   TIEMPO_RESPUESTA
+}
+
+enum EstadoAuditoria {
+  ACTIVO
+  INACTIVO
+  REVISION
+}
+
+enum TipoBaseDatos {
+  MYSQL
+  POSTGRESQL
+  MONGODB
+  EXCEL
+}
+
+enum EstadoBD {
+  ACTIVA
+  INACTIVA
+  MANTENIMIENTO
+}
+
+enum Genero {
+  MASCULINO
+  FEMENINO
+  OTRO
+}
+
+enum EstadoBeneficiario {
+  ACTIVO
+  INACTIVO
+  GRADUADO
+}
+
+enum EstadoVoluntario {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
 }

@@ -12,6 +12,9 @@ import { ListaComunidadesSection } from "@/components/lista-comunidades-section"
 import { PerfilComunitarioSection } from "@/components/perfil-comunitario-section"
 import { EstadisticasComunidadesSection } from "@/components/estadisticas-comunidades-section"
 import { PlantillasComunidadesSection } from "@/components/plantillas-comunidades-section"
+import { FormulariosAuditoriaSection } from "@/components/formularios-auditoria-section"
+import { BasesDatosAuditoriaSection } from "@/components/bases-datos-auditoria-section"
+import { ListaBeneficiariosSection } from "@/components/lista-beneficiarios-section"
 
 interface DashboardContentProps {
   activeSection: string
@@ -43,6 +46,31 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return <EstadisticasComunidadesSection />
       case "plantillas-comunidades":
         return <PlantillasComunidadesSection />
+      // Secciones de Auditorías
+      case "formularios-auditoria":
+        return <FormulariosAuditoriaSection />
+      case "bases-datos-auditoria":
+        return <BasesDatosAuditoriaSection />
+      case "tablero-consolidado":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Tablero Consolidado</h2><p>Funcionalidad en desarrollo</p></div>
+      case "estadistica-auditoria":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Auditoría</h2><p>Funcionalidad en desarrollo</p></div>
+      case "semaforo":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Semáforo</h2><p>Funcionalidad en desarrollo</p></div>
+      // Secciones de Abrazando Leyendas
+      case "lista-beneficiarios":
+        return <ListaBeneficiariosSection />
+      case "estadistica-leyendas":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Leyendas</h2><p>Funcionalidad en desarrollo</p></div>
+      // Secciones de Voluntariado
+      case "graficas-voluntariado":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Gráficas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
+      case "formulario-voluntariado":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Formulario de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
+      case "estadistica-voluntariado":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
+      case "indicadores":
+        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Indicadores</h2><p>Funcionalidad en desarrollo</p></div>
       default:
         return <OrganizacionesSection />
     }
@@ -71,6 +99,31 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return "📊 Estadísticas de Comunidades"
       case "plantillas-comunidades":
         return "📋 Plantillas de Comunidades"
+      // Títulos para Auditorías
+      case "formularios-auditoria":
+        return "🔍 Formularios de Auditoría"
+      case "bases-datos-auditoria":
+        return "🗄️ Bases de Datos"
+      case "tablero-consolidado":
+        return "📊 Tablero Consolidado"
+      case "estadistica-auditoria":
+        return "📈 Estadísticas de Auditoría"
+      case "semaforo":
+        return "🚦 Semáforo"
+      // Títulos para Abrazando Leyendas
+      case "lista-beneficiarios":
+        return "❤️ Lista de Beneficiarios"
+      case "estadistica-leyendas":
+        return "📊 Estadísticas de Leyendas"
+      // Títulos para Voluntariado
+      case "graficas-voluntariado":
+        return "📈 Gráficas de Voluntariado"
+      case "formulario-voluntariado":
+        return "📝 Formulario de Voluntariado"
+      case "estadistica-voluntariado":
+        return "📊 Estadísticas de Voluntariado"
+      case "indicadores":
+        return "🎯 Indicadores"
       default:
         return "📊 Lista de Organizaciones"
     }

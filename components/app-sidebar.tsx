@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut, MapPin, List, Users } from 'lucide-react'
+import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut, MapPin, List, Users, Shield, Database, Activity, Heart, UserCheck, TrendingUp, FileSpreadsheet, Search } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 
 import {
@@ -75,6 +75,82 @@ const menuItems = [
       },
     ]
   },
+  {
+    id: 'auditorias',
+    title: 'Auditorías',
+    icon: Shield,
+    children: [
+      {
+        id: 'formularios-auditoria',
+        title: 'Formularios',
+        icon: FileText,
+      },
+      {
+        id: 'bases-datos-auditoria',
+        title: 'Bases de datos',
+        icon: Database,
+      },
+      {
+        id: 'tablero-consolidado',
+        title: 'Tablero Consolidado',
+        icon: Activity,
+      },
+      {
+        id: 'estadistica-auditoria',
+        title: 'Estadística',
+        icon: BarChart3,
+      },
+      {
+        id: 'semaforo',
+        title: 'Semáforo',
+        icon: TrendingUp,
+      },
+    ]
+  },
+  {
+    id: 'abrazando-leyendas',
+    title: 'Abrazando Leyendas',
+    icon: Heart,
+    children: [
+      {
+        id: 'lista-beneficiarios',
+        title: 'Lista de beneficiarios',
+        icon: List,
+      },
+      {
+        id: 'estadistica-leyendas',
+        title: 'Estadística',
+        icon: BarChart3,
+      },
+    ]
+  },
+  {
+    id: 'voluntariado',
+    title: 'Voluntariado',
+    icon: UserCheck,
+    children: [
+      {
+        id: 'graficas-voluntariado',
+        title: 'Gráficas',
+        icon: BarChart3,
+      },
+      {
+        id: 'formulario-voluntariado',
+        title: 'Formulario',
+        icon: FileText,
+      },
+      {
+        id: 'estadistica-voluntariado',
+        title: 'Estadística',
+        icon: FileSpreadsheet,
+      },
+      {
+        id: 'indicadores',
+        title: 'Indicadores',
+        icon: Search,
+      },
+    ]
+  },
 ]
 
 interface AppSidebarProps {
@@ -84,7 +160,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
   const { user, logout } = useAuth()
-  const [expandedItems, setExpandedItems] = useState<string[]>(['organizacion', 'comunidades'])
+  const [expandedItems, setExpandedItems] = useState<string[]>(['organizacion', 'comunidades', 'auditorias', 'abrazando-leyendas', 'voluntariado'])
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems(prev => 
