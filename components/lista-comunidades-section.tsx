@@ -131,7 +131,7 @@ export function ListaComunidadesSection() {
     }
   }
 
-  const filteredComunidades = comunidades.filter(comunidad =>
+  const filteredComunidades = (comunidades || []).filter(comunidad =>
     comunidad.lider.toLowerCase().includes(searchTerm.toLowerCase()) ||
     comunidad.aldeas.toLowerCase().includes(searchTerm.toLowerCase()) ||
     comunidad.departamento.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -199,7 +199,7 @@ export function ListaComunidadesSection() {
               <MapPin className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Total Comunidades</p>
-                <p className="text-2xl font-bold text-gray-900">{comunidades.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{(comunidades || []).length}</p>
               </div>
             </div>
           </CardContent>
@@ -211,7 +211,7 @@ export function ListaComunidadesSection() {
               <div>
                 <p className="text-sm text-gray-600">Activas</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {comunidades.filter(c => c.activa).length}
+                  {(comunidades || []).filter(c => c.activa).length}
                 </p>
               </div>
             </div>
@@ -224,7 +224,7 @@ export function ListaComunidadesSection() {
               <div>
                 <p className="text-sm text-gray-600">Total Familias</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {comunidades.reduce((acc, c) => acc + c.cantidadFamilias, 0)}
+                  {(comunidades || []).reduce((acc, c) => acc + c.cantidadFamilias, 0)}
                 </p>
               </div>
             </div>
@@ -237,7 +237,7 @@ export function ListaComunidadesSection() {
               <div>
                 <p className="text-sm text-gray-600">Familias en RA</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {comunidades.reduce((acc, c) => acc + c.cantidadFamRA, 0)}
+                  {(comunidades || []).reduce((acc, c) => acc + c.cantidadFamRA, 0)}
                 </p>
               </div>
             </div>
