@@ -224,13 +224,13 @@ export function AdminOrganizacionesSection() {
               <span>Nueva Organización</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white border-2 border-gray-200 shadow-2xl">
+            <DialogHeader className="border-b border-gray-200 pb-4">
+              <DialogTitle className="text-xl font-semibold text-gray-900">
                 {editingOrganizacion ? 'Editar Organización' : 'Nueva Organización'}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 bg-white p-4 rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="nombre">Nombre *</Label>
@@ -354,11 +354,11 @@ export function AdminOrganizacionesSection() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setModalOpen(false)}>
+              <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200 bg-gray-50 p-4 rounded-b-lg">
+                <Button variant="outline" onClick={() => setModalOpen(false)} className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                   Cancelar
                 </Button>
-                <Button onClick={guardarOrganizacion} disabled={loading}>
+                <Button onClick={guardarOrganizacion} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
                   {loading ? 'Guardando...' : editingOrganizacion ? 'Actualizar' : 'Crear'}
                 </Button>
               </div>
