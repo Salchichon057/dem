@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 const menuItems = [
   {
     id: 'organizacion',
-    title: 'Organización',
+    title: 'Organizaciones',
     icon: Building2,
     children: [
       {
@@ -160,7 +160,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
   const { user, logout } = useAuth()
-  const [expandedItems, setExpandedItems] = useState<string[]>(['organizacion', 'comunidades', 'auditorias', 'abrazando-leyendas', 'voluntariado'])
+  const [expandedItems, setExpandedItems] = useState<string[]>([])
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems(prev => 
@@ -199,7 +199,6 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
               height={40}
               className="h-10 w-auto drop-shadow-lg"
             />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
           </div>
         </div>
         <div className="mt-2 text-xs text-gray-600">

@@ -15,6 +15,7 @@ import { PlantillasComunidadesSection } from "@/components/plantillas-comunidade
 import { FormulariosAuditoriaSection } from "@/components/formularios-auditoria-section"
 import { BasesDatosAuditoriaSection } from "@/components/bases-datos-auditoria-section"
 import { ListaBeneficiariosSection } from "@/components/lista-beneficiarios-section"
+import Image from "next/image"
 
 interface DashboardContentProps {
   activeSection: string
@@ -79,53 +80,53 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
   const getSectionTitle = () => {
     switch (activeSection) {
       case "organizaciones":
-        return "📊 Lista de Organizaciones"
+        return "Lista de Organizaciones"
       case "estadisticas":
-        return "📈 Estadísticas"
+        return "Estadísticas"
       case "plantillas":
-        return "📋 Plantillas"
+        return "Plantillas"
       case "formularios":
-        return "📝 Formularios"
+        return "Formularios"
       case "perfil":
-        return "👤 Perfil de Usuario"
+        return "Perfil de Usuario"
       case "configuracion":
-        return "⚙️ Configuración"
+        return "Configuración"
       // Títulos para Comunidades
       case "lista-comunidades":
-        return "🏘️ Lista de Comunidades"
+        return "Lista de Comunidades"
       case "perfil-comunitario":
-        return "👥 Perfil Comunitario"
+        return "Perfil Comunitario"
       case "estadisticas-comunidades":
-        return "📊 Estadísticas de Comunidades"
+        return "Estadísticas de Comunidades"
       case "plantillas-comunidades":
-        return "📋 Plantillas de Comunidades"
+        return "Plantillas de Comunidades"
       // Títulos para Auditorías
       case "formularios-auditoria":
-        return "🔍 Formularios de Auditoría"
+        return "Formularios de Auditoría"
       case "bases-datos-auditoria":
-        return "🗄️ Bases de Datos"
+        return "Bases de Datos"
       case "tablero-consolidado":
-        return "📊 Tablero Consolidado"
+        return "Tablero Consolidado"
       case "estadistica-auditoria":
-        return "📈 Estadísticas de Auditoría"
+        return "Estadísticas de Auditoría"
       case "semaforo":
-        return "🚦 Semáforo"
+        return "Semáforo"
       // Títulos para Abrazando Leyendas
       case "lista-beneficiarios":
-        return "❤️ Lista de Beneficiarios"
+        return "Lista de Beneficiarios"
       case "estadistica-leyendas":
-        return "📊 Estadísticas de Leyendas"
+        return "Estadísticas de Leyendas"
       // Títulos para Voluntariado
       case "graficas-voluntariado":
-        return "📈 Gráficas de Voluntariado"
+        return "Gráficas de Voluntariado"
       case "formulario-voluntariado":
-        return "📝 Formulario de Voluntariado"
+        return "Formulario de Voluntariado"
       case "estadistica-voluntariado":
-        return "📊 Estadísticas de Voluntariado"
+        return "Estadísticas de Voluntariado"
       case "indicadores":
-        return "🎯 Indicadores"
+        return "Indicadores"
       default:
-        return "📊 Lista de Organizaciones"
+        return "Lista de Organizaciones"
     }
   }
 
@@ -171,8 +172,13 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xs">DM</span>
+              <div className="w-8 h-8 bg-gradient-to-r rounded-full flex items-center justify-center">
+                <Image
+                  src="/logos/logo.png"
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                />
               </div>
               <span className="text-gray-300 font-medium">© 2025 Desarrollo en Movimiento. Todos los derechos reservados.</span>
             </div>
@@ -182,8 +188,6 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
               <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
               <span>Versión 1.0.0</span>
             </div>
-            <span>•</span>
-            <span>Soporte: info@desarrolloenmovimiento.org</span>
           </div>
         </div>
       </footer>
