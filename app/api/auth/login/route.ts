@@ -10,15 +10,25 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 Iniciando proceso de login...')
+    
     const body = await request.json()
+    console.log('📝 Datos recibidos:', { email: body.email })
     
     // Validar datos de entrada
     const validatedData = loginSchema.parse(body)
+    console.log('✅ Datos validados correctamente')
+    
+    // Probar conexión a base de datos
+    await prisma.$connect()
+    console.log('🔌 Conectado a la base de datos')
     
     // Buscar usuario
     const user = await prisma.user.findUnique({
       where: { email: validatedData.email }
     })
+    
+    console.log('👤 Usuario encontrado:', user ? 'Sí' : 'No')
     
     if (!user) {
       return NextResponse.json(
@@ -29,6 +39,7 @@ export async function POST(request: NextRequest) {
     
     // Verificar contraseña
     const isPasswordValid = await verifyPassword(validatedData.password, user.password)
+    console.log('🔐 Contraseña válida:', isPasswordValid ? 'Sí' : 'No')
     
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -39,6 +50,7 @@ export async function POST(request: NextRequest) {
     
     // Generar token
     const token = generateToken(user.id)
+    console.log('🎫 Token generado exitosamente')
     
     // Retornar usuario sin contraseña
     const safeUser = excludePassword(user)

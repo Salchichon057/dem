@@ -15,6 +15,10 @@ import { PlantillasComunidadesSection } from "@/components/plantillas-comunidade
 import { FormulariosAuditoriaSection } from "@/components/formularios-auditoria-section"
 import { BasesDatosAuditoriaSection } from "@/components/bases-datos-auditoria-section"
 import { ListaBeneficiariosSection } from "@/components/lista-beneficiarios-section"
+import { PimcoComunidadesSection } from "@/components/pimco-comunidades-section"
+import { PimcoGraficasEstadisticasSection } from "@/components/pimco-graficas-estadisticas-section"
+import { PimcoEntrevistasSection } from "@/components/pimco-entrevistas-section"
+import { PimcoDiagnosticoComunitarioSection } from "@/components/pimco-diagnostico-comunitario-section"
 import Image from "next/image"
 
 interface DashboardContentProps {
@@ -72,6 +76,15 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
       case "indicadores":
         return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Indicadores</h2><p>Funcionalidad en desarrollo</p></div>
+      // Secciones de PIMCO
+      case "pimco-comunidades":
+        return <PimcoComunidadesSection />
+      case "pimco-graficas-estadisticas":
+        return <PimcoGraficasEstadisticasSection />
+      case "pimco-entrevistas":
+        return <PimcoEntrevistasSection />
+      case "pimco-diagnostico-comunitario":
+        return <PimcoDiagnosticoComunitarioSection />
       default:
         return <OrganizacionesSection />
     }
@@ -125,6 +138,15 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return "Estadísticas de Voluntariado"
       case "indicadores":
         return "Indicadores"
+      // Títulos para PIMCO
+      case "pimco-comunidades":
+        return "PIMCO - Comunidades"
+      case "pimco-graficas-estadisticas":
+        return "PIMCO - Gráficas y Estadísticas"
+      case "pimco-entrevistas":
+        return "PIMCO - Entrevistas"
+      case "pimco-diagnostico-comunitario":
+        return "PIMCO - Diagnóstico Comunitario"
       default:
         return "Lista de Organizaciones"
     }

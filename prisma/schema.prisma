@@ -14,14 +14,20 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      Role     @default(USER)
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String?
+  nombre       String?
+  apellidos    String?
+  telefono     String?
+  role         Role     @default(USER)
+  rol          String?  // Para compatibilidad con el frontend
+  estado       String   @default("activo")
+  organizacion String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
   organizaciones OrganizacionMember[]
@@ -275,6 +281,8 @@ enum Role {
   USER
   ADMIN
   SUPER_ADMIN
+  COORDINADOR
+  VOLUNTARIO
 }
 
 enum EstadoOrganizacion {

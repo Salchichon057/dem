@@ -19,6 +19,7 @@ import { AdminBeneficiariosSection } from "@/components/admin-beneficiarios-sect
 import { AdminVoluntariosSection } from "@/components/admin-voluntarios-section"
 import { AdminFormulariosSection } from "@/components/admin-formularios-section"
 import { AdminEstadisticasSection } from "@/components/admin-estadisticas-section"
+import AdminUsuariosSection from "@/components/admin-usuarios-section"
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("comunidades")
@@ -29,7 +30,8 @@ export default function AdminPage() {
     beneficiarios: 156,
     voluntarios: 89,
     formularios: 45,
-    auditorias: 12
+    auditorias: 12,
+    usuarios: 25
   }
 
   return (
@@ -45,7 +47,7 @@ export default function AdminPage() {
         </div>
 
         {/* Estadísticas Rápidas */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-8">
           <Card className="bg-blue-50 border-blue-200">
             <CardContent className="p-4 text-center">
               <MapPin className="h-6 w-6 text-blue-600 mx-auto mb-2" />
@@ -88,6 +90,13 @@ export default function AdminPage() {
               <p className="text-xs text-indigo-600">Auditorías</p>
             </CardContent>
           </Card>
+          <Card className="bg-teal-50 border-teal-200">
+            <CardContent className="p-4 text-center">
+              <Users className="h-6 w-6 text-teal-600 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-teal-700">{estadisticasGenerales.usuarios}</p>
+              <p className="text-xs text-teal-600">Usuarios</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Tabs de Administración */}
@@ -100,7 +109,7 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
                 <TabsTrigger value="comunidades" className="flex items-center space-x-1">
                   <MapPin className="h-4 w-4" />
                   <span className="hidden sm:inline">Comunidades</span>
@@ -125,6 +134,10 @@ export default function AdminPage() {
                   <BarChart3 className="h-4 w-4" />
                   <span className="hidden sm:inline">Estadísticas</span>
                 </TabsTrigger>
+                <TabsTrigger value="usuarios" className="flex items-center space-x-1">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Usuarios</span>
+                </TabsTrigger>
               </TabsList>
 
               <div className="mt-6">
@@ -145,6 +158,9 @@ export default function AdminPage() {
                 </TabsContent>
                 <TabsContent value="estadisticas">
                   <AdminEstadisticasSection />
+                </TabsContent>
+                <TabsContent value="usuarios">
+                  <AdminUsuariosSection />
                 </TabsContent>
               </div>
             </Tabs>

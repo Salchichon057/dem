@@ -11,15 +11,25 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 Iniciando proceso de registro...')
+    
     const body = await request.json()
+    console.log('📝 Datos recibidos:', { email: body.email, name: body.name })
     
     // Validar datos de entrada
     const validatedData = registerSchema.parse(body)
+    console.log('✅ Datos validados correctamente')
+    
+    // Probar conexión a base de datos
+    await prisma.$connect()
+    console.log('🔌 Conectado a la base de datos')
     
     // Verificar si el usuario ya existe
     const existingUser = await prisma.user.findUnique({
       where: { email: validatedData.email }
     })
+    
+    console.log('👤 Usuario existente:', existingUser ? 'Sí' : 'No')
     
     if (existingUser) {
       return NextResponse.json(
@@ -30,6 +40,7 @@ export async function POST(request: NextRequest) {
     
     // Hash de la contraseña
     const hashedPassword = await hashPassword(validatedData.password)
+    console.log('🔐 Contraseña hasheada exitosamente')
     
     // Crear usuario
     const user = await prisma.user.create({
@@ -40,8 +51,11 @@ export async function POST(request: NextRequest) {
       }
     })
     
+    console.log('✨ Usuario creado exitosamente:', user.id)
+    
     // Generar token
     const token = generateToken(user.id)
+    console.log('🎫 Token generado exitosamente')
     
     // Retornar usuario sin contraseña
     const safeUser = excludePassword(user)
