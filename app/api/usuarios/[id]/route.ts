@@ -2,16 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
 // GET - Obtener usuario específico
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     
     const usuario = await prisma.user.findUnique({
       where: { id },
@@ -63,9 +57,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT - Actualizar usuario
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const { nombre, apellidos, email, telefono, rol, estado, organizacion } = body
 
@@ -84,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Mapear rol al enum de Prisma
-    let prismaRole: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'COORDINADOR' | 'VOLUNTARIO' = existingUser.role as any
+    let prismaRole: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'COORDINADOR' | 'VOLUNTARIO' = existingUser.role as 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'COORDINADOR' | 'VOLUNTARIO'
     if (rol === 'admin') prismaRole = 'ADMIN'
     else if (rol === 'coordinador') prismaRole = 'COORDINADOR'
     else if (rol === 'voluntario') prismaRole = 'VOLUNTARIO'
@@ -134,9 +128,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE - Eliminar usuario
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
 
     console.log('🗑️ Eliminando usuario:', { id })
 
@@ -170,9 +164,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 }
 
 // PATCH - Resetear contraseña
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const { newPassword } = body
 
