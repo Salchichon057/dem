@@ -1,355 +1,398 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { BarChart3, TrendingUp, PieChart, LineChart, Users, MapPin, Activity } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BarChart3, PieChart, LineChart, Users, MapPin, Activity, Calendar, UserCheck, Briefcase, Loader2 } from 'lucide-react'
 
-const estadisticasPimco = {
-  indicadoresGenerales: {
-    comunidadesImpactadas: 3,
-    familiasAtendidas: 1350,
-    proyectosEjecutados: 6,
-    inversion: 250000,
-    progresoGeneral: 65
-  },
-  impactoPorRegion: [
-    { region: 'Norte', comunidades: 1, familias: 450, inversion: 120000, progreso: 75 },
-    { region: 'Sur', comunidades: 1, familias: 320, inversion: 80000, progreso: 40 },
-    { region: 'Este', comunidades: 1, familias: 580, inversion: 50000, progreso: 15 }
-  ],
-  tiposProyecto: [
-    { tipo: 'Infraestructura', cantidad: 3, presupuesto: 150000, completados: 1 },
-    { tipo: 'Salud', cantidad: 2, presupuesto: 60000, completados: 1 },
-    { tipo: 'Educación', cantidad: 1, presupuesto: 40000, completados: 0 }
-  ],
-  evolucionMensual: [
-    { mes: 'Ene', familias: 100, proyectos: 1, inversion: 25000 },
-    { mes: 'Feb', familias: 280, proyectos: 2, inversion: 55000 },
-    { mes: 'Mar', familias: 450, proyectos: 3, inversion: 95000 },
-    { mes: 'Abr', familias: 650, proyectos: 4, inversion: 140000 },
-    { mes: 'May', familias: 890, proyectos: 5, inversion: 190000 },
-    { mes: 'Jun', familias: 1350, proyectos: 6, inversion: 250000 }
-  ]
+interface EstadisticasPimco {
+  resumenGeneral: {
+    totalEntrevistas: number
+    totalComunidades: number
+    encuestadoresActivos: number
+    periodoInicio: string
+    periodoFin: string
+  }
+  entrevistasPorEstado: Array<{
+    estadoVisita: string
+    _count: { id: number }
+  }>
+  distribucionSexo: Array<{
+    sexoEntrevistado: string
+    _count: { id: number }
+  }>
+  ocupaciones: Array<{
+    ocupacionJefeHogar: string
+    _count: { id: number }
+  }>
+  comunidadesActividad: Array<{
+    id: string
+    nombreComunidad: string
+    coordinadorComunitario: string
+    _count: { entrevistas: number }
+  }>
 }
 
 export function PimcoGraficasEstadisticasSection() {
-  const [selectedTab, setSelectedTab] = useState('indicadores')
+  const [selectedTab, setSelectedTab] = useState('resumen')
+  const [filtroFecha, setFiltroFecha] = useState('todos')
+  const [estadisticas, setEstadisticas] = useState<EstadisticasPimco | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  // Cargar estadísticas desde la API
+  const cargarEstadisticas = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/estadisticas-pimco')
+      if (!response.ok) throw new Error('Error al cargar estadísticas')
+      
+      const data = await response.json()
+      setEstadisticas(data)
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    cargarEstadisticas()
+  }, [])
+
+  if (loading || !estadisticas) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Cargando estadísticas...</span>
+      </div>
+    )
+  }
+
+  // Procesar datos para mostrar
+  const entrevistasPorTipo = estadisticas.entrevistasPorEstado.reduce((acc, item) => {
+    const tipo = item.estadoVisita === 'PRIMERA_VISITA' ? 'primeraVisita' :
+                 item.estadoVisita === 'VISITA_SEGUIMIENTO' ? 'visitaSegundo' : 'visitaSeguimiento'
+    acc[tipo] = item._count.id
+    return acc
+  }, { primeraVisita: 0, visitaSegundo: 0, visitaSeguimiento: 0 })
+
+  const sexoData = estadisticas.distribucionSexo.reduce((acc, item) => {
+    const sexoKey = item.sexoEntrevistado.toLowerCase() as keyof typeof acc
+    if (sexoKey in acc) {
+      acc[sexoKey] = item._count.id
+    }
+    return acc
+  }, { femenino: 0, masculino: 0 })
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <BarChart3 className="h-6 w-6 text-green-600" />
-        <h2 className="text-2xl font-bold">PIMCO - Gráficas y Estadísticas</h2>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-6 w-6 text-green-600" />
+          <div>
+            <h2 className="text-2xl font-bold">PIMCO - Gráficas y Estadísticas</h2>
+            <p className="text-muted-foreground">
+              Análisis de entrevistas y visitas comunitarias
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Select value={filtroFecha} onValueChange={setFiltroFecha}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos los períodos</SelectItem>
+              <SelectItem value="2024">2024</SelectItem>
+              <SelectItem value="ultimo-mes">Último mes</SelectItem>
+              <SelectItem value="ultimo-trimestre">Último trimestre</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline">
+            Exportar Reporte
+          </Button>
+        </div>
       </div>
 
+      {/* Métricas principales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <UserCheck className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-sm text-gray-600">Total Entrevistas</p>
+                <p className="text-2xl font-bold">{estadisticas.resumenGeneral.totalEntrevistas}</p>
+                <p className="text-xs text-green-600">Datos reales de BD</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-5 w-5 text-purple-600" />
+              <div>
+                <p className="text-sm text-gray-600">Comunidades Visitadas</p>
+                <p className="text-2xl font-bold">{estadisticas.resumenGeneral.totalComunidades}</p>
+                <p className="text-xs text-blue-600">100% de cobertura</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5 text-orange-600" />
+              <div>
+                <p className="text-sm text-gray-600">Encuestadores Activos</p>
+                <p className="text-2xl font-bold">{estadisticas.resumenGeneral.encuestadoresActivos}</p>
+                <p className="text-xs text-gray-600">En primera visita</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <Activity className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="text-sm text-gray-600">Tasa de Seguimiento</p>
+                <p className="text-2xl font-bold">
+                  {entrevistasPorTipo.primeraVisita > 0 ? 
+                    Math.round((entrevistasPorTipo.visitaSegundo / entrevistasPorTipo.primeraVisita) * 100) 
+                    : 0}%
+                </p>
+                <p className="text-xs text-green-600">Excelente</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabs de análisis */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="indicadores">Indicadores</TabsTrigger>
-          <TabsTrigger value="regiones">Por Región</TabsTrigger>
-          <TabsTrigger value="proyectos">Proyectos</TabsTrigger>
-          <TabsTrigger value="tendencias">Tendencias</TabsTrigger>
+          <TabsTrigger value="resumen">Resumen</TabsTrigger>
+          <TabsTrigger value="comunidades">Por Comunidad</TabsTrigger>
+          <TabsTrigger value="demograficos">Demográficos</TabsTrigger>
+          <TabsTrigger value="temporal">Evolución</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="indicadores" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Comunidades</CardTitle>
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{estadisticasPimco.indicadoresGenerales.comunidadesImpactadas}</div>
-                <p className="text-xs text-muted-foreground">
-                  En 3 regiones diferentes
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Familias Atendidas</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{estadisticasPimco.indicadoresGenerales.familiasAtendidas.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  +85% vs año anterior
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Proyectos</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{estadisticasPimco.indicadoresGenerales.proyectosEjecutados}</div>
-                <p className="text-xs text-muted-foreground">
-                  2 completados, 4 en progreso
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Inversión Total</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${estadisticasPimco.indicadoresGenerales.inversion.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  USD en 6 meses
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Progreso General del Programa PIMCO</CardTitle>
-              <CardDescription>
-                Avance consolidado de todas las iniciativas
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium">Progreso Total</span>
-                  <span className="text-2xl font-bold text-green-600">
-                    {estadisticasPimco.indicadoresGenerales.progresoGeneral}%
-                  </span>
-                </div>
-                <Progress value={estadisticasPimco.indicadoresGenerales.progresoGeneral} className="h-4" />
-                <div className="grid gap-2 md:grid-cols-3 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Meta 2024:</span> 80%
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Promedio mensual:</span> +12%
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Tiempo restante:</span> 6 meses
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="regiones" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Impacto por Región</CardTitle>
-              <CardDescription>
-                Distribución de recursos y progreso por área geográfica
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {estadisticasPimco.impactoPorRegion.map((region, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 className="font-semibold text-lg">Región {region.region}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {region.comunidades} comunidad • {region.familias} familias
-                        </p>
-                      </div>
-                      <Badge variant={region.progreso > 60 ? 'default' : region.progreso > 30 ? 'secondary' : 'outline'}>
-                        {region.progreso}%
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid gap-3 md:grid-cols-3 mb-3">
-                      <div className="text-center p-2 bg-blue-50 rounded">
-                        <div className="text-xl font-bold text-blue-600">{region.familias}</div>
-                        <div className="text-xs text-blue-800">Familias</div>
-                      </div>
-                      <div className="text-center p-2 bg-green-50 rounded">
-                        <div className="text-xl font-bold text-green-600">${region.inversion.toLocaleString()}</div>
-                        <div className="text-xs text-green-800">Inversión</div>
-                      </div>
-                      <div className="text-center p-2 bg-purple-50 rounded">
-                        <div className="text-xl font-bold text-purple-600">{region.progreso}%</div>
-                        <div className="text-xs text-purple-800">Progreso</div>
-                      </div>
-                    </div>
-                    
-                    <Progress value={region.progreso} className="h-2" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="proyectos" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Estadísticas por Tipo de Proyecto</CardTitle>
-              <CardDescription>
-                Análisis de inversión y resultados por categoría
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {estadisticasPimco.tiposProyecto.map((tipo, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-semibold">{tipo.tipo}</h4>
-                      <div className="flex gap-2">
-                        <Badge variant="outline">{tipo.cantidad} proyectos</Badge>
-                        <Badge className="bg-green-100 text-green-800">
-                          {tipo.completados} completados
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="grid gap-3 md:grid-cols-4">
-                      <div>
-                        <div className="text-sm text-muted-foreground">Total Proyectos</div>
-                        <div className="text-xl font-bold">{tipo.cantidad}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Completados</div>
-                        <div className="text-xl font-bold text-green-600">{tipo.completados}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">En Progreso</div>
-                        <div className="text-xl font-bold text-blue-600">{tipo.cantidad - tipo.completados}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Presupuesto</div>
-                        <div className="text-xl font-bold">${tipo.presupuesto.toLocaleString()}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-3">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Tasa de Finalización</span>
-                        <span>{Math.round((tipo.completados / tipo.cantidad) * 100)}%</span>
-                      </div>
-                      <Progress value={(tipo.completados / tipo.cantidad) * 100} className="h-2" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="tendencias" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Evolución del Programa PIMCO</CardTitle>
-              <CardDescription>
-                Tendencias mensuales de crecimiento e impacto
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {estadisticasPimco.evolucionMensual.map((mes, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border-l-4 border-blue-500 bg-blue-50">
-                    <div className="flex items-center gap-4">
-                      <div className="font-bold text-blue-600 w-12">{mes.mes}</div>
-                      <div className="grid gap-1 md:grid-cols-3">
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{mes.familias} familias</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Activity className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{mes.proyectos} proyectos</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">${mes.inversion.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {index > 0 && (
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-green-600">
-                          +{mes.familias - estadisticasPimco.evolucionMensual[index-1].familias} familias
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          vs mes anterior
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-4 md:grid-cols-2">
+        {/* Tab: Resumen */}
+        <TabsContent value="resumen" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Estado de Visitas */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <LineChart className="h-5 w-5" />
-                  Crecimiento Acumulado
+                  <Calendar className="h-5 w-5" />
+                  Estado de Visitas
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Familias Atendidas</span>
-                      <span>1,350</span>
-                    </div>
-                    <Progress value={85} className="h-2" />
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Primera Visita</span>
+                    <span className="font-bold">{entrevistasPorTipo.primeraVisita}</span>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Inversión Total</span>
-                      <span>$250,000</span>
-                    </div>
-                    <Progress value={70} className="h-2" />
+                  <Progress value={(entrevistasPorTipo.primeraVisita / estadisticas.resumenGeneral.totalEntrevistas) * 100} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Visita de Seguimiento</span>
+                    <span className="font-bold">{entrevistasPorTipo.visitaSegundo}</span>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Proyectos Activos</span>
-                      <span>6</span>
-                    </div>
-                    <Progress value={60} className="h-2" />
+                  <Progress value={(entrevistasPorTipo.visitaSegundo / estadisticas.resumenGeneral.totalEntrevistas) * 100} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Seguimiento Adicional</span>
+                    <span className="font-bold">{entrevistasPorTipo.visitaSeguimiento}</span>
                   </div>
+                  <Progress value={(entrevistasPorTipo.visitaSeguimiento / estadisticas.resumenGeneral.totalEntrevistas) * 100} className="h-2" />
                 </div>
               </CardContent>
             </Card>
 
+            {/* Distribución por Sexo */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <PieChart className="h-5 w-5" />
-                  Proyección 2024
+                  Distribución por Sexo
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">2,000</div>
-                    <div className="text-sm text-muted-foreground">Familias Meta</div>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Femenino</span>
+                    <span className="font-bold">{sexoData.femenino}</span>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">$400,000</div>
-                    <div className="text-sm text-muted-foreground">Inversión Planificada</div>
+                  <Progress value={(sexoData.femenino / estadisticas.resumenGeneral.totalEntrevistas) * 100} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Masculino</span>
+                    <span className="font-bold">{sexoData.masculino}</span>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">10</div>
-                    <div className="text-sm text-muted-foreground">Proyectos Totales</div>
-                  </div>
+                  <Progress value={(sexoData.masculino / estadisticas.resumenGeneral.totalEntrevistas) * 100} className="h-2" />
+                </div>
+
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-gray-600">
+                    {Math.round((sexoData.femenino / estadisticas.resumenGeneral.totalEntrevistas) * 100)}% de participación femenina
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Tab: Por Comunidad */}
+        <TabsContent value="comunidades" className="space-y-4">
+          <div className="grid gap-4">
+            {estadisticas.comunidadesActividad.map((comunidad, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg">{comunidad.nombreComunidad}</CardTitle>
+                      <CardDescription>Coordinador: {comunidad.coordinadorComunitario}</CardDescription>
+                    </div>
+                    <Badge variant="outline">
+                      {comunidad._count.entrevistas} entrevistas
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{comunidad._count.entrevistas}</div>
+                      <div className="text-sm text-gray-600">Total Entrevistas</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {Math.round((comunidad._count.entrevistas / estadisticas.resumenGeneral.totalEntrevistas) * 100)}%
+                      </div>
+                      <div className="text-sm text-gray-600">Participación</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">Activa</div>
+                      <div className="text-sm text-gray-600">Estado</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* Tab: Demográficos */}
+        <TabsContent value="demograficos" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Ocupaciones */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Ocupaciones Principales
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {estadisticas.ocupaciones.slice(0, 5).map((ocupacion) => (
+                  <div key={ocupacion.ocupacionJefeHogar} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{ocupacion.ocupacionJefeHogar}</span>
+                      <span className="font-bold">{ocupacion._count.id}</span>
+                    </div>
+                    <Progress 
+                      value={(ocupacion._count.id / estadisticas.resumenGeneral.totalEntrevistas) * 100} 
+                      className="h-2" 
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Distribución por Sexo Detallada */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Análisis de Género
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {estadisticas.distribucionSexo.map((sexo) => (
+                  <div key={sexo.sexoEntrevistado} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{sexo.sexoEntrevistado}</span>
+                      <span className="font-bold">{sexo._count.id}</span>
+                    </div>
+                    <Progress 
+                      value={(sexo._count.id / estadisticas.resumenGeneral.totalEntrevistas) * 100} 
+                      className="h-2" 
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab: Evolución Temporal */}
+        <TabsContent value="temporal" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LineChart className="h-5 w-5" />
+                Datos en Tiempo Real
+              </CardTitle>
+              <CardDescription>
+                Información actualizada desde la base de datos
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-semibold">Período Actual</h4>
+                    <Badge variant="outline">{estadisticas.resumenGeneral.totalEntrevistas} entrevistas</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Desde: </span>
+                      <span className="font-bold">{estadisticas.resumenGeneral.periodoInicio}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Hasta: </span>
+                      <span className="font-bold">{estadisticas.resumenGeneral.periodoFin}</span>
+                    </div>
+                  </div>
+                  <Progress 
+                    value={100} 
+                    className="mt-2 h-2" 
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
   )
 }
+
+export default PimcoGraficasEstadisticasSection

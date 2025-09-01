@@ -362,3 +362,72 @@ enum EstadoVoluntario {
   INACTIVO
   SUSPENDIDO
 }
+
+// Modelos PIMCO
+model ComunidadPimco {
+  id                      String   @id @default(cuid())
+  nombreComunidad         String
+  departamento            String
+  municipio               String
+  corregimiento           String?
+  vereda                  String?
+  numeroFamilias          Int
+  numeroPersonas          Int
+  coordinadorComunitario  String
+  telefonoCoordinador     String
+  estado                  EstadoComunidadPimco @default(ACTIVO)
+  observaciones           String?
+  fechaCreacion           DateTime @default(now())
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relaciones
+  entrevistas             EntrevistaPimco[]
+
+  @@map("comunidades_pimco")
+}
+
+model EntrevistaPimco {
+  id                      String   @id @default(cuid())
+  fechaEncuesta           DateTime
+  estadoVisita            TipoVisita
+  nombreEncargado         String
+  sexoEntrevistado        String
+  fechaNacimiento         DateTime?
+  ocupacionJefeHogar      String?
+  comunidadId             String
+  encuestadorId           String?
+  observaciones           String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relaciones
+  comunidad               ComunidadPimco @relation(fields: [comunidadId], references: [id], onDelete: Cascade)
+
+  @@map("entrevistas_pimco")
+}
+
+model EncuestadorPimco {
+  id                      String   @id @default(cuid())
+  nombre                  String
+  apellidos               String
+  telefono                String?
+  email                   String?
+  activo                  Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("encuestadores_pimco")
+}
+
+enum EstadoComunidadPimco {
+  ACTIVO
+  INACTIVO
+  EN_PROCESO
+}
+
+enum TipoVisita {
+  PRIMERA_VISITA
+  VISITA_SEGUIMIENTO
+  SEGUIMIENTO_ADICIONAL
+}

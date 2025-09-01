@@ -22,6 +22,33 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const menuItems = [
   {
+    id: 'pimco',
+    title: 'PIMCO',
+    icon: Building2,
+    children: [
+      {
+        id: 'pimco-comunidades',
+        title: 'Comunidades',
+        icon: MapPin,
+      },
+      {
+        id: 'pimco-graficas-estadisticas',
+        title: 'Gráficas y Estadísticas',
+        icon: BarChart3,
+      },
+      {
+        id: 'pimco-entrevistas',
+        title: 'Entrevistas',
+        icon: FileText,
+      },
+      {
+        id: 'pimco-diagnostico-comunitario',
+        title: 'Diagnóstico Comunitario',
+        icon: Activity,
+      },
+    ]
+  },
+  {
     id: 'organizacion',
     title: 'Organizaciones',
     icon: Building2,
@@ -148,33 +175,6 @@ const menuItems = [
         id: 'indicadores',
         title: 'Indicadores',
         icon: Search,
-      },
-    ]
-  },
-  {
-    id: 'pimco',
-    title: 'PIMCO',
-    icon: Building2,
-    children: [
-      {
-        id: 'pimco-comunidades',
-        title: 'Comunidades',
-        icon: MapPin,
-      },
-      {
-        id: 'pimco-graficas-estadisticas',
-        title: 'Gráficas y Estadísticas',
-        icon: BarChart3,
-      },
-      {
-        id: 'pimco-entrevistas',
-        title: 'Entrevistas',
-        icon: FileText,
-      },
-      {
-        id: 'pimco-diagnostico-comunitario',
-        title: 'Diagnóstico Comunitario',
-        icon: Activity,
       },
     ]
   },
