@@ -8,8 +8,12 @@ const organizacionSchema = z.object({
   descripcion: z.string().optional(),
   direccion: z.string().optional(),
   telefono: z.string().optional(),
-  email: z.string().email('Email inválido').optional(),
-  sitioWeb: z.string().url('URL inválida').optional(),
+  email: z.string().optional().refine((val) => !val || z.string().email().safeParse(val).success, {
+    message: "Email inválido"
+  }),
+  sitioWeb: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, {
+    message: "URL inválida"
+  }),
 })
 
 // GET - Obtener organizaciones del usuario
@@ -101,12 +105,39 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const validatedData = organizacionSchema.parse(body)
+    
+    let organizacionData: {
+      nombre: string;
+      descripcion?: string;
+      direccion?: string;
+      telefono?: string;
+      email?: string;
+      sitioWeb?: string;
+    }
+    
+    try {
+      const validatedData = organizacionSchema.parse(body)
+      
+      // Preparar datos para crear organización, asegurando que nombre esté presente
+      organizacionData = {
+        nombre: validatedData.nombre,
+        ...(validatedData.descripcion && validatedData.descripcion !== '' && { descripcion: validatedData.descripcion }),
+        ...(validatedData.direccion && validatedData.direccion !== '' && { direccion: validatedData.direccion }),
+        ...(validatedData.telefono && validatedData.telefono !== '' && { telefono: validatedData.telefono }),
+        ...(validatedData.email && validatedData.email !== '' && { email: validatedData.email }),
+        ...(validatedData.sitioWeb && validatedData.sitioWeb !== '' && { sitioWeb: validatedData.sitioWeb }),
+      }
+    } catch (validationError) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: validationError },
+        { status: 400 }
+      )
+    }
 
     // Crear organización
     const organizacion = await prisma.organizacion.create({
       data: {
-        ...validatedData,
+        ...organizacionData,
         miembros: {
           create: {
             userId: decoded.userId,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -48,7 +48,7 @@ export default function PimcoComunidadesSection() {
   const { toast } = useToast()
 
   // Cargar comunidades desde la API
-  const cargarComunidades = useCallback(async () => {
+  const cargarComunidades = async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/comunidades-pimco')
@@ -66,11 +66,12 @@ export default function PimcoComunidadesSection() {
     } finally {
       setLoading(false)
     }
-  }, [toast])
+  }
 
   useEffect(() => {
     cargarComunidades()
-  }, [cargarComunidades])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Filtrar comunidades
   const comunidadesFiltradas = comunidades.filter(comunidad => {

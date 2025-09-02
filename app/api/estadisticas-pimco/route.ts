@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Tipo para el resultado de la query raw de entrevistas por mes
+interface EntrevistaPorMes {
+  anio: bigint
+  mes: bigint
+  total: bigint
+}
+
 export async function GET() {
   try {
     // Obtener estadísticas generales
@@ -51,7 +58,7 @@ export async function GET() {
     })
 
     // Entrevistas por mes
-    const entrevistasPorMes = await prisma.$queryRaw`
+    const entrevistasPorMes = await prisma.$queryRaw<EntrevistaPorMes[]>`
       SELECT 
         EXTRACT(YEAR FROM "fechaEncuesta") as anio,
         EXTRACT(MONTH FROM "fechaEncuesta") as mes,
@@ -84,18 +91,53 @@ export async function GET() {
 
     return NextResponse.json({
       resumenGeneral: {
-        totalEntrevistas,
-        totalComunidades,
+        totalEntrevistas: Number(totalEntrevistas),
+        totalComunidades: Number(totalComunidades),
         encuestadoresActivos: 3, // Este número podríamos calcularlo dinámicamente
         periodoInicio: '2024-04-25', // Podríamos calcularlo dinámicamente
         periodoFin: new Date().toISOString().split('T')[0]
       },
-      comunidadesPorDepartamento,
-      entrevistasPorEstado,
-      distribucionSexo,
-      ocupaciones,
-      entrevistasPorMes,
-      comunidadesActividad
+      comunidadesPorDepartamento: comunidadesPorDepartamento.map(item => ({
+        ...item,
+        _count: {
+          ...item._count,
+          id: Number(item._count.id)
+        }
+      })),
+      entrevistasPorEstado: entrevistasPorEstado.map(item => ({
+        ...item,
+        _count: {
+          ...item._count,
+          id: Number(item._count.id)
+        }
+      })),
+      distribucionSexo: distribucionSexo.map(item => ({
+        ...item,
+        _count: {
+          ...item._count,
+          id: Number(item._count.id)
+        }
+      })),
+      ocupaciones: ocupaciones.map(item => ({
+        ...item,
+        _count: {
+          ...item._count,
+          id: Number(item._count.id)
+        }
+      })),
+      entrevistasPorMes: entrevistasPorMes.map((item: EntrevistaPorMes) => ({
+        ...item,
+        anio: Number(item.anio),
+        mes: Number(item.mes),
+        total: Number(item.total)
+      })),
+      comunidadesActividad: comunidadesActividad.map(item => ({
+        ...item,
+        _count: {
+          ...item._count,
+          entrevistas: Number(item._count.entrevistas)
+        }
+      }))
     })
   } catch (error) {
     console.error('Error al obtener estadísticas PIMCO:', error)

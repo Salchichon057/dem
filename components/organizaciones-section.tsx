@@ -62,7 +62,13 @@ export function OrganizacionesSection() {
 
     try {
       setCreatingOrg(true)
-      const nuevaOrganizacion = await crearOrganizacion(newOrgForm)
+      
+      // Limpiar datos antes de enviar (remover strings vacíos)
+      const datosLimpios = Object.fromEntries(
+        Object.entries(newOrgForm).filter(([, value]) => value !== '')
+      ) as NuevaOrganizacion
+      
+      const nuevaOrganizacion = await crearOrganizacion(datosLimpios)
       
       // Agregar a la lista local
       setOrganizacionesList(prev => [nuevaOrganizacion, ...prev])
