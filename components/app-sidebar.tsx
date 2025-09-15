@@ -35,6 +35,18 @@ const menuItems = [
         id: 'pimco-graficas-estadisticas',
         title: 'Gráficas y Estadísticas',
         icon: BarChart3,
+        children: [
+          {
+            id: 'pimco-graficas-estadisticas-dashboard',
+            title: 'Dashboard',
+            icon: BarChart3,
+          },
+          {
+            id: 'pimco-bd-estadisticas',
+            title: 'BD Estadísticas',
+            icon: Database,
+          },
+        ]
       },
       {
         id: 'pimco-entrevistas',
@@ -260,24 +272,65 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                       {expandedItems.includes(item.id) && (
                         <div className="ml-6 mt-1 space-y-1">
                           {item.children.map((subItem) => (
-                            <SidebarMenuButton
-                              key={subItem.id}
-                              isActive={activeSection === subItem.id}
-                              onClick={() => setActiveSection(subItem.id)}
-                              className={`
-                                w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
-                                ${activeSection === subItem.id 
-                                  ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
-                                  : ''
-                                }
-                              `}
-                            >
-                              <subItem.icon className={`h-3 w-3 ${activeSection === subItem.id ? 'text-white' : 'text-gray-500'}`} />
-                              <span className="text-sm font-medium">{subItem.title}</span>
-                              {activeSection === subItem.id && (
-                                <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                            <div key={subItem.id}>
+                              {subItem.children ? (
+                                <div>
+                                  <SidebarMenuButton
+                                    onClick={() => toggleExpanded(subItem.id)}
+                                    className="w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300"
+                                  >
+                                    <subItem.icon className="h-3 w-3 text-gray-500" />
+                                    <span className="text-sm font-medium">{subItem.title}</span>
+                                    <ChevronDown className={`ml-auto h-3 w-3 transition-transform ${
+                                      expandedItems.includes(subItem.id) ? 'rotate-180' : ''
+                                    }`} />
+                                  </SidebarMenuButton>
+                                  {expandedItems.includes(subItem.id) && (
+                                    <div className="ml-6 mt-1 space-y-1">
+                                      {subItem.children.map((subSubItem) => (
+                                        <SidebarMenuButton
+                                          key={subSubItem.id}
+                                          isActive={activeSection === subSubItem.id}
+                                          onClick={() => setActiveSection(subSubItem.id)}
+                                          className={`
+                                            w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
+                                            ${activeSection === subSubItem.id 
+                                              ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
+                                              : ''
+                                            }
+                                          `}
+                                        >
+                                          <subSubItem.icon className={`h-2 w-2 ${activeSection === subSubItem.id ? 'text-white' : 'text-gray-500'}`} />
+                                          <span className="text-xs font-medium">{subSubItem.title}</span>
+                                          {activeSection === subSubItem.id && (
+                                            <div className="ml-auto w-1 h-1 bg-white rounded-full animate-pulse"></div>
+                                          )}
+                                        </SidebarMenuButton>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <SidebarMenuButton
+                                  key={subItem.id}
+                                  isActive={activeSection === subItem.id}
+                                  onClick={() => setActiveSection(subItem.id)}
+                                  className={`
+                                    w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
+                                    ${activeSection === subItem.id 
+                                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
+                                      : ''
+                                    }
+                                  `}
+                                >
+                                  <subItem.icon className={`h-3 w-3 ${activeSection === subItem.id ? 'text-white' : 'text-gray-500'}`} />
+                                  <span className="text-sm font-medium">{subItem.title}</span>
+                                  {activeSection === subItem.id && (
+                                    <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                  )}
+                                </SidebarMenuButton>
                               )}
-                            </SidebarMenuButton>
+                            </div>
                           ))}
                         </div>
                       )}

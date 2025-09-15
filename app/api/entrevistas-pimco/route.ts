@@ -36,13 +36,11 @@ export async function POST(request: NextRequest) {
       data: {
         fechaEncuesta: new Date(data.fechaEncuesta),
         estadoVisita: data.estadoVisita,
-        nombreEncargado: data.nombreEncargado,
+        encargadoVisita: data.encargadoVisita || data.nombreEncargado,
         sexoEntrevistado: data.sexoEntrevistado,
         fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento) : null,
         ocupacionJefeHogar: data.ocupacionJefeHogar || '',
-        comunidadId: data.comunidadId,
-        encuestadorId: data.encuestadorId || null,
-        observaciones: data.observaciones || ''
+        comunidadId: data.comunidadId
       },
       include: {
         comunidad: {

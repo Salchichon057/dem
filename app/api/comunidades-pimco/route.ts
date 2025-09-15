@@ -35,14 +35,18 @@ export async function POST(request: NextRequest) {
         nombreComunidad: data.nombreComunidad,
         departamento: data.departamento,
         municipio: data.municipio,
-        corregimiento: data.corregimiento || '',
-        vereda: data.vereda || '',
-        numeroFamilias: parseInt(data.numeroFamilias),
-        numeroPersonas: parseInt(data.numeroPersonas),
-        coordinadorComunitario: data.coordinadorComunitario,
-        telefonoCoordinador: data.telefonoCoordinador,
-        estado: data.estado || 'ACTIVO',
-        observaciones: data.observaciones || ''
+        aldeas: data.aldeas || '',
+        caseriosQueAtienden: data.caseriosQueAtienden || '',
+        qtyCaseriosQueAtienden: parseInt(data.qtyCaseriosQueAtienden) || 0,
+        ubicacionGoogleMaps: data.ubicacionGoogleMaps || '',
+        coordinadorComunitario: data.coordinadorComunitario || '',
+        liderNumero: data.liderNumero || '',
+        comiteComunitario: data.comiteComunitario || '',
+        activa: data.activa !== undefined ? data.activa : true,
+        cantidadFamiliasEnComunidad: parseInt(data.cantidadFamiliasEnComunidad) || 0,
+        cantidadFamEnRA: parseInt(data.cantidadFamEnRA) || 0,
+        fotografiaReferencia: data.fotografiaReferencia || '',
+        motivoSuspencionOBaja: data.motivoSuspencionOBaja || ''
       }
     })
 

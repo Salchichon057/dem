@@ -17,6 +17,7 @@ import { BasesDatosAuditoriaSection } from "@/components/bases-datos-auditoria-s
 import { ListaBeneficiariosSection } from "@/components/lista-beneficiarios-section"
 import PimcoComunidadesSection from "@/components/pimco-comunidades-section"
 import PimcoGraficasEstadisticasSection from "@/components/pimco-graficas-estadisticas-section"
+import { PimcoBdEstadisticasSection } from "@/components/pimco-bd-estadisticas-section"
 import { PimcoEntrevistasSection } from "@/components/pimco-entrevistas-section"
 import { PimcoDiagnosticoComunitarioSection } from "@/components/pimco-diagnostico-comunitario-section"
 import Image from "next/image"
@@ -79,8 +80,10 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       // Secciones de PIMCO
       case "pimco-comunidades":
         return <PimcoComunidadesSection />
-      case "pimco-graficas-estadisticas":
+      case "pimco-graficas-estadisticas-dashboard":
         return <PimcoGraficasEstadisticasSection />
+      case "pimco-bd-estadisticas":
+        return <PimcoBdEstadisticasSection />
       case "pimco-entrevistas":
         return <PimcoEntrevistasSection />
       case "pimco-diagnostico-comunitario":
@@ -141,8 +144,10 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       // Títulos para PIMCO
       case "pimco-comunidades":
         return "PIMCO - Comunidades"
-      case "pimco-graficas-estadisticas":
+      case "pimco-graficas-estadisticas-dashboard":
         return "PIMCO - Gráficas y Estadísticas"
+      case "pimco-bd-estadisticas":
+        return "PIMCO - Base de Datos Estadísticas"
       case "pimco-entrevistas":
         return "PIMCO - Entrevistas"
       case "pimco-diagnostico-comunitario":

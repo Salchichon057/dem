@@ -369,14 +369,18 @@ model ComunidadPimco {
   nombreComunidad         String
   departamento            String
   municipio               String
-  corregimiento           String?
-  vereda                  String?
-  numeroFamilias          Int
-  numeroPersonas          Int
-  coordinadorComunitario  String
-  telefonoCoordinador     String
-  estado                  EstadoComunidadPimco @default(ACTIVO)
-  observaciones           String?
+  aldeas                  String
+  caseriosQueAtienden     String
+  qtyCaseriosQueAtienden  Int
+  ubicacionGoogleMaps     String?
+  coordinadorComunitario  String?
+  liderNumero             String
+  comiteComunitario       String
+  activa                  Boolean  @default(true)
+  cantidadFamiliasEnComunidad Int
+  cantidadFamEnRA         Int
+  fotografiaReferencia    String?
+  motivoSuspencionOBaja   String?
   fechaCreacion           DateTime @default(now())
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
@@ -389,15 +393,110 @@ model ComunidadPimco {
 
 model EntrevistaPimco {
   id                      String   @id @default(cuid())
+  marcaTemporal           DateTime @default(now())
   fechaEncuesta           DateTime
-  estadoVisita            TipoVisita
-  nombreEncargado         String
-  sexoEntrevistado        String
+  estadoVisita            String   // "Primera Visita", "Visita de Seguimiento"
+  encargadoVisita         String
+  sexoEntrevistado        String   // "Masculino", "Femenino"
   fechaNacimiento         DateTime?
-  ocupacionJefeHogar      String?
+  dpi                     String?
+  edad                    Int?
+  etnia                   String?  // "Ladino / Mestizo", "Maya", etc.
+  escolaridad             String?  // "Primaria", "Básicos", "Preprimaria", etc.
+  tipoVivienda            String?  // "Propia", "Alquilada", etc.
+  personasHogar           Int?
+  ingresoMensual          String?  // "Q.300.00 - Q.500.00", "< Q.300.00", etc.
+  personaEmbarazada       Boolean?
+  mesesEmbarazo           String?
+  personaDiscapacidad     Boolean?
+  observacionesDiscapacidad String?
+  convulsiones            String?
+  
+  // Agua y saneamiento
+  fuenteAgua              String?  // "Chorro dentro de la vivienda", "Pozo", etc.
+  frecuenciaAgua          String?  // "1 a 2 veces a la semana", etc.
+  duracionAgua            String?  // "> 7 días", "1 día", etc.
+  distanciaAgua           String?  // "2 km", etc.
+  tiempoAgua              String?  // "15 min", etc.
+  tratamientoAgua         String?  // "SODIS", "Clorado", "Hervido", etc.
+  tipoSanitario           String?  // "Inodoro", "Fosa Septica", etc.
+  eliminaAguasNegras      Boolean?
+  formaEliminacion        String?  // "Al aire libre / calle", "Alcantarillado", etc.
+  energiaElectrica        Boolean?
+  
+  // Materiales de vivienda
+  materialParedes         String?  // "Adobe", "Block", "Ladrillo", etc.
+  materialTecho           String?  // "Lámina", "Concreto", etc.
+  materialPiso            String?  // "Torta de barro", "Tierra", "Piso cerámico", etc.
+  materialPatio           String?  // "Torta de barro", "Tierra", "Torta de cemento", etc.
+  espaciosVivienda        String?  // "2", "3 o más", etc.
+  cocinaSeparada          Boolean?
+  observacionesCocina     String?
+  
+  // Higiene
+  habitosHigiene          String?  // "Baño diario, Lavado frecuente de manos, etc."
+  frecuenciaHigiene       String?  // "Todos los días", etc.
+  
+  // Ocupación e ingresos
+  ocupacionJefeHogar      String?  // "Actividad Agrícola", "Ama (o) de casa", etc.
+  fuenteIngresoFamilia    String?  // "Jornalero", "Ninguna", etc.
+  personasTrabajan        Int?
+  familiarExtranjero      Boolean?
+  recibeRemesas           Boolean?
+  frecuenciaRemesas       String?
+  usoRemesas              String?
+  
+  // Agricultura
+  tieneTierra             Boolean?
+  alquilaTierra           Boolean?
+  cultivaTierra           String?  // "Frijol", etc.
+  usoCosecha              String?  // "Consumo", "Venta", etc.
+  guardaAlimentos         Boolean?
+  alimentosGuardados      String?  // "Frijol", etc.
+  cantidadAlmacena        String?  // "> 3 quintales", etc.
+  tiempoDura              String?  // "> 1 mes", etc.
+  huertoFamiliar          Boolean?
+  cosechaHuerto           String?
+  controlPlagas           Boolean?
+  metodosControl          String?
+  sistemaRiego            Boolean?
+  tipoRiego               String?
+  fuenteAguaRiego         String?
+  
+  // Salud
+  accesoSalud             Boolean?
+  enfermerosPermanentes   Boolean?
+  tiempoSalud             String?  // "1 hora", "15 min", etc.
+  ninesMenores5           Int?
+  controlVacunacion       Boolean?
+  enfermanDiarrea         Boolean?
+  frecuenciaDiarrea       String?  // "Cada 2 meses", etc.
+  acudeSaludDiarrea       Boolean?
+  enfermanRespiratorias   Boolean?
+  frecuenciaRespiratorias String?
+  acudeSaludRespiratorias Boolean?
+  
+  // Escala de hambre
+  escalaHambre1           String?  // "No ocurrió", "Pocas veces", "Algunas veces", etc.
+  escalaHambre2           String?
+  escalaHambre3           String?
+  tiemposComida           String?  // "Desayuno, Almuerzo, Cena", etc.
+  
+  // Consumo de alimentos (usando JSON para almacenar estructuras complejas)
+  consumoVerduras         Json?    // Datos de verduras y hortalizas
+  consumoFrutas           Json?    // Datos de frutas
+  consumoAzucares         Json?    // Datos de azúcares
+  consumoCereales         Json?    // Datos de cereales y leguminosas
+  consumoCarnes           Json?    // Datos de carnes
+  consumoLacteos          Json?    // Datos de lácteos y huevos
+  consumoGrasas           Json?    // Datos de grasas
+  
+  // Capacitaciones y otros
+  temasCapacitacion       String?  // "Agua Potable y Salud", etc.
+  nombreEncargado         String?  // Nombre del encargado de la visita
+  precioVenta             String?  // Para productos que se venden
+  
   comunidadId             String
-  encuestadorId           String?
-  observaciones           String?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
@@ -418,12 +517,6 @@ model EncuestadorPimco {
   updatedAt               DateTime @updatedAt
 
   @@map("encuestadores_pimco")
-}
-
-enum EstadoComunidadPimco {
-  ACTIVO
-  INACTIVO
-  EN_PROCESO
 }
 
 enum TipoVisita {
