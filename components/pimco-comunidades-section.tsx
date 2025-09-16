@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Label } from '@/components/ui/label'
 import { MapPin, Users, Plus, Edit, Trash2, Download, Filter, Loader2, ExternalLink } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
 
 interface ComunidadPimco {
   id: string
@@ -41,32 +40,25 @@ export default function PimcoComunidadesSection() {
     departamento: 'todos',
     activa: 'todos'
   })
-  
-  const { toast } = useToast()
-
-  const cargarComunidades = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/comunidades-pimco')
-      if (!response.ok) throw new Error('Error al cargar comunidades')
-      
-      const data = await response.json()
-      setComunidades(data)
-    } catch (error) {
-      console.error('Error:', error)
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las comunidades",
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [toast])
 
   useEffect(() => {
+    const cargarComunidades = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/comunidades-pimco')
+        if (!response.ok) throw new Error('Error al cargar comunidades')
+        
+        const data = await response.json()
+        setComunidades(data)
+      } catch (error) {
+        console.error('Error al cargar comunidades:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     cargarComunidades()
-  }, [cargarComunidades])
+  }, []) // Solo ejecutar una vez al montar el componente
 
   const comunidadesFiltradas = comunidades.filter(comunidad => {
     return (
