@@ -457,52 +457,54 @@ export function PimcoBdEstadisticasSection() {
                   <span className="ml-2">Cargando datos...</span>
                 </div>
               ) : (
-                <ScrollArea className="h-[600px]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Comunidad</TableHead>
-                        <TableHead>Departamento</TableHead>
-                        <TableHead>Municipio</TableHead>
-                        <TableHead>Estado Visita</TableHead>
-                        <TableHead>Encargado</TableHead>
-                        <TableHead>Sexo</TableHead>
-                        <TableHead>Edad</TableHead>
-                        <TableHead>Etnia</TableHead>
-                        <TableHead>Escolaridad</TableHead>
-                        <TableHead>Ocupación</TableHead>
-                        <TableHead>Ingresos</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {entrevistas.map(entrevista => (
-                        <TableRow key={entrevista.id}>
-                          <TableCell>
-                            {new Date(entrevista.fechaEncuesta).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {entrevista.nombreComunidad}
-                          </TableCell>
-                          <TableCell>{entrevista.departamento}</TableCell>
-                          <TableCell>{entrevista.municipio}</TableCell>
-                          <TableCell>
-                            <Badge variant={entrevista.estadoVisita === 'Primera Visita' ? 'default' : 'secondary'}>
-                              {entrevista.estadoVisita}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{entrevista.encargadoVisita}</TableCell>
-                          <TableCell>{entrevista.sexoEntrevistado}</TableCell>
-                          <TableCell>{entrevista.edad}</TableCell>
-                          <TableCell>{entrevista.etnia}</TableCell>
-                          <TableCell>{entrevista.escolaridad}</TableCell>
-                          <TableCell>{entrevista.ocupacionJefeHogar}</TableCell>
-                          <TableCell>{entrevista.ingresoMensual}</TableCell>
+                <div className="overflow-x-auto">
+                  <ScrollArea className="h-[600px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead>Comunidad</TableHead>
+                          <TableHead>Departamento</TableHead>
+                          <TableHead>Municipio</TableHead>
+                          <TableHead>Estado Visita</TableHead>
+                          <TableHead>Encargado</TableHead>
+                          <TableHead>Sexo</TableHead>
+                          <TableHead>Edad</TableHead>
+                          <TableHead>Etnia</TableHead>
+                          <TableHead>Escolaridad</TableHead>
+                          <TableHead>Ocupación</TableHead>
+                          <TableHead>Ingresos</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
+                      </TableHeader>
+                      <TableBody>
+                        {entrevistas.map(entrevista => (
+                          <TableRow key={entrevista.id}>
+                            <TableCell>
+                              {new Date(entrevista.fechaEncuesta).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {entrevista.nombreComunidad}
+                            </TableCell>
+                            <TableCell>{entrevista.departamento}</TableCell>
+                            <TableCell>{entrevista.municipio}</TableCell>
+                            <TableCell>
+                              <Badge variant={entrevista.estadoVisita === 'Primera Visita' ? 'default' : 'secondary'}>
+                                {entrevista.estadoVisita}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{entrevista.encargadoVisita}</TableCell>
+                            <TableCell>{entrevista.sexoEntrevistado}</TableCell>
+                            <TableCell>{entrevista.edad}</TableCell>
+                            <TableCell>{entrevista.etnia}</TableCell>
+                            <TableCell>{entrevista.escolaridad}</TableCell>
+                            <TableCell>{entrevista.ocupacionJefeHogar}</TableCell>
+                            <TableCell>{entrevista.ingresoMensual}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                </div>
               )}
 
               {/* Paginación */}

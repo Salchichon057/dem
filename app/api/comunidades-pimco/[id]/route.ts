@@ -1,36 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
-  try {
-    const comunidades = await prisma.comunidadPimco.findMany({
-      include: {
-        _count: {
-          select: {
-            entrevistas: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-
-    return NextResponse.json(comunidades)
-  } catch (error) {
-    console.error('Error al obtener comunidades PIMCO:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function POST(request: NextRequest) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const data = await request.json()
-    
-    const comunidad = await prisma.comunidadPimco.create({
+    const { id } = params
+
+    const comunidad = await prisma.comunidadPimco.update({
+      where: { id },
       data: {
         nombreComunidad: data.aldeas || `${data.municipio} - ${data.aldeas}`,
         departamento: data.departamento,
@@ -49,11 +29,32 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(comunidad, { status: 201 })
+    return NextResponse.json(comunidad)
   } catch (error) {
-    console.error('Error al crear comunidad PIMCO:', error)
+    console.error('Error al actualizar comunidad PIMCO:', error)
     return NextResponse.json(
-      { error: 'Error al crear la comunidad' },
+      { error: 'Error al actualizar la comunidad' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params
+
+    await prisma.comunidadPimco.delete({
+      where: { id }
+    })
+
+    return NextResponse.json({ message: 'Comunidad eliminada exitosamente' })
+  } catch (error) {
+    console.error('Error al eliminar comunidad PIMCO:', error)
+    return NextResponse.json(
+      { error: 'Error al eliminar la comunidad' },
       { status: 500 }
     )
   }

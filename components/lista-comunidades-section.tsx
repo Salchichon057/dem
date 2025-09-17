@@ -235,7 +235,7 @@ export function ListaComunidadesSection() {
             <div className="flex items-center space-x-2">
               <Users className="h-5 w-5 text-purple-600" />
               <div>
-                <p className="text-sm text-gray-600">Familias en RA</p>
+                <p className="text-sm text-gray-600">Familias en RUA</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {(comunidades || []).reduce((acc, c) => acc + c.cantidadFamRA, 0)}
                 </p>
@@ -431,7 +431,7 @@ export function ListaComunidadesSection() {
                       <p className="text-xl font-bold text-gray-900">{selectedComunidad.cantidadFamilias}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Familias en RA</label>
+                      <label className="text-sm font-medium text-gray-600">Familias en RUA</label>
                       <p className="text-xl font-bold text-purple-600">{selectedComunidad.cantidadFamRA}</p>
                     </div>
                     <div>
