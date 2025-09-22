@@ -164,11 +164,11 @@ export function PimcoBdEstadisticasSection() {
         page: page.toString(),
         limit: paginacion.limit.toString(),
       })
-      
+
       if (filtros.departamento !== 'all') {
         params.append('departamento', filtros.departamento)
       }
-      
+
       if (filtros.municipio !== 'all') {
         params.append('municipio', filtros.municipio)
       }
@@ -179,15 +179,15 @@ export function PimcoBdEstadisticasSection() {
       }
 
       const data: ResponseData = await response.json()
-      
+
       setEntrevistas(data.entrevistas)
       setPaginacion(data.pagination)
       setDepartamentos(data.filtros.departamentos)
       setMunicipios(data.filtros.municipios)
-      
+
       // Calcular estadísticas de resumen
       calcularEstadisticas(data.entrevistas)
-      
+
     } catch (error) {
       console.error('Error al cargar datos:', error)
     } finally {
@@ -211,13 +211,13 @@ export function PimcoBdEstadisticasSection() {
     data.forEach(entrevista => {
       // Distribución por sexo
       if (entrevista.sexoEntrevistado) {
-        stats.distribucionSexo[entrevista.sexoEntrevistado] = 
+        stats.distribucionSexo[entrevista.sexoEntrevistado] =
           (stats.distribucionSexo[entrevista.sexoEntrevistado] || 0) + 1
       }
 
       // Distribución por etnia
       if (entrevista.etnia) {
-        stats.distribucionEtnia[entrevista.etnia] = 
+        stats.distribucionEtnia[entrevista.etnia] =
           (stats.distribucionEtnia[entrevista.etnia] || 0) + 1
       }
 
@@ -229,13 +229,13 @@ export function PimcoBdEstadisticasSection() {
 
       // Distribución por escolaridad
       if (entrevista.escolaridad) {
-        stats.distribucionEscolaridad[entrevista.escolaridad] = 
+        stats.distribucionEscolaridad[entrevista.escolaridad] =
           (stats.distribucionEscolaridad[entrevista.escolaridad] || 0) + 1
       }
 
       // Distribución por ingresos
       if (entrevista.ingresoMensual) {
-        stats.distribucionIngresos[entrevista.ingresoMensual] = 
+        stats.distribucionIngresos[entrevista.ingresoMensual] =
           (stats.distribucionIngresos[entrevista.ingresoMensual] || 0) + 1
       }
     })
@@ -246,7 +246,7 @@ export function PimcoBdEstadisticasSection() {
   }
 
   // Filtrar municipios por departamento seleccionado
-  const municipiosFiltrados = municipios.filter(m => 
+  const municipiosFiltrados = municipios.filter(m =>
     filtros.departamento === 'all' || m.departamento === filtros.departamento
   )
 
@@ -369,8 +369,8 @@ export function PimcoBdEstadisticasSection() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Departamento</label>
-              <Select 
-                value={filtros.departamento} 
+              <Select
+                value={filtros.departamento}
                 onValueChange={(value) => setFiltros(prev => ({ ...prev, departamento: value, municipio: 'all' }))}
               >
                 <SelectTrigger>
@@ -387,8 +387,8 @@ export function PimcoBdEstadisticasSection() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">Municipio</label>
-              <Select 
-                value={filtros.municipio} 
+              <Select
+                value={filtros.municipio}
                 onValueChange={(value) => setFiltros(prev => ({ ...prev, municipio: value }))}
                 disabled={filtros.departamento === 'all'}
               >
@@ -441,13 +441,12 @@ export function PimcoBdEstadisticasSection() {
 
         <TabsContent value="tabla" className="space-y-4">
           {renderEstadisticas()}
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Entrevistas Registradas</CardTitle>
               <CardDescription>
-                Página {paginacion.currentPage} de {paginacion.totalPages} 
-                ({paginacion.totalRegistros} registros totales)
+                Página {paginacion.currentPage} de {paginacion.totalPages}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -457,53 +456,65 @@ export function PimcoBdEstadisticasSection() {
                   <span className="ml-2">Cargando datos...</span>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <ScrollArea className="h-[600px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Fecha</TableHead>
-                          <TableHead>Comunidad</TableHead>
-                          <TableHead>Departamento</TableHead>
-                          <TableHead>Municipio</TableHead>
-                          <TableHead>Estado Visita</TableHead>
-                          <TableHead>Encargado</TableHead>
-                          <TableHead>Sexo</TableHead>
-                          <TableHead>Edad</TableHead>
-                          <TableHead>Etnia</TableHead>
-                          <TableHead>Escolaridad</TableHead>
-                          <TableHead>Ocupación</TableHead>
-                          <TableHead>Ingresos</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {entrevistas.map(entrevista => (
-                          <TableRow key={entrevista.id}>
-                            <TableCell>
-                              {new Date(entrevista.fechaEncuesta).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {entrevista.nombreComunidad}
-                            </TableCell>
-                            <TableCell>{entrevista.departamento}</TableCell>
-                            <TableCell>{entrevista.municipio}</TableCell>
-                            <TableCell>
-                              <Badge variant={entrevista.estadoVisita === 'Primera Visita' ? 'default' : 'secondary'}>
-                                {entrevista.estadoVisita}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{entrevista.encargadoVisita}</TableCell>
-                            <TableCell>{entrevista.sexoEntrevistado}</TableCell>
-                            <TableCell>{entrevista.edad}</TableCell>
-                            <TableCell>{entrevista.etnia}</TableCell>
-                            <TableCell>{entrevista.escolaridad}</TableCell>
-                            <TableCell>{entrevista.ocupacionJefeHogar}</TableCell>
-                            <TableCell>{entrevista.ingresoMensual}</TableCell>
+                <div className="overflow-x-auto border rounded-lg">
+                  <div className="min-w-[1400px]">
+                    <ScrollArea className="h-[600px]">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
+                          <TableRow>
+                            <TableHead className="min-w-[100px] bg-background">Fecha</TableHead>
+                            <TableHead className="min-w-[200px] bg-background">Comunidad</TableHead>
+                            <TableHead className="min-w-[120px] bg-background">Departamento</TableHead>
+                            <TableHead className="min-w-[120px] bg-background">Municipio</TableHead>
+                            <TableHead className="min-w-[130px] bg-background">Estado Visita</TableHead>
+                            <TableHead className="min-w-[180px] bg-background">Encargado</TableHead>
+                            <TableHead className="min-w-[80px] bg-background">Sexo</TableHead>
+                            <TableHead className="min-w-[70px] bg-background">Edad</TableHead>
+                            <TableHead className="min-w-[100px] bg-background">Etnia</TableHead>
+                            <TableHead className="min-w-[120px] bg-background">Escolaridad</TableHead>
+                            <TableHead className="min-w-[180px] bg-background">Ocupación</TableHead>
+                            <TableHead className="min-w-[120px] bg-background">Ingresos</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
+                        </TableHeader>
+                        <TableBody>
+                          {entrevistas.map(entrevista => (
+                            <TableRow key={entrevista.id}>
+                              <TableCell className="min-w-[100px]">
+                                {new Date(entrevista.fechaEncuesta).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="font-medium min-w-[200px] max-w-[200px]">
+                                <div className="truncate" title={entrevista.nombreComunidad || ''}>
+                                  {entrevista.nombreComunidad}
+                                </div>
+                              </TableCell>
+                              <TableCell className="min-w-[120px]">{entrevista.departamento}</TableCell>
+                              <TableCell className="min-w-[120px]">{entrevista.municipio}</TableCell>
+                              <TableCell className="min-w-[130px]">
+                                <Badge variant={entrevista.estadoVisita === 'Primera Visita' ? 'default' : 'secondary'}>
+                                  {entrevista.estadoVisita}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="min-w-[180px] max-w-[180px]">
+                                <div className="truncate" title={entrevista.encargadoVisita || ''}>
+                                  {entrevista.encargadoVisita}
+                                </div>
+                              </TableCell>
+                              <TableCell className="min-w-[80px]">{entrevista.sexoEntrevistado}</TableCell>
+                              <TableCell className="min-w-[70px] text-center">{entrevista.edad}</TableCell>
+                              <TableCell className="min-w-[100px]">{entrevista.etnia}</TableCell>
+                              <TableCell className="min-w-[120px]">{entrevista.escolaridad}</TableCell>
+                              <TableCell className="min-w-[180px] max-w-[180px]">
+                                <div className="truncate" title={entrevista.ocupacionJefeHogar || ''}>
+                                  {entrevista.ocupacionJefeHogar}
+                                </div>
+                              </TableCell>
+                              <TableCell className="min-w-[120px]">{entrevista.ingresoMensual}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </div>
                 </div>
               )}
 
@@ -539,7 +550,7 @@ export function PimcoBdEstadisticasSection() {
 
         <TabsContent value="graficos" className="space-y-4">
           {renderEstadisticas()}
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
@@ -552,10 +563,10 @@ export function PimcoBdEstadisticasSection() {
                       <span className="text-sm">{escolaridad}</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ 
-                              width: `${(cantidad / estadisticasResumen.totalEntrevistas) * 100}%` 
+                          <div
+                            className="bg-blue-600 h-2 rounded-full"
+                            style={{
+                              width: `${(cantidad / estadisticasResumen.totalEntrevistas) * 100}%`
                             }}
                           ></div>
                         </div>
@@ -578,10 +589,10 @@ export function PimcoBdEstadisticasSection() {
                       <span className="text-sm">{ingreso}</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-600 h-2 rounded-full" 
-                            style={{ 
-                              width: `${(cantidad / estadisticasResumen.totalEntrevistas) * 100}%` 
+                          <div
+                            className="bg-green-600 h-2 rounded-full"
+                            style={{
+                              width: `${(cantidad / estadisticasResumen.totalEntrevistas) * 100}%`
                             }}
                           ></div>
                         </div>

@@ -214,14 +214,14 @@ export default function PimcoComunidadesSection() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <MapPin className="h-6 w-6 text-blue-600" />
-            Comunidades PIMCO
+            Gestión de comunidades del programa PIMCO
           </h2>
           <p className="text-muted-foreground">
-            Gestión de comunidades del programa PIMCO
+            Administra las comunidades atendidas por el programa PIMCO
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex items-center gap-2">
+          <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
