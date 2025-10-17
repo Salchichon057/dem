@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea'
 import { MapPin, Users, Plus, Edit, Trash2, Download, Filter, Loader2, ExternalLink } from 'lucide-react'
 
+type EstadoComunidad = 'ACTIVA' | 'INACTIVA' | 'SUSPENDIDA'
+
 interface ComunidadPimco {
   id: string
   departamento: string
@@ -23,6 +25,7 @@ interface ComunidadPimco {
   liderNumero: string
   comiteComunitario: string
   activa: boolean
+  estado?: EstadoComunidad
   cantidadFamiliasEnComunidad: number
   cantidadFamEnRA: number
   fotografiaReferencia?: string
@@ -54,6 +57,7 @@ export default function PimcoComunidadesSection() {
     liderNumero: '',
     comiteComunitario: '',
     activa: true,
+    estado: 'ACTIVA' as EstadoComunidad,
     cantidadFamiliasEnComunidad: 0,
     cantidadFamEnRA: 0,
     fotografiaReferencia: '',
@@ -90,6 +94,7 @@ export default function PimcoComunidadesSection() {
       liderNumero: '',
       comiteComunitario: '',
       activa: true,
+      estado: 'ACTIVA' as EstadoComunidad,
       cantidadFamiliasEnComunidad: 0,
       cantidadFamEnRA: 0,
       fotografiaReferencia: '',
@@ -111,6 +116,7 @@ export default function PimcoComunidadesSection() {
         liderNumero: comunidad.liderNumero,
         comiteComunitario: comunidad.comiteComunitario,
         activa: comunidad.activa,
+        estado: comunidad.estado || 'ACTIVA',
         cantidadFamiliasEnComunidad: comunidad.cantidadFamiliasEnComunidad,
         cantidadFamEnRA: comunidad.cantidadFamEnRA,
         fotografiaReferencia: comunidad.fotografiaReferencia || '',
@@ -187,6 +193,11 @@ export default function PimcoComunidadesSection() {
   }
 
   const comunidadesFiltradas = comunidades.filter(comunidad => {
+    const estadoMatch = filtros.activa === 'todos' || filtros.activa === '' ||
+      (comunidad.estado && comunidad.estado === filtros.activa) ||
+      (!comunidad.estado && filtros.activa === 'ACTIVA' && comunidad.activa) ||
+      (!comunidad.estado && filtros.activa === 'INACTIVA' && !comunidad.activa)
+    
     return (
       comunidad.aldeas.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
       comunidad.municipio.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
@@ -194,9 +205,7 @@ export default function PimcoComunidadesSection() {
       comunidad.comiteComunitario.toLowerCase().includes(filtros.busqueda.toLowerCase())
     ) &&
     (filtros.departamento === 'todos' || filtros.departamento === '' || comunidad.departamento === filtros.departamento) &&
-    (filtros.activa === 'todos' || filtros.activa === '' || 
-     (filtros.activa === 'true' && comunidad.activa) || 
-     (filtros.activa === 'false' && !comunidad.activa))
+    estadoMatch
   })
 
   if (loading) {
@@ -348,17 +357,22 @@ export default function PimcoComunidadesSection() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="activa">Estado</Label>
+                    <Label htmlFor="estado">Estado</Label>
                     <Select
-                      value={formData.activa.toString()}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, activa: value === 'true' }))}
+                      value={formData.estado}
+                      onValueChange={(value: EstadoComunidad) => setFormData(prev => ({ 
+                        ...prev, 
+                        estado: value,
+                        activa: value === 'ACTIVA'
+                      }))}
                     >
                       <SelectTrigger className="bg-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="true">Activa</SelectItem>
-                        <SelectItem value="false">Inactiva</SelectItem>
+                        <SelectItem value="ACTIVA">Activa</SelectItem>
+                        <SelectItem value="SUSPENDIDA">Suspendida</SelectItem>
+                        <SelectItem value="INACTIVA">Inactiva</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -372,7 +386,7 @@ export default function PimcoComunidadesSection() {
                     placeholder="URL de la fotografía"
                   />
                 </div>
-                {!formData.activa && (
+                {(formData.estado === 'SUSPENDIDA' || formData.estado === 'INACTIVA') && (
                   <div>
                     <Label htmlFor="motivo">Motivo de Suspensión/Baja</Label>
                     <Textarea
@@ -491,8 +505,9 @@ export default function PimcoComunidadesSection() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="true">Activas</SelectItem>
-                  <SelectItem value="false">Inactivas</SelectItem>
+                  <SelectItem value="ACTIVA">Activas</SelectItem>
+                  <SelectItem value="SUSPENDIDA">Suspendidas</SelectItem>
+                  <SelectItem value="INACTIVA">Inactivas</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -557,8 +572,18 @@ export default function PimcoComunidadesSection() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={comunidad.activa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                        {comunidad.activa ? 'Activa' : 'Inactiva'}
+                      <Badge className={
+                        comunidad.estado === 'ACTIVA' || (comunidad.activa && !comunidad.estado) 
+                          ? 'bg-green-100 text-green-800' 
+                          : comunidad.estado === 'SUSPENDIDA'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }>
+                        {comunidad.estado === 'ACTIVA' || (comunidad.activa && !comunidad.estado) 
+                          ? 'Activa' 
+                          : comunidad.estado === 'SUSPENDIDA'
+                          ? 'Suspendida'
+                          : 'Inactiva'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">{comunidad.cantidadFamiliasEnComunidad}</TableCell>

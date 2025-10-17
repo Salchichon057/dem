@@ -377,6 +377,7 @@ model ComunidadPimco {
   liderNumero             String
   comiteComunitario       String
   activa                  Boolean  @default(true)
+  estado                  EstadoComunidad @default(ACTIVA)
   cantidadFamiliasEnComunidad Int
   cantidadFamEnRA         Int
   fotografiaReferencia    String?
@@ -523,4 +524,10 @@ enum TipoVisita {
   PRIMERA_VISITA
   VISITA_SEGUIMIENTO
   SEGUIMIENTO_ADICIONAL
+}
+
+enum EstadoComunidad {
+  ACTIVA
+  INACTIVA
+  SUSPENDIDA
 }

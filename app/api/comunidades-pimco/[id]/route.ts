@@ -22,6 +22,7 @@ export async function PUT(
         liderNumero: data.liderNumero || '',
         comiteComunitario: data.comiteComunitario || '',
         activa: data.activa !== undefined ? data.activa : true,
+        estado: data.estado || 'ACTIVA',
         cantidadFamiliasEnComunidad: parseInt(data.cantidadFamiliasEnComunidad) || 0,
         cantidadFamEnRA: parseInt(data.cantidadFamEnRA) || 0,
         fotografiaReferencia: data.fotografiaReferencia || '',

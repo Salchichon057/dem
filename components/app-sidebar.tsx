@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 const menuItems = [
   {
     id: 'pimco',
-    title: 'PIMCO',
+    title: 'Perfil Comunitario',
     icon: Building2,
     children: [
       {
