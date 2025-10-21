@@ -41,6 +41,7 @@ model User {
 model Organizacion {
   id          String   @id @default(cuid())
   nombre      String
+  nombreCompleto String?
   descripcion String?
   logo        String?
   estado      EstadoOrganizacion @default(ACTIVA)
@@ -48,6 +49,79 @@ model Organizacion {
   telefono    String?
   email       String?
   sitioWeb    String?
+  
+  // Información adicional
+  ubicacionGoogleMaps String?
+  clasificacion       String? // pequeña, mediana, grande
+  productosConsumen   String? // texto largo
+  capacidadAlmacenamiento String?
+  visitaInstitucional String?
+  categorizacion      String?
+  personasAutorizadas String?
+  
+  // Contactos principales
+  contacto1Nombre     String?
+  contacto1Cargo      String?
+  contacto1Telefono   String?
+  contacto1Email      String?
+  
+  contacto2Nombre     String?
+  contacto2Telefono   String?
+  contacto2Email      String?
+  
+  // Ubicaciones
+  departamento        String?
+  municipio           String?
+  zona                String?
+  direccionDetallada  String?
+  
+  departamento2       String?
+  municipio2          String?
+  zona2               String?
+  direccion2          String?
+  
+  departamento3       String?
+  municipio3          String?
+  zona3               String?
+  direccion3          String?
+  
+  // Información institucional
+  tipoLaborSocial     String?
+  tipoFinanciamiento  String?
+  tiposProgramas      String?
+  paginaSocial        String?
+  
+  // Beneficiarios
+  rangoEdad           String?
+  poblacionTotalDEM   Int?
+  poblacionTotalBeneficiada Int?
+  
+  // Demografía detallada
+  primeraInfanciaMujeres Int?
+  primeraInfanciaHombres Int?
+  ninezMujeres        Int?
+  ninezHombres        Int?
+  jovenesMujeres      Int?
+  jovenesHombres      Int?
+  adultosMujeres      Int?
+  adultosHombres      Int?
+  adultosMayoresMujeres Int?
+  adultosMayoresHombres Int?
+  
+  familiasAtendidas   Int?
+  ninasMadres         Int?
+  ninasLactantes      Int?
+  personasFemenino    Int?
+  personasMasculino   Int?
+  
+  // Cobertura geográfica
+  departamentosAtendidos String?
+  municipiosAtendidos String?
+  
+  // Información legal
+  nit                 String?
+  nombreLegal         String?
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -366,6 +440,7 @@ enum EstadoVoluntario {
 // Modelos PIMCO
 model ComunidadPimco {
   id                      String   @id @default(cuid())
+  fechaInscripcion        DateTime @default(now())
   nombreComunidad         String
   departamento            String
   municipio               String
@@ -375,13 +450,42 @@ model ComunidadPimco {
   ubicacionGoogleMaps     String?
   coordinadorComunitario  String?
   liderNumero             String
+  asistenteLideresDEM     String?
   comiteComunitario       String
   activa                  Boolean  @default(true)
   estado                  EstadoComunidad @default(ACTIVA)
   cantidadFamiliasEnComunidad Int
   cantidadFamEnRA         Int
+  
+  // Demografía detallada
+  primeraInfancia0a2Mujeres Int @default(0)
+  primeraInfancia0a2Hombres Int @default(0)
+  ninez3a5Mujeres           Int @default(0)
+  ninez3a5Hombres           Int @default(0)
+  jovenes6a10Mujeres        Int @default(0)
+  jovenes6a10Hombres        Int @default(0)
+  adolescentes11a18Mujeres  Int @default(0)
+  adolescentes11a18Hombres  Int @default(0)
+  adultos19a60Mujeres       Int @default(0)
+  adultos19a60Hombres       Int @default(0)
+  adultosMayor61Mujeres     Int @default(0)
+  adultosMayor61Hombres     Int @default(0)
+  mujeresGestantes          Int @default(0)
+  mujeresLactantes          Int @default(0)
+  
+  // Clasificación y operaciones
+  clasificacion             String? // Pequeña: 1-50, Mediana: 51-150, Grande: arriba 150
+  capacidadAlmacenamiento   String?
+  formasColocacionInteres   String? // BS: bazar seco, BA: bazar agrícola, C: combos, B: bolsas
+  tipoColocacion            String?
+  grupoWhatsapp             String?
+  book                      String?
+  bolsasMaximo              Int?
+  bolsasCortesia            Int?
+  
   fotografiaReferencia    String?
   motivoSuspencionOBaja   String?
+  fechaBaja               DateTime?
   fechaCreacion           DateTime @default(now())
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

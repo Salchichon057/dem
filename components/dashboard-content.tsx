@@ -2,13 +2,13 @@
 
 import { useAuth } from "@/contexts/auth-context"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { OrganizacionesSection } from "@/components/organizaciones-section"
+import OrganizacionesSectionNew from "@/components/organizaciones-section-new"
 import { EstadisticasSection } from "@/components/estadisticas-section"
 import { PlantillasSection } from "@/components/plantillas-section"
 import { FormulariosSection } from "@/components/formularios-section"
 import { PerfilSection } from "@/components/perfil-section"
 import { ConfiguracionSection } from "@/components/configuracion-section"
-import { ListaComunidadesSection } from "@/components/lista-comunidades-section"
+import ListaComunidadesSection from "@/components/lista-comunidades-section"
 import { PerfilComunitarioSection } from "@/components/perfil-comunitario-section"
 import { EstadisticasComunidadesSection } from "@/components/estadisticas-comunidades-section"
 import { PlantillasComunidadesSection } from "@/components/plantillas-comunidades-section"
@@ -32,7 +32,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
   const renderSection = () => {
     switch (activeSection) {
       case "organizaciones":
-        return <OrganizacionesSection />
+        return <OrganizacionesSectionNew />
       case "estadisticas":
         return <EstadisticasSection />
       case "plantillas":
@@ -89,7 +89,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "pimco-diagnostico-comunitario":
         return <PimcoDiagnosticoComunitarioSection />
       default:
-        return <OrganizacionesSection />
+        return <OrganizacionesSectionNew />
     }
   }
 
