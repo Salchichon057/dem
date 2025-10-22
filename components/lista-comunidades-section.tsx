@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { List, Database, Download, Filter, MapPin, Construction } from 'lucide-react'
+import { List, Database, Download, Filter, MapPin, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 import * as XLSX from 'xlsx'
 
@@ -63,6 +63,11 @@ export default function ListaComunidadesSection() {
   const [vista, setVista] = useState<'lista' | 'base-datos'>('lista')
   const [comunidades, setComunidades] = useState<ComunidadPimco[]>([])
   const [loading, setLoading] = useState(true)
+  const [detalleAbierto, setDetalleAbierto] = useState<string | null>(null)
+  
+  // Filtros para lista
+  const [filtroDepartamento, setFiltroDepartamento] = useState('todos')
+  const [filtroAldea, setFiltroAldea] = useState('')
   
   // Filtros para base de datos
   const [filtroMes, setFiltroMes] = useState('todos')
@@ -89,6 +94,16 @@ export default function ListaComunidadesSection() {
     }
   }
 
+  // Filtrado para lista de comunidades
+  const comunidadesFiltradas = comunidades.filter(c => {
+    const cumpleDepartamento = filtroDepartamento === 'todos' || c.departamento === filtroDepartamento
+    const cumpleAldea = filtroAldea === '' || 
+      c.aldeas.toLowerCase().includes(filtroAldea.toLowerCase())
+    
+    return cumpleDepartamento && cumpleAldea
+  })
+
+  // Filtrado para base de datos
   const comunidadesFiltradasBD = comunidades.filter(c => {
     const fecha = new Date(c.fechaInscripcion)
     const mes = (fecha.getMonth() + 1).toString()
@@ -104,6 +119,22 @@ export default function ListaComunidadesSection() {
     
     return cumpleMes && cumpleAnio && cumpleDepartamento && cumpleBusqueda
   })
+
+  const exportarExcelLista = () => {
+    const datos = comunidadesFiltradas.map(c => ({
+      'Departamento': c.departamento,
+      'Municipio': c.municipio,
+      'Aldeas': c.aldeas,
+      'Lider / Numero': c.liderNumero,
+      'Comité Comunitario': c.comiteComunitario,
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(datos)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Lista de Comunidades')
+    XLSX.writeFile(wb, `lista_comunidades_${new Date().toISOString().split('T')[0]}.xlsx`)
+    toast.success('Archivo Excel descargado exitosamente')
+  }
 
   const exportarExcelCompleto = () => {
     const datos = comunidadesFiltradasBD.map(c => ({
@@ -157,6 +188,10 @@ export default function ListaComunidadesSection() {
   const aniosDisponibles = Array.from(
     new Set(comunidades.map(c => new Date(c.fechaInscripcion).getFullYear()))
   ).sort((a, b) => b - a)
+
+  const departamentosUnicos = Array.from(
+    new Set(comunidades.map(c => c.departamento))
+  ).sort()
 
   const meses = [
     { valor: '1', nombre: 'Enero' },
@@ -219,24 +254,325 @@ export default function ListaComunidadesSection() {
       </Card>
 
       {vista === 'lista' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Construction className="h-5 w-5 text-orange-500" />
-              En Construcción
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
-              <Construction className="h-16 w-16 text-orange-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Sección en Construcción</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Esta sección está actualmente en desarrollo. Por favor, utiliza la vista de 
-                &quot;Base de Datos Comunidades&quot; para acceder a toda la información.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                Filtros
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="filtroDept">Departamento</Label>
+                  <Select value={filtroDepartamento} onValueChange={setFiltroDepartamento}>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      {departamentosUnicos.map(d => (
+                        <SelectItem key={d} value={d}>{d}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="filtroAldea">Buscar Aldea</Label>
+                  <Input
+                    id="filtroAldea"
+                    placeholder="Nombre de aldea..."
+                    value={filtroAldea}
+                    onChange={(e) => setFiltroAldea(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button
+                    variant="outline"
+                    onClick={exportarExcelLista}
+                    className="w-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Descargar Excel
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista de Comunidades ({comunidadesFiltradas.length} registros)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Departamento</TableHead>
+                      <TableHead>Municipio</TableHead>
+                      <TableHead>Aldeas</TableHead>
+                      <TableHead>Lider / Numero</TableHead>
+                      <TableHead>Comité Comunitario</TableHead>
+                      <TableHead>Opciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {comunidadesFiltradas.map((c) => (
+                      <>
+                        <TableRow key={c.id}>
+                          <TableCell>{c.departamento}</TableCell>
+                          <TableCell>{c.municipio}</TableCell>
+                          <TableCell>{c.aldeas}</TableCell>
+                          <TableCell>{c.liderNumero}</TableCell>
+                          <TableCell className="max-w-xs truncate">{c.comiteComunitario}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDetalleAbierto(detalleAbierto === c.id ? null : c.id)}
+                            >
+                              {detalleAbierto === c.id ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                              <span className="ml-2">Detalle</span>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                        {detalleAbierto === c.id && (
+                          <TableRow>
+                            <TableCell colSpan={6} className="bg-gray-50">
+                              <div className="p-6 space-y-6">
+                                <h3 className="text-lg font-semibold border-b pb-2">Información Detallada</h3>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                  <div className="space-y-3">
+                                    <h4 className="font-semibold text-sm text-gray-700">Información General</h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div>
+                                        <span className="font-medium">Fecha de inscripción:</span>
+                                        <p className="text-gray-600">{new Date(c.fechaInscripcion).toLocaleDateString('es-GT')}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Departamento:</span>
+                                        <p className="text-gray-600">{c.departamento}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Municipio:</span>
+                                        <p className="text-gray-600">{c.municipio}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Aldeas:</span>
+                                        <p className="text-gray-600">{c.aldeas}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Caserios que atienden:</span>
+                                        <p className="text-gray-600">{c.caseriosQueAtienden}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">QTY caserios que atienden:</span>
+                                        <p className="text-gray-600">{c.qtyCaseriosQueAtienden}</p>
+                                      </div>
+                                      {c.ubicacionGoogleMaps && (
+                                        <div>
+                                          <span className="font-medium">Ubicación Google Maps:</span>
+                                          <a 
+                                            href={c.ubicacionGoogleMaps} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline block"
+                                          >
+                                            Ver en Google Maps
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <h4 className="font-semibold text-sm text-gray-700">Liderazgo y Comité</h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div>
+                                        <span className="font-medium">Lider / Numero:</span>
+                                        <p className="text-gray-600">{c.liderNumero}</p>
+                                      </div>
+                                      {c.asistenteLideresDEM && (
+                                        <div>
+                                          <span className="font-medium">Asistente en grupo de Lideres/liderezas DEM:</span>
+                                          <p className="text-gray-600">{c.asistenteLideresDEM}</p>
+                                        </div>
+                                      )}
+                                      <div>
+                                        <span className="font-medium">Comité Comunitario:</span>
+                                        <p className="text-gray-600">{c.comiteComunitario}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Activa/inactiva:</span>
+                                        <Badge className={
+                                          c.estado === 'ACTIVA' 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : c.estado === 'SUSPENDIDA'
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-red-100 text-red-800'
+                                        }>
+                                          {c.estado}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <h4 className="font-semibold text-sm text-gray-700">Familias</h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div>
+                                        <span className="font-medium">Cantidad de familias en comunidad:</span>
+                                        <p className="text-gray-600">{c.cantidadFamiliasEnComunidad}</p>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Cantidad de fam en RA:</span>
+                                        <p className="text-gray-600">{c.cantidadFamEnRA}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="border-t pt-4">
+                                  <h4 className="font-semibold text-sm text-gray-700 mb-3">Distribución Poblacional</h4>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                    <div className="bg-white p-3 rounded border">
+                                      <p className="font-medium text-xs text-gray-600 mb-1">Primera infancia (0 a 2 años)</p>
+                                      <p className="text-gray-800">Mujeres: <span className="font-semibold">{c.primeraInfancia0a2Mujeres}</span></p>
+                                      <p className="text-gray-800">Hombres: <span className="font-semibold">{c.primeraInfancia0a2Hombres}</span></p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                      <p className="font-medium text-xs text-gray-600 mb-1">Niñez 3 a 5 años</p>
+                                      <p className="text-gray-800">Mujeres: <span className="font-semibold">{c.ninez3a5Mujeres}</span></p>
+                                      <p className="text-gray-800">Hombres: <span className="font-semibold">{c.ninez3a5Hombres}</span></p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                      <p className="font-medium text-xs text-gray-600 mb-1">Jovenes de 6 a 10 años</p>
+                                      <p className="text-gray-800">Mujeres: <span className="font-semibold">{c.jovenes6a10Mujeres}</span></p>
+                                      <p className="text-gray-800">Hombres: <span className="font-semibold">{c.jovenes6a10Hombres}</span></p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                      <p className="font-medium text-xs text-gray-600 mb-1">Adultos 11 a 18 años</p>
+                                      <p className="text-gray-800">Mujeres: <span className="font-semibold">{c.adolescentes11a18Mujeres}</span></p>
+                                      <p className="text-gray-800">Hombres: <span className="font-semibold">{c.adolescentes11a18Hombres}</span></p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                      <p className="font-medium text-xs text-gray-600 mb-1">Adultos 19 a 60 años</p>
+                                      <p className="text-gray-800">Mujeres: <span className="font-semibold">{c.adultos19a60Mujeres}</span></p>
+                                      <p className="text-gray-800">Hombres: <span className="font-semibold">{c.adultos19a60Hombres}</span></p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                      <p className="font-medium text-xs text-gray-600 mb-1">Adulto mayor 61 para arriba</p>
+                                      <p className="text-gray-800">Mujeres: <span className="font-semibold">{c.adultosMayor61Mujeres}</span></p>
+                                      <p className="text-gray-800">Hombres: <span className="font-semibold">{c.adultosMayor61Hombres}</span></p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                      <p className="font-medium text-xs text-gray-600 mb-1">Mujeres</p>
+                                      <p className="text-gray-800">Gestantes: <span className="font-semibold">{c.mujeresGestantes}</span></p>
+                                      <p className="text-gray-800">Lactantes: <span className="font-semibold">{c.mujeresLactantes}</span></p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="border-t pt-4">
+                                  <h4 className="font-semibold text-sm text-gray-700 mb-3">Información Operativa</h4>
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    {c.clasificacion && (
+                                      <div>
+                                        <span className="font-medium">Clasificación:</span>
+                                        <p className="text-gray-600">{c.clasificacion}</p>
+                                        <p className="text-xs text-gray-500">Pequeña: 1-50, Mediana: 51-150, Grande: arriba 150</p>
+                                      </div>
+                                    )}
+                                    {c.capacidadAlmacenamiento && (
+                                      <div>
+                                        <span className="font-medium">Capacidad de almacenamiento o entrega a beneficiarios:</span>
+                                        <p className="text-gray-600">{c.capacidadAlmacenamiento}</p>
+                                      </div>
+                                    )}
+                                    {c.formasColocacionInteres && (
+                                      <div>
+                                        <span className="font-medium">Formas de colocación de interés:</span>
+                                        <p className="text-gray-600">{c.formasColocacionInteres}</p>
+                                        <p className="text-xs text-gray-500">BS: bazar seco, BA: bazar agrícola, C: combos, B: bolsas</p>
+                                      </div>
+                                    )}
+                                    {c.fotografiaReferencia && (
+                                      <div>
+                                        <span className="font-medium">Fotografía del referencia del lugar:</span>
+                                        <p className="text-gray-600">{c.fotografiaReferencia}</p>
+                                      </div>
+                                    )}
+                                    {c.tipoColocacion && (
+                                      <div>
+                                        <span className="font-medium">Tipo de colocación:</span>
+                                        <p className="text-gray-600">{c.tipoColocacion}</p>
+                                      </div>
+                                    )}
+                                    {c.grupoWhatsapp && (
+                                      <div>
+                                        <span className="font-medium">Grupo de Whatsapp:</span>
+                                        <p className="text-gray-600">{c.grupoWhatsapp}</p>
+                                      </div>
+                                    )}
+                                    {c.book && (
+                                      <div>
+                                        <span className="font-medium">Book:</span>
+                                        <p className="text-gray-600">{c.book}</p>
+                                      </div>
+                                    )}
+                                    {c.bolsasMaximo !== null && (
+                                      <div>
+                                        <span className="font-medium">Bolsas Máximo:</span>
+                                        <p className="text-gray-600">{c.bolsasMaximo}</p>
+                                      </div>
+                                    )}
+                                    {c.bolsasCortesia !== null && (
+                                      <div>
+                                        <span className="font-medium">Bolsas de cortesía:</span>
+                                        <p className="text-gray-600">{c.bolsasCortesia}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {(c.fechaBaja || c.motivoSuspencionOBaja) && (
+                                  <div className="border-t pt-4">
+                                    <h4 className="font-semibold text-sm mb-3 text-red-600">Información de Baja/Suspensión</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                      {c.fechaBaja && (
+                                        <div>
+                                          <span className="font-medium">Fecha de baja:</span>
+                                          <p className="text-gray-600">{new Date(c.fechaBaja).toLocaleDateString('es-GT')}</p>
+                                        </div>
+                                      )}
+                                      {c.motivoSuspencionOBaja && (
+                                        <div>
+                                          <span className="font-medium">Motivo de suspención o de Baja:</span>
+                                          <p className="text-gray-600">{c.motivoSuspencionOBaja}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
 
       {vista === 'base-datos' && (
