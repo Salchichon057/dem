@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Eye, Edit, Trash2, Loader2, Search, Plus, AlertCircle, Inbox, Globe, Pause, FileText } from 'lucide-react'
 import { authFetch } from '@/lib/auth-fetch'
 import { FormSectionType, FormListResponse, FormTemplateWithQuestions } from '@/lib/types'
+import Modal from '@/components/ui/Modal'
 
 interface FormTemplate {
   id: string
@@ -33,6 +34,20 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loadingFormId, setLoadingFormId] = useState<string | null>(null)
+  
+  // Estado para modales
+  const [modal, setModal] = useState<{
+    isOpen: boolean
+    type: 'success' | 'error' | 'warning' | 'info' | 'confirm'
+    title: string
+    message: string
+    onConfirm?: () => void
+  }>({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: ''
+  })
 
   useEffect(() => {
     async function loadForms() {
@@ -73,56 +88,90 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
   )
 
   const handleDelete = async (formId: string, formName: string) => {
-    if (!confirm(`¿Estás seguro de eliminar el formulario "${formName}"?`)) {
-      return
-    }
+    setModal({
+      isOpen: true,
+      type: 'confirm',
+      title: 'Confirmar Eliminación',
+      message: `¿Estás seguro de eliminar el formulario "${formName}"? Esta acción no se puede deshacer.`,
+      onConfirm: async () => {
+        try {
+          const response = await authFetch(`/api/formularios?id=${formId}`, {
+            method: 'DELETE'
+          })
 
-    try {
-      const response = await authFetch(`/api/formularios?id=${formId}`, {
-        method: 'DELETE'
-      })
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Error al eliminar')
+          }
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al eliminar')
+          // Actualizar lista localmente
+          setForms(forms.filter(f => f.id !== formId))
+          
+          setModal({
+            isOpen: true,
+            type: 'success',
+            title: 'Formulario Eliminado',
+            message: `El formulario "${formName}" ha sido eliminado exitosamente.`
+          })
+        } catch (err) {
+          setModal({
+            isOpen: true,
+            type: 'error',
+            title: 'Error',
+            message: err instanceof Error ? err.message : 'Error al eliminar formulario'
+          })
+        }
       }
-
-      // Actualizar lista localmente
-      setForms(forms.filter(f => f.id !== formId))
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error al eliminar formulario')
-    }
+    })
   }
 
   const handleToggleActive = async (formId: string, currentStatus: boolean, formName: string) => {
     const action = currentStatus ? 'desactivar' : 'activar'
-    if (!confirm(`¿Estás seguro de ${action} el formulario "${formName}"?`)) {
-      return
-    }
+    const actionPast = currentStatus ? 'desactivado' : 'activado'
+    
+    setModal({
+      isOpen: true,
+      type: 'confirm',
+      title: `Confirmar ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+      message: `¿Estás seguro de ${action} el formulario "${formName}"?`,
+      onConfirm: async () => {
+        try {
+          const response = await authFetch(`/api/formularios/${formId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              is_active: !currentStatus
+            })
+          })
 
-    try {
-      const response = await authFetch(`/api/formularios/${formId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          is_active: !currentStatus
-        })
-      })
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || `Error al ${action}`)
+          }
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Error al ${action}`)
+          // Actualizar lista localmente
+          setForms(forms.map(f => 
+            f.id === formId ? { ...f, is_active: !currentStatus } : f
+          ))
+          
+          setModal({
+            isOpen: true,
+            type: 'success',
+            title: 'Formulario Actualizado',
+            message: `El formulario "${formName}" ha sido ${actionPast} exitosamente.`
+          })
+        } catch (err) {
+          setModal({
+            isOpen: true,
+            type: 'error',
+            title: 'Error',
+            message: err instanceof Error ? err.message : `Error al ${action} formulario`
+          })
+        }
       }
-
-      // Actualizar lista localmente
-      setForms(forms.map(f => 
-        f.id === formId ? { ...f, is_active: !currentStatus } : f
-      ))
-    } catch (err) {
-      alert(err instanceof Error ? err.message : `Error al ${action} formulario`)
-    }
+    })
   }
 
   const handleViewForm = async (formId: string) => {
@@ -145,7 +194,12 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
         throw new Error('No se pudo cargar el formulario')
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error al cargar formulario')
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Error',
+        message: err instanceof Error ? err.message : 'Error al cargar formulario'
+      })
     } finally {
       setLoadingFormId(null)
     }
@@ -368,6 +422,16 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
           })}
         </div>
       )}
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   )
 }

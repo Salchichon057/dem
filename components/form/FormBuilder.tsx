@@ -395,30 +395,18 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
 
       let result
       if (mode === 'edit' && formId) {
-        console.log('🔄 [EDIT] Actualizando formulario:', formId)
-        console.log('📝 [EDIT] Datos a enviar:', {
-          name: formData.name,
-          sections: formData.sections.length,
-          totalQuestions: formData.sections.reduce((acc, s) => acc + s.questions.length, 0)
-        })
-        
         const response = await fetch(`/api/formularios/${formId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         })
         
-        console.log('📥 [EDIT] Response status:', response.status)
-        const responseText = await response.text()
-        console.log('📄 [EDIT] Response body:', responseText)
-        
-        try {
-          result = JSON.parse(responseText)
-          console.log('✅ [EDIT] Resultado parseado:', result)
-        } catch (e) {
-          console.error('❌ [EDIT] Error parseando JSON:', e)
-          throw new Error(`Response inválido: ${responseText}`)
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Error al actualizar: ${errorText}`)
         }
+        
+        result = await response.json()
       } else {
         const response = await fetch('/api/formularios', {
           method: 'POST',

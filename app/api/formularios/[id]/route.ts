@@ -197,14 +197,6 @@ export async function PUT(
     const { id } = await params
     const body = await req.json()
 
-    console.log('🔄 [API PUT] Formulario ID:', id)
-    console.log('📦 [API PUT] Body recibido:', {
-      name: body.name,
-      hasIsActive: 'is_active' in body,
-      hasSections: !!body.sections,
-      sectionsCount: body.sections?.length
-    })
-
     // Verificar que el usuario sea el creador del formulario
     const { data: formCheck, error: checkError } = await supabase
       .from('form_templates')
@@ -213,7 +205,6 @@ export async function PUT(
       .single()
 
     if (checkError || !formCheck) {
-      console.error('❌ [API PUT] Formulario no encontrado:', checkError)
       return NextResponse.json(
         { error: 'Formulario no encontrado' },
         { status: 404 }
@@ -221,25 +212,19 @@ export async function PUT(
     }
 
     const userId = '4157e293-5629-4369-bcdb-5a0197596e3c' // ID del admin hardcoded
-    console.log('👤 [API PUT] Usuario actual:', user.id, 'Usuario formulario:', formCheck.created_by)
 
     // Permitir si:
     // 1. Es el creador del formulario
     // 2. O si el formulario fue creado por el admin hardcoded (cualquier usuario autenticado puede editar)
     if (formCheck.created_by !== user.id && formCheck.created_by !== userId) {
-      console.error('❌ [API PUT] Permiso denegado')
       return NextResponse.json(
         { error: 'No tienes permiso para modificar este formulario' },
         { status: 403 }
       )
     }
 
-    console.log('✅ [API PUT] Permiso concedido')
-
     // Caso 1: Solo actualizar is_active (toggle activate/deactivate)
-    if ('is_active' in body && !body.sections && !body.name) {
-      console.log('🔘 [API PUT] Actualizando solo is_active:', body.is_active)
-      
+    if ('is_active' in body && !body.sections && !body.name) {      
       const { data, error } = await supabase
         .from('form_templates')
         .update({
@@ -251,20 +236,16 @@ export async function PUT(
         .single()
 
       if (error) {
-        console.error('❌ [API PUT] Error actualizando is_active:', error)
         return NextResponse.json(
           { error: 'Error al actualizar formulario', details: error.message },
           { status: 500 }
         )
       }
 
-      console.log('✅ [API PUT] is_active actualizado')
       return NextResponse.json({ success: true, data })
     }
 
-    // Caso 2: Actualización completa del formulario (edit)
-    console.log('📝 [API PUT] Actualizando formulario completo')
-    
+    // Caso 2: Actualización completa del formulario (edit)    
     // Actualizar form_template
     const { data: updatedForm, error: updateError } = await supabase
       .from('form_templates')
@@ -281,44 +262,26 @@ export async function PUT(
       .single()
 
     if (updateError) {
-      console.error('❌ [API PUT] Error actualizando form_template:', updateError)
       return NextResponse.json(
         { error: 'Error al actualizar formulario', details: updateError.message },
         { status: 500 }
       )
     }
 
-    console.log('✅ [API PUT] form_template actualizado')
-
     // Eliminar secciones y preguntas antiguas
-    console.log('🗑️ [API PUT] Eliminando secciones antiguas...')
-    const { error: deleteQuestionsError } = await supabase
+    await supabase
       .from('questions')
       .delete()
       .eq('form_template_id', id)
 
-    if (deleteQuestionsError) {
-      console.error('❌ [API PUT] Error eliminando preguntas:', deleteQuestionsError)
-    }
-
-    const { error: deleteSectionsError } = await supabase
+    await supabase
       .from('form_sections')
       .delete()
       .eq('form_template_id', id)
 
-    if (deleteSectionsError) {
-      console.error('❌ [API PUT] Error eliminando secciones:', deleteSectionsError)
-    }
-
-    console.log('✅ [API PUT] Secciones y preguntas antiguas eliminadas')
-
     // Crear nuevas secciones y preguntas
     if (body.sections && body.sections.length > 0) {
-      console.log('➕ [API PUT] Creando', body.sections.length, 'secciones nuevas...')
-      
       for (const section of body.sections) {
-        console.log('📄 [API PUT] Creando sección:', section.title)
-        
         const { data: newSection, error: sectionError } = await supabase
           .from('form_sections')
           .insert({
@@ -331,16 +294,11 @@ export async function PUT(
           .single()
 
         if (sectionError || !newSection) {
-          console.error('❌ [API PUT] Error creando sección:', sectionError)
           throw new Error(`Error al crear sección: ${sectionError?.message}`)
         }
 
-        console.log('✅ [API PUT] Sección creada:', newSection.id)
-
         // Crear preguntas de esta sección
         if (section.questions && section.questions.length > 0) {
-          console.log('❓ [API PUT] Creando', section.questions.length, 'preguntas...')
-          
           const questionsToInsert = section.questions.map((q: { question_type_id: string; title: string; help_text?: string; is_required: boolean; order_index: number; config?: Record<string, unknown> }) => ({
             form_template_id: id,
             section_id: newSection.id,
@@ -357,16 +315,11 @@ export async function PUT(
             .insert(questionsToInsert)
 
           if (questionsError) {
-            console.error('❌ [API PUT] Error creando preguntas:', questionsError)
             throw new Error(`Error al crear preguntas: ${questionsError.message}`)
           }
-
-          console.log('✅ [API PUT] Preguntas creadas')
         }
       }
     }
-
-    console.log('🎉 [API PUT] Formulario actualizado completamente')
 
     return NextResponse.json({
       success: true,
