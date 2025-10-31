@@ -5,7 +5,8 @@ export enum FormSectionType {
   PERFIL_COMUNITARIO = 'perfil-comunitario',
   ORGANIZACIONES = 'organizaciones',
   AUDITORIAS = 'auditorias',
-  COMUNIDADES = 'comunidades'
+  COMUNIDADES = 'comunidades',
+  VOLUNTARIADO = 'voluntariado'
 }
 
 export interface QuestionConfig {

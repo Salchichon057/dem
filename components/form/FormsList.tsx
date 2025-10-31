@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Eye, Edit, Trash2, Loader2, Search, Plus, AlertCircle, Inbox, Globe, Pause, FileText } from 'lucide-react'
 import { authFetch } from '@/lib/auth-fetch'
 import { FormSectionType, FormListResponse, FormTemplateWithQuestions } from '@/lib/types'
 
@@ -40,6 +41,9 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
         const response = await authFetch(`/api/formularios?section_location=${sectionLocation}`)
         
         if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('No autorizado. Por favor, inicia sesión nuevamente.')
+          }
           throw new Error('Error al cargar formularios')
         }
         
@@ -88,27 +92,6 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
     }
   }
 
-  const handleDuplicate = async (formId: string) => {
-    try {
-      const response = await authFetch(`/api/formularios/${formId}/duplicar`, {
-        method: 'POST'
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al duplicar')
-      }
-
-      // Recargar lista
-      const updatedResponse = await authFetch(`/api/formularios?section_location=${sectionLocation}`)
-      const data: FormListResponse = await updatedResponse.json()
-      const formsArray = data.forms || []
-      setForms(Array.isArray(formsArray) ? formsArray : [])
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error al duplicar formulario')
-    }
-  }
-
   const handleViewForm = async (formId: string) => {
     if (!onViewForm) return
     
@@ -139,7 +122,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <i className="fa-solid fa-spinner fa-spin text-4xl text-[#e6235a] mb-4"></i>
+          <Loader2 className="w-10 h-10 text-[#e6235a] mb-4 mx-auto animate-spin" />
           <p className="text-gray-600">Cargando formularios...</p>
         </div>
       </div>
@@ -149,7 +132,9 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <i className="fa-solid fa-exclamation-circle text-4xl text-red-500 mb-3"></i>
+        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <AlertCircle className="w-6 h-6 text-red-500" />
+        </div>
         <p className="text-red-700 font-medium">{error}</p>
       </div>
     )
@@ -170,16 +155,16 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
 
         <Link
           href={`/dashboard/formularios/new?section=${sectionLocation}`}
-          className="px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium shadow-md"
+          className="px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium shadow-md flex items-center gap-2"
         >
-          <i className="fa-solid fa-plus-circle mr-2"></i>
+          <Plus className="w-5 h-5" />
           Nuevo Formulario
         </Link>
       </div>
 
       {/* Buscador */}
       <div className="relative">
-        <i className="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
           type="text"
           value={searchTerm}
@@ -192,7 +177,9 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
       {/* Lista de formularios */}
       {filteredForms.length === 0 ? (
         <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-          <i className="fa-solid fa-inbox text-6xl text-gray-300 mb-4"></i>
+          <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Inbox className="w-10 h-10 text-gray-400" />
+          </div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
             {searchTerm ? 'No se encontraron formularios' : 'No hay formularios'}
           </h3>
@@ -204,9 +191,9 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
           {!searchTerm && (
             <Link
               href={`/dashboard/formularios/new?section=${sectionLocation}`}
-              className="inline-block px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium"
             >
-              <i className="fa-solid fa-plus-circle mr-2"></i>
+              <Plus className="w-5 h-5" />
               Crear Formulario
             </Link>
           )}
@@ -238,12 +225,12 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
                   <div className="flex gap-1 ml-2">
                     {form.is_public && (
                       <span className="text-green-500" title="Público">
-                        <i className="fa-solid fa-globe text-sm"></i>
+                        <Globe className="w-4 h-4" />
                       </span>
                     )}
                     {!form.is_active && (
                       <span className="text-gray-400" title="Inactivo">
-                        <i className="fa-solid fa-pause-circle text-sm"></i>
+                        <Pause className="w-4 h-4" />
                       </span>
                     )}
                   </div>
@@ -251,76 +238,68 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
 
                 {/* Estadísticas */}
                 <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <i className="fa-solid fa-file-alt mr-2 text-[#e6235a]"></i>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-[#e6235a]" />
                     <span>{submissionCount} respuestas</span>
                   </div>
                 </div>
 
                 {/* Acciones */}
-                <div className="flex gap-2 pt-4 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-200">
+                  {/* Botón Ver */}
                   {onViewForm ? (
                     <button
                       onClick={() => handleViewForm(form.id)}
                       disabled={loadingFormId === form.id}
-                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Ver formulario"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loadingFormId === form.id ? (
-                        <>
-                          <i className="fa-solid fa-spinner fa-spin mr-1"></i>
-                          Cargando...
-                        </>
+                        <Loader2 className="w-5 h-5 mx-auto animate-spin" />
                       ) : (
-                        <>
-                          <i className="fa-solid fa-eye mr-1"></i>
-                          Ver
-                        </>
+                        <Eye className="w-5 h-5 mx-auto" />
                       )}
                     </button>
                   ) : (
                     <Link
                       href={`/dashboard/formularios/${form.id}/view`}
-                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center text-sm font-medium"
+                      title="Ver formulario"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
                     >
-                      <i className="fa-solid fa-eye mr-1"></i>
-                      Ver
+                      <Eye className="w-5 h-5" />
                     </Link>
                   )}
 
-                  {!hasResponses && (
+                  {/* Botón Editar - Solo si no tiene respuestas */}
+                  {!hasResponses ? (
                     <Link
                       href={`/dashboard/formularios/${form.id}/edit?section=${sectionLocation}`}
-                      className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-center text-sm font-medium"
+                      title="Editar formulario"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
                     >
-                      <i className="fa-solid fa-edit mr-1"></i>
-                      Editar
+                      <Edit className="w-5 h-5" />
                     </Link>
+                  ) : (
+                    <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed inline-flex items-center justify-center" title="No se puede editar (tiene respuestas)">
+                      <Edit className="w-5 h-5" />
+                    </div>
                   )}
 
-                  <button
-                    onClick={() => handleDuplicate(form.id)}
-                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
-                    title="Duplicar"
-                  >
-                    <i className="fa-solid fa-copy"></i>
-                  </button>
-
-                  {!hasResponses && (
+                  {/* Botón Eliminar - Solo si no tiene respuestas */}
+                  {!hasResponses ? (
                     <button
                       onClick={() => handleDelete(form.id, form.name)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
-                      title="Eliminar"
+                      title="Eliminar formulario"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium col-span-2"
                     >
-                      <i className="fa-solid fa-trash"></i>
+                      <Trash2 className="w-5 h-5 mx-auto" />
                     </button>
+                  ) : (
+                    <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed col-span-2 inline-flex items-center justify-center" title="No se puede eliminar (tiene respuestas)">
+                      <Trash2 className="w-5 h-5" />
+                    </div>
                   )}
                 </div>
-
-                {hasResponses && (
-                  <p className="text-xs text-gray-500 mt-2 text-center italic">
-                    No se puede editar/eliminar (tiene respuestas)
-                  </p>
-                )}
               </div>
             )
           })}

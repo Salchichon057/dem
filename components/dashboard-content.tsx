@@ -20,6 +20,7 @@ import PimcoGraficasEstadisticasSection from "@/components/pimco-graficas-estadi
 import { PimcoBdEstadisticasSection } from "@/components/pimco-bd-estadisticas-section"
 import { PIMCOEntrevistasSection } from "@/components/pimco-entrevistas-section"
 import { PimcoDiagnosticoComunitarioSection } from "@/components/pimco-diagnostico-comunitario-section"
+import { FormularioVoluntariadoSection } from "@/components/formulario-voluntariado-section"
 import Image from "next/image"
 
 interface DashboardContentProps {
@@ -72,7 +73,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "graficas-voluntariado":
         return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Gráficas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
       case "formulario-voluntariado":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Formulario de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
+        return <FormularioVoluntariadoSection />
       case "estadistica-voluntariado":
         return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
       case "indicadores":
