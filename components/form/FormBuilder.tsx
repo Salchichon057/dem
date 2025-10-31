@@ -94,25 +94,20 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
   useEffect(() => {
     async function loadFormData() {
       if (mode === 'edit' && formId && !initialData) {
-        console.log('🔍 [FormBuilder] Cargando datos del formulario:', formId)
         try {
           const userId = '4157e293-5629-4369-bcdb-5a0197596e3c' // ID del admin hardcoded
           const response = await fetch(`/api/formularios/${formId}?userId=${userId}`)
-          console.log('📥 [FormBuilder] Response status:', response.status)
           
           if (!response.ok) {
             const errorText = await response.text()
-            console.error('❌ [FormBuilder] Error response:', errorText)
+            console.error('❌ [FormBuilder] Error cargando formulario:', errorText)
             throw new Error(`Error ${response.status}: ${errorText}`)
           }
           
           const result = await response.json()
-          console.log('✅ [FormBuilder] Datos recibidos:', result)
           
           if (result.success && result.data) {
             const form = result.data
-            console.log('📋 [FormBuilder] Formulario:', form.name)
-            console.log('📑 [FormBuilder] Secciones:', form.sections?.length || 0)
             
             // Cargar datos básicos del formulario
             setFormName(form.name || '')
@@ -138,13 +133,8 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                   config: q.config || {}
                 }))
               }))
-              console.log('✨ [FormBuilder] Secciones convertidas:', convertedSections.length)
               setSections(convertedSections)
-            } else {
-              console.warn('⚠️ [FormBuilder] No se encontraron secciones')
             }
-          } else {
-            console.error('❌ [FormBuilder] Respuesta sin datos válidos')
           }
         } catch (error) {
           console.error('💥 [FormBuilder] Error cargando formulario:', error)
@@ -163,7 +153,6 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
   // Cargar datos iniciales si estamos en modo edición con initialData
   useEffect(() => {
     if (mode === 'edit' && initialData) {
-      console.log('📦 [FormBuilder] Cargando desde initialData:', initialData.name)
       const convertedSections: BuilderSection[] = initialData.sections.map(section => ({
         tempId: `section-${section.id}`,
         title: section.title,
@@ -406,18 +395,37 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
 
       let result
       if (mode === 'edit' && formId) {
+        console.log('🔄 [EDIT] Actualizando formulario:', formId)
+        console.log('📝 [EDIT] Datos a enviar:', {
+          name: formData.name,
+          sections: formData.sections.length,
+          totalQuestions: formData.sections.reduce((acc, s) => acc + s.questions.length, 0)
+        })
+        
         const response = await fetch(`/api/formularios/${formId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         })
-        result = await response.json()
+        
+        console.log('📥 [EDIT] Response status:', response.status)
+        const responseText = await response.text()
+        console.log('📄 [EDIT] Response body:', responseText)
+        
+        try {
+          result = JSON.parse(responseText)
+          console.log('✅ [EDIT] Resultado parseado:', result)
+        } catch (e) {
+          console.error('❌ [EDIT] Error parseando JSON:', e)
+          throw new Error(`Response inválido: ${responseText}`)
+        }
       } else {
         const response = await fetch('/api/formularios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         })
+
         result = await response.json()
       }
       
