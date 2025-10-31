@@ -54,7 +54,7 @@ export function FormulariosAuditoriaSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="create" sectionLocation={FormSectionType.AUDITORIAS} />
+        <FormBuilder mode="create" sectionLocation={FormSectionType.AUDITORIAS} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }
@@ -68,7 +68,7 @@ export function FormulariosAuditoriaSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.AUDITORIAS} />
+        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.AUDITORIAS} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }

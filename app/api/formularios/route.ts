@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-server'
 import { createClient } from '@supabase/supabase-js'
@@ -111,20 +112,47 @@ export async function GET(req: NextRequest) {
 
     console.log('✅ Formularios obtenidos:', forms?.length || 0)
 
-    // Obtener conteo de submissions para cada formulario
-    const formsWithCount = await Promise.all(
-      (forms || []).map(async (form) => {
-        const { count: submissionCount } = await supabase
+    // Obtener conteo de submissions para cada formulario usando una query agregada
+    // Intentar primero con count directo de form_submissions
+    const formIds = (forms || []).map(f => f.id)
+    
+    let submissionCounts: Record<string, number> = {}
+    
+    if (formIds.length > 0) {
+      try {
+        // Intentar obtener el conteo directamente desde form_submissions
+        // Esto puede fallar si RLS no permite acceso
+        const { data: submissions, error: subError } = await supabase
           .from('form_submissions')
-          .select('*', { count: 'exact', head: true })
-          .eq('form_template_id', form.id)
+          .select('form_template_id')
+          .in('form_template_id', formIds)
 
-        return {
-          ...form,
-          submission_count: submissionCount || 0
+        if (subError) {
+          console.warn('⚠️ No se puede acceder a form_submissions con anon key:', subError.message)
+          console.log('💡 Tip: Necesitas crear una política RLS en form_submissions que permita contar (SELECT) para anon role')
+        } else if (submissions) {
+          // Contar manualmente los submissions por form_template_id
+          submissionCounts = submissions.reduce((acc, sub) => {
+            acc[sub.form_template_id] = (acc[sub.form_template_id] || 0) + 1
+            return acc
+          }, {} as Record<string, number>)
+          
+          console.log('📊 Conteo de submissions por formulario:', submissionCounts)
         }
-      })
-    )
+      } catch (err) {
+        console.error('❌ Error al obtener submissions:', err)
+      }
+    }
+
+    const formsWithCount = (forms || []).map(form => ({
+      ...form,
+      submission_count: submissionCounts[form.id] || 0
+    }))
+
+    console.log('✅ Formularios con conteo:', formsWithCount.map(f => ({ 
+      name: f.name, 
+      count: f.submission_count 
+    })))
 
     return NextResponse.json({ 
       forms: formsWithCount,
@@ -152,7 +180,19 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { name, description, section_location, is_public = true } = body
+    const { name, description, section_location, is_public = true, sections = [] } = body
+
+    // DEBUG: Imprimir datos recibidos
+    console.log('📥 POST /api/formularios - Datos recibidos:')
+    console.log('- name:', name)
+    console.log('- description:', description)
+    console.log('- section_location:', section_location)
+    console.log('- is_public:', is_public)
+    console.log('- sections:', JSON.stringify(sections, null, 2))
+    console.log('- user.id:', user.id)
+
+    // TEMPORAL: Usar UUID fijo porque el auth está generando CUIDs
+    const userId = '4157e293-5629-4369-bcdb-5a0197596e3c'
 
     // Validar campos requeridos
     if (!name || !section_location) {
@@ -182,7 +222,7 @@ export async function POST(req: NextRequest) {
       + '-' + Date.now() // Agregar timestamp para unicidad
 
     // Crear formulario
-    const { data: newForm, error } = await supabase
+    const { data: newForm, error: formError } = await supabase
       .from('form_templates')
       .insert({
         name,
@@ -190,23 +230,85 @@ export async function POST(req: NextRequest) {
         description: description || null,
         section_location,
         is_public,
-        created_by: user.id,
+        created_by: userId, // Usar userId hardcodeado
         version: 1,
         is_active: true
       })
       .select()
       .single()
 
-    if (error) {
-      console.error('Error de Supabase:', error)
+    if (formError) {
+      console.error('Error de Supabase al crear formulario:', formError)
       return NextResponse.json(
-        { error: 'Error al crear formulario' },
+        { error: 'Error al crear formulario', details: formError.message },
         { status: 500 }
       )
     }
 
+    console.log('✅ Formulario creado:', newForm.id, newForm.name)
+
+    // Crear secciones y preguntas si se proporcionaron
+    if (sections && sections.length > 0) {
+      for (const section of sections) {
+        // Crear sección
+        const { data: newSection, error: sectionError } = await supabase
+          .from('form_sections')
+          .insert({
+            form_template_id: newForm.id,
+            title: section.title,
+            description: section.description || null,
+            order_index: section.order_index
+          })
+          .select()
+          .single()
+
+        if (sectionError) {
+          console.error('Error al crear sección:', sectionError)
+          // Intentar eliminar el formulario si falló la creación de secciones
+          await supabase.from('form_templates').delete().eq('id', newForm.id)
+          return NextResponse.json(
+            { error: 'Error al crear secciones del formulario', details: sectionError.message },
+            { status: 500 }
+          )
+        }
+
+        console.log('✅ Sección creada:', newSection.id, newSection.title)
+
+        // Crear preguntas de la sección
+        if (section.questions && section.questions.length > 0) {
+          const questionsToInsert = section.questions.map((q: any) => ({
+            form_template_id: newForm.id,
+            section_id: newSection.id,
+            question_type_id: q.question_type_id,
+            title: q.title,
+            help_text: q.help_text || null,
+            is_required: q.is_required || false,
+            order_index: q.order_index,
+            config: q.config || {}
+          }))
+
+          const { error: questionsError } = await supabase
+            .from('questions')
+            .insert(questionsToInsert)
+
+          if (questionsError) {
+            console.error('Error al crear preguntas:', questionsError)
+            // Intentar eliminar el formulario si falló la creación de preguntas
+            await supabase.from('form_templates').delete().eq('id', newForm.id)
+            return NextResponse.json(
+              { error: 'Error al crear preguntas del formulario', details: questionsError.message },
+              { status: 500 }
+            )
+          }
+
+          console.log(`✅ ${questionsToInsert.length} preguntas creadas para sección ${newSection.title}`)
+        }
+      }
+    }
+
     return NextResponse.json({ 
-      formulario: newForm,
+      success: true,
+      data: newForm,
       message: 'Formulario creado exitosamente' 
     }, { status: 201 })
 

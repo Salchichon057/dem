@@ -54,7 +54,7 @@ export function FormularioVoluntariadoSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="create" sectionLocation={FormSectionType.VOLUNTARIADO} />
+        <FormBuilder mode="create" sectionLocation={FormSectionType.VOLUNTARIADO} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }
@@ -68,7 +68,7 @@ export function FormularioVoluntariadoSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.VOLUNTARIADO} />
+        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.VOLUNTARIADO} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }

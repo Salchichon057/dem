@@ -54,7 +54,7 @@ export function PIMCOEntrevistasSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="create" sectionLocation={FormSectionType.PERFIL_COMUNITARIO} />
+        <FormBuilder mode="create" sectionLocation={FormSectionType.PERFIL_COMUNITARIO} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }
@@ -68,7 +68,7 @@ export function PIMCOEntrevistasSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.PERFIL_COMUNITARIO} />
+        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.PERFIL_COMUNITARIO} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }

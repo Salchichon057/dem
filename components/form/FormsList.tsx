@@ -94,6 +94,37 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
     }
   }
 
+  const handleToggleActive = async (formId: string, currentStatus: boolean, formName: string) => {
+    const action = currentStatus ? 'desactivar' : 'activar'
+    if (!confirm(`¿Estás seguro de ${action} el formulario "${formName}"?`)) {
+      return
+    }
+
+    try {
+      const response = await authFetch(`/api/formularios/${formId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          is_active: !currentStatus
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Error al ${action}`)
+      }
+
+      // Actualizar lista localmente
+      setForms(forms.map(f => 
+        f.id === formId ? { ...f, is_active: !currentStatus } : f
+      ))
+    } catch (err) {
+      alert(err instanceof Error ? err.message : `Error al ${action} formulario`)
+    }
+  }
+
   const handleViewForm = async (formId: string) => {
     if (!onViewForm) return
     
@@ -307,19 +338,29 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                     </div>
                   )}
 
-                  {/* Botón Eliminar - Solo si no tiene respuestas */}
+                  {/* Botón Eliminar o Desactivar */}
                   {!hasResponses ? (
                     <button
                       onClick={() => handleDelete(form.id, form.name)}
                       title="Eliminar formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium col-span-2"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium col-span-2 inline-flex items-center justify-center gap-2"
                     >
-                      <Trash2 className="w-5 h-5 mx-auto" />
+                      <Trash2 className="w-5 h-5" />
+                      <span>Eliminar</span>
                     </button>
                   ) : (
-                    <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed col-span-2 inline-flex items-center justify-center" title="No se puede eliminar (tiene respuestas)">
-                      <Trash2 className="w-5 h-5" />
-                    </div>
+                    <button
+                      onClick={() => handleToggleActive(form.id, form.is_active, form.name)}
+                      title={form.is_active ? "Desactivar formulario" : "Activar formulario"}
+                      className={`px-4 py-2.5 bg-white border-2 rounded-lg transition-all text-sm font-medium col-span-2 inline-flex items-center justify-center gap-2 ${
+                        form.is_active 
+                          ? 'border-orange-300 text-orange-700 hover:border-orange-500 hover:bg-orange-50' 
+                          : 'border-green-300 text-green-700 hover:border-green-500 hover:bg-green-50'
+                      }`}
+                    >
+                      <Pause className="w-5 h-5" />
+                      <span>{form.is_active ? 'Desactivar' : 'Activar'}</span>
+                    </button>
                   )}
                 </div>
               </div>

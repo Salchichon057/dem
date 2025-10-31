@@ -73,6 +73,8 @@ export function FormulariosSection() {
         <FormBuilder
           mode="create"
           sectionLocation={FormSectionType.ORGANIZACIONES}
+          onSuccess={handleBackToList}
+          onCancel={handleBackToList}
         />
       </div>
     );
@@ -97,6 +99,8 @@ export function FormulariosSection() {
           mode="edit"
           formId={editingFormId}
           sectionLocation={FormSectionType.ORGANIZACIONES}
+          onSuccess={handleBackToList}
+          onCancel={handleBackToList}
         />
       </div>
     );

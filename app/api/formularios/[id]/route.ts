@@ -179,3 +179,96 @@ export async function GET(
     )
   }
 }
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Verificar autenticación
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
+
+    const { id } = await params
+    const body = await req.json()
+
+    console.log('🔄 [API] Actualizando formulario:', id, body)
+
+    // Validar que solo se actualice is_active
+    const updateData: { is_active?: boolean } = {}
+
+    if ('is_active' in body && typeof body.is_active === 'boolean') {
+      updateData.is_active = body.is_active
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: 'No se proporcionaron campos válidos para actualizar' },
+        { status: 400 }
+      )
+    }
+
+    // Verificar que el usuario sea el creador del formulario
+    const { data: formCheck, error: checkError } = await supabase
+      .from('form_templates')
+      .select('created_by')
+      .eq('id', id)
+      .single()
+
+    if (checkError || !formCheck) {
+      return NextResponse.json(
+        { error: 'Formulario no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    if (formCheck.created_by !== user.id) {
+      return NextResponse.json(
+        { error: 'No tienes permiso para modificar este formulario' },
+        { status: 403 }
+      )
+    }
+
+    // Actualizar el formulario
+    const { data, error } = await supabase
+      .from('form_templates')
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('❌ [API] Error al actualizar formulario:', error)
+      return NextResponse.json(
+        { error: 'Error al actualizar formulario', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ [API] Formulario actualizado:', data)
+
+    return NextResponse.json({
+      success: true,
+      data
+    })
+
+  } catch (err: unknown) {
+    const error = err as Error
+    console.error('❌ [API] Error en PUT /api/formularios/[id]:', {
+      message: error.message,
+      stack: error.stack
+    })
+    return NextResponse.json(
+      { error: 'Error interno del servidor', details: error.message },
+      { status: 500 }
+    )
+  }
+}

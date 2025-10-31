@@ -31,6 +31,8 @@ interface FormBuilderProps {
   mode?: 'create' | 'edit'
   formId?: string  // UUID, no number
   sectionLocation?: string // ← NUEVO: 'organizaciones', 'auditorias', 'entrevistas', etc.
+  onSuccess?: () => void // ← Callback para cuando se guarda exitosamente
+  onCancel?: () => void // ← Callback para cuando se cancela
   initialData?: {
     name: string
     description?: string
@@ -60,7 +62,7 @@ interface FormBuilderProps {
   }
 }
 
-export default function FormBuilder({ mode = 'create', formId, sectionLocation, initialData }: FormBuilderProps) {
+export default function FormBuilder({ mode = 'create', formId, sectionLocation, onSuccess, onCancel, initialData }: FormBuilderProps) {
   const router = useRouter()
   const [formName, setFormName] = useState(initialData?.name || '')
   const [formDescription, setFormDescription] = useState(initialData?.description || '')
@@ -88,9 +90,80 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
     message: ''
   })
 
-  // Cargar datos iniciales si estamos en modo edición
+  // Cargar datos del formulario desde la API si estamos en modo edición con formId
+  useEffect(() => {
+    async function loadFormData() {
+      if (mode === 'edit' && formId && !initialData) {
+        console.log('🔍 [FormBuilder] Cargando datos del formulario:', formId)
+        try {
+          const userId = '4157e293-5629-4369-bcdb-5a0197596e3c' // ID del admin hardcoded
+          const response = await fetch(`/api/formularios/${formId}?userId=${userId}`)
+          console.log('📥 [FormBuilder] Response status:', response.status)
+          
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('❌ [FormBuilder] Error response:', errorText)
+            throw new Error(`Error ${response.status}: ${errorText}`)
+          }
+          
+          const result = await response.json()
+          console.log('✅ [FormBuilder] Datos recibidos:', result)
+          
+          if (result.success && result.data) {
+            const form = result.data
+            console.log('📋 [FormBuilder] Formulario:', form.name)
+            console.log('📑 [FormBuilder] Secciones:', form.sections?.length || 0)
+            
+            // Cargar datos básicos del formulario
+            setFormName(form.name || '')
+            setFormDescription(form.description || '')
+            setFormSlug(form.slug || '')
+            setIsPublic(form.is_public ?? true)
+            
+            // Cargar secciones y preguntas
+            if (form.sections && form.sections.length > 0) {
+              const convertedSections: BuilderSection[] = form.sections.map((section: any) => ({
+                tempId: `section-${section.id}`,
+                title: section.title || '',
+                description: section.description || '',
+                order_index: section.order_index || 0,
+                questions: (section.questions || []).map((q: any) => ({
+                  tempId: `question-${q.id}`,
+                  title: q.title || '',
+                  help_text: q.help_text || '',
+                  is_required: q.is_required ?? false,
+                  order_index: q.order_index || 0,
+                  question_type_id: q.question_type_id,
+                  question_type_code: q.question_types?.code || '',
+                  config: q.config || {}
+                }))
+              }))
+              console.log('✨ [FormBuilder] Secciones convertidas:', convertedSections.length)
+              setSections(convertedSections)
+            } else {
+              console.warn('⚠️ [FormBuilder] No se encontraron secciones')
+            }
+          } else {
+            console.error('❌ [FormBuilder] Respuesta sin datos válidos')
+          }
+        } catch (error) {
+          console.error('💥 [FormBuilder] Error cargando formulario:', error)
+          setModal({
+            isOpen: true,
+            type: 'error',
+            title: 'Error',
+            message: 'No se pudo cargar el formulario. Por favor, intenta nuevamente.'
+          })
+        }
+      }
+    }
+    loadFormData()
+  }, [mode, formId, initialData])
+
+  // Cargar datos iniciales si estamos en modo edición con initialData
   useEffect(() => {
     if (mode === 'edit' && initialData) {
+      console.log('📦 [FormBuilder] Cargando desde initialData:', initialData.name)
       const convertedSections: BuilderSection[] = initialData.sections.map(section => ({
         tempId: `section-${section.id}`,
         title: section.title,
@@ -354,7 +427,13 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
           type: 'success',
           title: mode === 'edit' ? '¡Formulario Actualizado!' : '¡Formulario Creado!',
           message: `El formulario "${formName}" ha sido ${mode === 'edit' ? 'actualizado' : 'creado'} exitosamente.`,
-          onConfirm: () => router.back()
+          onConfirm: () => {
+            if (onSuccess) {
+              onSuccess() // Usar callback si existe
+            } else {
+              router.back() // Fallback al comportamiento anterior
+            }
+          }
         })
       } else {
         setModal({
@@ -569,7 +648,13 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
         {/* Footer con botones de acción */}
         <div className="bg-white rounded-lg shadow-md p-6 mt-6 flex justify-between items-center">
           <button
-            onClick={() => router.back()}
+            onClick={() => {
+              if (onCancel) {
+                onCancel()
+              } else {
+                router.back()
+              }
+            }}
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <i className="fa-solid fa-arrow-left mr-2"></i>

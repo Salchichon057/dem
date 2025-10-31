@@ -54,7 +54,7 @@ export function PlantillasComunidadesSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="create" sectionLocation={FormSectionType.COMUNIDADES} />
+        <FormBuilder mode="create" sectionLocation={FormSectionType.COMUNIDADES} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }
@@ -68,7 +68,7 @@ export function PlantillasComunidadesSection() {
             Cancelar
           </button>
         </div>
-        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.COMUNIDADES} />
+        <FormBuilder mode="edit" formId={editingFormId} sectionLocation={FormSectionType.COMUNIDADES} onSuccess={handleBackToList} onCancel={handleBackToList} />
       </div>
     );
   }
