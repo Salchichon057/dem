@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import QuestionTypeSelector from './QuestionTypeSelector'
 import QuestionEditor from './QuestionEditor'
 import Modal from '@/components/ui/Modal'
-import { getQuestionTypes, createFormWithSections, updateFormWithSections } from '@/app/actions/form-builder'
 import type { QuestionType } from '@/lib/types'
 
 interface BuilderQuestion {
@@ -115,8 +114,15 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
   // Cargar tipos de pregunta al montar
   useEffect(() => {
     async function loadQuestionTypes() {
-      const types = await getQuestionTypes()
-      setQuestionTypes(types)
+      try {
+        const response = await fetch('/api/question-types')
+        const result = await response.json()
+        if (result.success && result.data) {
+          setQuestionTypes(result.data)
+        }
+      } catch (error) {
+        console.error('Error loading question types:', error)
+      }
     }
     loadQuestionTypes()
   }, [])
@@ -327,9 +333,19 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
 
       let result
       if (mode === 'edit' && formId) {
-        result = await updateFormWithSections(formId, formData, sectionLocation)
+        const response = await fetch(`/api/formularios/${formId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        result = await response.json()
       } else {
-        result = await createFormWithSections(formData, sectionLocation)
+        const response = await fetch('/api/formularios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        result = await response.json()
       }
       
       if (result.success) {

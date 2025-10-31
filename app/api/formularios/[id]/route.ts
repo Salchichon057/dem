@@ -5,11 +5,19 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+// Cliente con ANON key únicamente
 const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
   }
+})
+
+// Log de configuración
+console.log('🔧 [API] Supabase configurado:', {
+  url: supabaseUrl?.substring(0, 30) + '...',
+  usingAnonKey: !!supabaseAnonKey,
+  anonKeyLength: supabaseAnonKey?.length
 })
 
  
@@ -29,10 +37,12 @@ export async function GET(
 
     const { id } = await params
 
-    console.log('🔍 Obteniendo formulario:', id)
+    console.log('🔍 [API] Obteniendo formulario:', id)
+    console.log('🔍 [API] Usuario autenticado:', { userId: user.id, email: user.email })
 
-    // Obtener formulario
-    const { data: form, error: formError } = await supabase
+    // SOLUCIÓN: Hacer TODO desde form_templates con JOIN para evitar permisos de form_sections
+    console.log('🔍 [API] Intentando query con JOIN desde form_templates...')
+    const { data: formWithSections, error: formError } = await supabase
       .from('form_templates')
       .select(`
         id,
@@ -45,88 +55,124 @@ export async function GET(
         version,
         created_by,
         created_at,
-        updated_at
+        updated_at,
+        form_sections (
+          id,
+          title,
+          description,
+          order_index,
+          form_template_id,
+          questions (
+            id,
+            form_template_id,
+            section_id,
+            question_type_id,
+            title,
+            help_text,
+            is_required,
+            order_index,
+            config,
+            created_at,
+            updated_at,
+            question_types (
+              id,
+              code,
+              name,
+              description
+            )
+          )
+        )
       `)
       .eq('id', id)
-      .eq('is_active', true)
       .single()
 
-    if (formError || !form) {
-      console.error('❌ Error al obtener formulario:', formError)
+    console.log('� [API] Query result:', { 
+      found: !!formWithSections, 
+      error: formError,
+      formData: formWithSections ? { 
+        id: formWithSections.id, 
+        name: formWithSections.name, 
+        is_active: formWithSections.is_active,
+        sectionsCount: formWithSections.form_sections?.length || 0
+      } : null
+    })
+
+    if (formError || !formWithSections) {
+      console.error('❌ [API] Error al obtener formulario:', {
+        error: formError,
+        errorCode: formError?.code,
+        errorMessage: formError?.message,
+        id: id
+      })
       return NextResponse.json(
-        { error: 'Formulario no encontrado' },
+        { error: 'Formulario no encontrado', details: formError?.message },
         { status: 404 }
       )
     }
 
-    // Obtener secciones
-    const { data: sections, error: sectionsError } = await supabase
-      .from('form_sections')
-      .select('id, title, description, order_index, form_template_id')
-      .eq('form_template_id', id)
-      .order('order_index', { ascending: true })
+    console.log('✅ [API] Formulario completo obtenido:', {
+      id: formWithSections.id,
+      name: formWithSections.name,
+      sections: formWithSections.form_sections?.length || 0
+    })
 
-    if (sectionsError) {
-      console.error('❌ Error al obtener secciones:', sectionsError)
-      return NextResponse.json(
-        { error: 'Error al obtener secciones' },
-        { status: 500 }
-      )
+    // Transformar al formato esperado
+    const sections = formWithSections.form_sections || []
+    
+    // Aplanar todas las preguntas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allQuestions = sections.flatMap((section: any) => 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (section.questions || []).map((q: any) => ({
+        ...q,
+        section_id: section.id
+      }))
+    )
+
+    // Devolver en el formato esperado por FormTemplateWithQuestions
+    const response = {
+      id: formWithSections.id,
+      slug: formWithSections.slug,
+      name: formWithSections.name,
+      description: formWithSections.description,
+      version: formWithSections.version,
+      is_active: formWithSections.is_active,
+      is_public: formWithSections.is_public,
+      created_by: formWithSections.created_by,
+      created_at: formWithSections.created_at,
+      updated_at: formWithSections.updated_at,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sections: sections.map((section: any) => ({
+        id: section.id,
+        form_template_id: section.form_template_id,
+        title: section.title,
+        description: section.description,
+        order_index: section.order_index,
+        created_at: section.created_at,
+        questions: section.questions || []
+      })),
+      questions: allQuestions
     }
 
-    // Obtener preguntas con sus tipos
-    const { data: questions, error: questionsError } = await supabase
-      .from('questions')
-      .select(`
-        id,
-        form_template_id,
-        section_id,
-        question_type_id,
-        title,
-        help_text,
-        is_required,
-        order_index,
-        config,
-        created_at,
-        updated_at,
-        question_types (
-          id,
-          code,
-          name,
-          description
-        )
-      `)
-      .eq('form_template_id', id)
-      .order('order_index', { ascending: true })
-
-    if (questionsError) {
-      console.error('❌ Error al obtener preguntas:', questionsError)
-      return NextResponse.json(
-        { error: 'Error al obtener preguntas' },
-        { status: 500 }
-      )
-    }
-
-    // Organizar preguntas por sección
-    const sectionsWithQuestions = sections?.map(section => ({
-      ...section,
-      questions: questions?.filter(q => q.section_id === section.id) || []
-    })) || []
-
-    console.log('✅ Formulario obtenido:', {
-      id: form.id,
-      sections: sectionsWithQuestions.length,
-      questions: questions?.length || 0
+    console.log('✅ [API] Response preparado:', {
+      id: response.id,
+      name: response.name,
+      totalSections: response.sections.length,
+      totalQuestions: response.questions.length
     })
 
     return NextResponse.json({
-      ...form,
-      sections: sectionsWithQuestions
+      success: true,
+      data: response
     })
 
   } catch (err: unknown) {
     const error = err as Error
-    console.error('❌ Error en GET /api/formularios/[id]:', error)
+    console.error('❌ [API] Error en GET /api/formularios/[id]:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

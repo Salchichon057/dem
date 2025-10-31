@@ -3,13 +3,6 @@ import { getCurrentUser } from '@/lib/auth-server'
 import { createClient } from '@supabase/supabase-js'
 import { FormSectionType } from '@/lib/types'
 
-// ============================================
-// CONFIGURACIÓN DE SUPABASE
-// ============================================
-// OPCIÓN 1: Service Role (bypass RLS) - Requiere políticas RLS o service_role key válido
-// OPCIÓN 2: Anon Key (con RLS) - Requiere políticas RLS configuradas en Supabase
-// Estamos usando OPCIÓN 2 porque el service_role da error de permisos
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Usando anon key
 

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import Image from 'next/image'
-import { submitFormResponse } from '@/app/actions/forms'
 import type { FormTemplateWithQuestions, QuestionWithRelations } from '@/lib/types'
 import SuccessModal from './SuccessModal'
 import ErrorModal from './ErrorModal'
@@ -15,7 +14,6 @@ interface FormRendererProps {
 export default function FormRenderer({ form }: FormRendererProps) {
   const [answers, setAnswers] = useState<Record<string, unknown>>({})
   const [isPending, startTransition] = useTransition()
-  const [startTime, setStartTime] = useState(0)
   const [currentSection, setCurrentSection] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
   
@@ -31,13 +29,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
     setAnswers({})
     setCurrentSection(0)
     setErrors({})
-    setStartTime(Date.now())
   }
-
-  // Inicializar startTime solo en el cliente
-  useEffect(() => {
-    setStartTime(Date.now())
-  }, [])
 
   // Dividir preguntas por secciones (cada sección es un step)
   const steps = form.questions.reduce<QuestionWithRelations[][]>((acc, question) => {
@@ -150,22 +142,34 @@ export default function FormRenderer({ form }: FormRendererProps) {
       return
     }
 
-    const timeSpent = startTime > 0 ? Math.floor((Date.now() - startTime) / 1000) : 0
-
     startTransition(async () => {
-      const result = await submitFormResponse({
-        formId: form.id,
-        answers: Object.entries(answers).map(([questionId, answerValue]) => ({
-          questionId,
-          answerValue: answerValue as string | number | boolean | string[] | Record<string, string> | null
-        })),
-        timeSpentSeconds: timeSpent
-      })
+      try {
+        const response = await fetch('/api/forms/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            form_template_id: form.id,
+            answers: Object.fromEntries(
+              Object.entries(answers).map(([questionId, answerValue]) => [
+                questionId,
+                answerValue
+              ])
+            )
+          })
+        })
 
-      if (result.success) {
-        setShowSuccessModal(true)
-      } else {
-        setErrorMessage(result.error || 'Ha ocurrido un error al enviar el formulario')
+        const result = await response.json()
+
+        if (result.success) {
+          setShowSuccessModal(true)
+        } else {
+          setErrorMessage(result.error || 'Ha ocurrido un error al enviar el formulario')
+          setShowErrorModal(true)
+        }
+      } catch {
+        setErrorMessage('Error de conexión. Por favor, intenta de nuevo.')
         setShowErrorModal(true)
       }
     })

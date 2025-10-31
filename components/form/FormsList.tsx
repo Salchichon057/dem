@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { authFetch } from '@/lib/auth-fetch'
-import { FormSectionType, FormListResponse } from '@/lib/types'
+import { FormSectionType, FormListResponse, FormTemplateWithQuestions } from '@/lib/types'
 
 interface FormTemplate {
   id: string
@@ -21,13 +21,15 @@ interface FormTemplate {
 interface FormsListProps {
   sectionLocation: FormSectionType
   locationName?: string
+  onViewForm?: (form: FormTemplateWithQuestions) => void
 }
 
-export default function FormsList({ sectionLocation, locationName }: FormsListProps) {
+export default function FormsList({ sectionLocation, locationName, onViewForm }: FormsListProps) {
   const [forms, setForms] = useState<FormTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [loadingFormId, setLoadingFormId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadForms() {
@@ -104,6 +106,32 @@ export default function FormsList({ sectionLocation, locationName }: FormsListPr
       setForms(Array.isArray(formsArray) ? formsArray : [])
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al duplicar formulario')
+    }
+  }
+
+  const handleViewForm = async (formId: string) => {
+    if (!onViewForm) return
+    
+    try {
+      setLoadingFormId(formId)
+      
+      const response = await authFetch(`/api/formularios/${formId}`)
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar el formulario')
+      }
+      
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        onViewForm(result.data)
+      } else {
+        throw new Error('No se pudo cargar el formulario')
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al cargar formulario')
+    } finally {
+      setLoadingFormId(null)
     }
   }
 
@@ -231,13 +259,33 @@ export default function FormsList({ sectionLocation, locationName }: FormsListPr
 
                 {/* Acciones */}
                 <div className="flex gap-2 pt-4 border-t border-gray-200">
-                  <Link
-                    href={`/forms/${form.slug}`}
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center text-sm font-medium"
-                  >
-                    <i className="fa-solid fa-eye mr-1"></i>
-                    Ver
-                  </Link>
+                  {onViewForm ? (
+                    <button
+                      onClick={() => handleViewForm(form.id)}
+                      disabled={loadingFormId === form.id}
+                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loadingFormId === form.id ? (
+                        <>
+                          <i className="fa-solid fa-spinner fa-spin mr-1"></i>
+                          Cargando...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fa-solid fa-eye mr-1"></i>
+                          Ver
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/dashboard/formularios/${form.id}/view`}
+                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center text-sm font-medium"
+                    >
+                      <i className="fa-solid fa-eye mr-1"></i>
+                      Ver
+                    </Link>
+                  )}
 
                   {!hasResponses && (
                     <Link
