@@ -1,5 +1,31 @@
 'use client'
 
+import { 
+  Type, 
+  AlignLeft, 
+  Hash, 
+  Mail, 
+  Phone, 
+  Link, 
+  Circle, 
+  List, 
+  ChevronDown, 
+  ToggleLeft, 
+  CheckSquare, 
+  ListChecks,
+  Calendar, 
+  Clock, 
+  Star, 
+  SlidersHorizontal, 
+  Upload, 
+  Table, 
+  Minus, 
+  Heading, 
+  Image, 
+  Video,
+  HelpCircle,
+  X
+} from 'lucide-react'
 import type { QuestionType } from '@/lib/types'
 
 interface QuestionTypeSelectorProps {
@@ -8,31 +34,31 @@ interface QuestionTypeSelectorProps {
   onClose: () => void
 }
 
-// Iconos para cada tipo de pregunta
-const QUESTION_ICONS: Record<string, string> = {
-  TEXT: 'fa-font',
-  PARAGRAPH_TEXT: 'fa-align-left',
-  NUMBER: 'fa-hashtag',
-  EMAIL: 'fa-envelope',
-  PHONE: 'fa-phone',
-  URL: 'fa-link',
-  MULTIPLE_CHOICE: 'fa-circle-dot',
-  RADIO: 'fa-circle-dot',
-  LIST: 'fa-list',
-  DROPDOWN: 'fa-caret-square-down',
-  YES_NO: 'fa-toggle-on',
-  CHECKBOX: 'fa-check-square',
-  DROPDOWN_MULTIPLE: 'fa-list-check',
-  DATE: 'fa-calendar',
-  TIME: 'fa-clock',
-  RATING: 'fa-star',
-  LINEAR_SCALE: 'fa-sliders',
-  FILE_UPLOAD: 'fa-file-arrow-up',
-  GRID: 'fa-table',
-  PAGE_BREAK: 'fa-minus',
-  SECTION_HEADER: 'fa-heading',
-  IMAGE: 'fa-image',
-  VIDEO: 'fa-video',
+// Componentes de iconos para cada tipo de pregunta
+const QUESTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  TEXT: Type,
+  PARAGRAPH_TEXT: AlignLeft,
+  NUMBER: Hash,
+  EMAIL: Mail,
+  PHONE: Phone,
+  URL: Link,
+  MULTIPLE_CHOICE: Circle,
+  RADIO: Circle,
+  LIST: List,
+  DROPDOWN: ChevronDown,
+  YES_NO: ToggleLeft,
+  CHECKBOX: CheckSquare,
+  DROPDOWN_MULTIPLE: ListChecks,
+  DATE: Calendar,
+  TIME: Clock,
+  RATING: Star,
+  LINEAR_SCALE: SlidersHorizontal,
+  FILE_UPLOAD: Upload,
+  GRID: Table,
+  PAGE_BREAK: Minus,
+  SECTION_HEADER: Heading,
+  IMAGE: Image,
+  VIDEO: Video,
 }
 
 // Categorías de preguntas
@@ -77,7 +103,7 @@ export default function QuestionTypeSelector({ questionTypes, onSelect, onClose 
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
           >
-            <i className="fa-solid fa-times text-2xl"></i>
+            <X className="w-6 h-6" />
           </button>
         </div>
 
@@ -97,29 +123,33 @@ export default function QuestionTypeSelector({ questionTypes, onSelect, onClose 
                 </h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {typesInCategory.map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => onSelect(type.id, type.code)}
-                      className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-[#e6235a] hover:bg-pink-50 transition-all group"
-                    >
-                      <div className="flex items-start">
-                        <div className="bg-gray-100 group-hover:bg-[#e6235a] group-hover:text-white rounded-lg w-12 h-12 flex items-center justify-center mr-3 transition-colors flex-shrink-0">
-                          <i className={`fa-solid ${QUESTION_ICONS[type.code] || 'fa-question'} text-xl`}></i>
+                  {typesInCategory.map((type) => {
+                    const IconComponent = QUESTION_ICONS[type.code] || HelpCircle
+                    
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => onSelect(type.id, type.code)}
+                        className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-[#e6235a] hover:bg-pink-50 transition-all group"
+                      >
+                        <div className="flex items-start">
+                          <div className="bg-gray-100 group-hover:bg-[#e6235a] group-hover:text-white rounded-lg w-12 h-12 flex items-center justify-center mr-3 transition-colors flex-shrink-0">
+                            <IconComponent className="w-6 h-6" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-gray-800 group-hover:text-[#e6235a] transition-colors">
+                              {type.name}
+                            </h4>
+                            {type.description && (
+                              <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                {type.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-gray-800 group-hover:text-[#e6235a] transition-colors">
-                            {type.name}
-                          </h4>
-                          {type.description && (
-                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                              {type.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )

@@ -3,6 +3,19 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { 
+  Trash2, 
+  ArrowUp, 
+  ArrowDown, 
+  X, 
+  PlusCircle, 
+  Layers, 
+  ArrowLeft, 
+  Loader2, 
+  Save,
+  Edit,
+  FileText
+} from 'lucide-react'
 import QuestionTypeSelector from './QuestionTypeSelector'
 import QuestionEditor from './QuestionEditor'
 import Modal from '@/components/ui/Modal'
@@ -456,8 +469,12 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">
-            <i className={`fa-solid ${mode === 'edit' ? 'fa-edit' : 'fa-plus-circle'} text-[#e6235a] mr-3`}></i>
+          <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+            {mode === 'edit' ? (
+              <Edit className="w-8 h-8 text-[#e6235a] mr-3" />
+            ) : (
+              <FileText className="w-8 h-8 text-[#e6235a] mr-3" />
+            )}
             {mode === 'edit' ? 'Editar Formulario' : 'Crear Nuevo Formulario'}
           </h1>
 
@@ -553,7 +570,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                   className="ml-4 text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
                   title="Eliminar sección"
                 >
-                  <i className="fa-solid fa-trash text-lg"></i>
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
 
@@ -580,10 +597,10 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                           {questionIndex > 0 && (
                             <button
                               onClick={() => handleMoveQuestion(section.tempId, question.tempId, 'up')}
-                              className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 p-1 rounded transition-colors"
+                              className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 p-1.5 rounded transition-colors"
                               title="Mover arriba"
                             >
-                              <i className="fa-solid fa-arrow-up text-sm"></i>
+                              <ArrowUp className="w-4 h-4" />
                             </button>
                           )}
                           
@@ -591,20 +608,20 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                           {questionIndex < section.questions.length - 1 && (
                             <button
                               onClick={() => handleMoveQuestion(section.tempId, question.tempId, 'down')}
-                              className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 p-1 rounded transition-colors"
+                              className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 p-1.5 rounded transition-colors"
                               title="Mover abajo"
                             >
-                              <i className="fa-solid fa-arrow-down text-sm"></i>
+                              <ArrowDown className="w-4 h-4" />
                             </button>
                           )}
                           
                           {/* Eliminar */}
                           <button
                             onClick={() => handleDeleteQuestion(section.tempId, question.tempId)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors"
                             title="Eliminar pregunta"
                           >
-                            <i className="fa-solid fa-times text-sm"></i>
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -622,9 +639,9 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 {/* Botón agregar pregunta */}
                 <button
                   onClick={() => handleAddQuestion(section.tempId)}
-                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-pink-50 transition-colors"
+                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-pink-50 transition-colors flex items-center justify-center"
                 >
-                  <i className="fa-solid fa-plus-circle mr-2"></i>
+                  <PlusCircle className="w-5 h-5 mr-2" />
                   Agregar Pregunta
                 </button>
               </div>
@@ -634,9 +651,9 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
           {/* Botón agregar sección */}
           <button
             onClick={handleAddSection}
-            className="w-full border-2 border-dashed border-gray-400 rounded-lg p-6 text-gray-600 hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-pink-50 transition-colors font-medium text-lg"
+            className="w-full border-2 border-dashed border-gray-400 rounded-lg p-6 text-gray-600 hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-pink-50 transition-colors font-medium text-lg flex items-center justify-center"
           >
-            <i className="fa-solid fa-layer-group mr-2"></i>
+            <Layers className="w-6 h-6 mr-2" />
             Agregar Sección
           </button>
         </div>
@@ -651,25 +668,25 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 router.back()
               }
             }}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center"
           >
-            <i className="fa-solid fa-arrow-left mr-2"></i>
+            <ArrowLeft className="w-5 h-5 mr-2" />
             Cancelar
           </button>
 
           <button
             onClick={handleSaveForm}
             disabled={isSaving}
-            className="px-8 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+            className="px-8 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center"
           >
             {isSaving ? (
               <>
-                <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                 Guardando...
               </>
             ) : (
               <>
-                <i className="fa-solid fa-save mr-2"></i>
+                <Save className="w-5 h-5 mr-2" />
                 {mode === 'edit' ? 'Actualizar Formulario' : 'Guardar Formulario'}
               </>
             )}
