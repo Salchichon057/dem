@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, Fragment } from 'react'
 import Image from 'next/image'
 import type { FormTemplateWithQuestions, QuestionWithRelations } from '@/lib/types'
 import SuccessModal from './SuccessModal'
@@ -651,6 +651,10 @@ export default function FormRenderer({ form }: FormRendererProps) {
       {/* Header del formulario */}
       <div className="bg-white rounded-lg shadow-sm border-t-4 border-[#e6235a] p-6 sm:p-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{form.name}</h1>
+        <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
+          <i className="far fa-question-circle text-[#e6235a]"></i>
+          <span>{form.questions?.filter(q => q.question_types?.code !== 'PAGE_BREAK' && q.question_types?.code !== 'SECTION_HEADER').length || 0} preguntas</span>
+        </div>
         {form.description && (
           <p className="text-gray-600">{form.description}</p>
         )}
@@ -660,16 +664,17 @@ export default function FormRenderer({ form }: FormRendererProps) {
       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
         {/* Stepper de secciones */}
         {totalSections > 1 && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
+          <div className="mb-6">
+            <div className="relative flex items-center justify-between">
               {filteredSteps.map((step, idx) => {
                 const sectionInfo = step[0]?.form_sections
                 const isActive = idx === currentSection
                 const isCompleted = idx < currentSection
                 
                 return (
-                  <div key={idx} className="flex items-center flex-1">
-                    <div className="flex flex-col items-center flex-1">
+                  <Fragment key={idx}>
+                    {/* Círculo del step */}
+                    <div className="flex flex-col items-center relative z-10">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
                         isActive 
                           ? 'bg-[#e6235a] text-white ring-4 ring-[#e6235a]/20 scale-110' 
@@ -684,19 +689,21 @@ export default function FormRenderer({ form }: FormRendererProps) {
                         )}
                       </div>
                       {sectionInfo?.title && (
-                        <span className={`text-xs mt-2 text-center font-medium max-w-[120px] ${
+                        <span className={`text-xs mt-2 text-center font-medium max-w-[100px] truncate ${
                           isActive ? 'text-[#e6235a]' : 'text-gray-500'
                         }`}>
                           {sectionInfo.title}
                         </span>
                       )}
                     </div>
+                    
+                    {/* Línea conectora entre steps */}
                     {idx < filteredSteps.length - 1 && (
-                      <div className={`h-1 flex-1 mx-2 rounded transition-all ${
+                      <div className={`flex-1 h-1 mx-2 rounded transition-all relative ${
                         isCompleted ? 'bg-green-500' : 'bg-gray-200'
-                      }`}></div>
+                      }`} style={{ marginBottom: sectionInfo?.title ? '50px' : '0' }}></div>
                     )}
-                  </div>
+                  </Fragment>
                 )
               })}
             </div>
