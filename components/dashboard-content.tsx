@@ -18,7 +18,7 @@ import { ListaBeneficiariosSection } from "@/components/lista-beneficiarios-sect
 import PimcoComunidadesSection from "@/components/pimco-comunidades-section"
 import PimcoGraficasEstadisticasSection from "@/components/pimco-graficas-estadisticas-section"
 import { PimcoBdEstadisticasSection } from "@/components/pimco-bd-estadisticas-section"
-import { PimcoEntrevistasSection } from "@/components/pimco-entrevistas-section"
+import { PIMCOEntrevistasSection } from "@/components/pimco-entrevistas-section"
 import { PimcoDiagnosticoComunitarioSection } from "@/components/pimco-diagnostico-comunitario-section"
 import Image from "next/image"
 
@@ -85,7 +85,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "pimco-bd-estadisticas":
         return <PimcoBdEstadisticasSection />
       case "pimco-entrevistas":
-        return <PimcoEntrevistasSection />
+        return <PIMCOEntrevistasSection />
       case "pimco-diagnostico-comunitario":
         return <PimcoDiagnosticoComunitarioSection />
       default:

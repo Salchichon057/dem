@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -133,14 +134,26 @@ export default function OrganizacionesSectionNew() {
   const cargarOrganizaciones = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/organizaciones')
+      const response = await authFetch('/api/organizaciones')
       if (!response.ok) throw new Error('Error al cargar organizaciones')
       
       const data = await response.json()
-      setOrganizaciones(data)
+      
+      // La API devuelve { organizaciones: [...] }
+      const orgs = data.organizaciones || data
+      
+      // Validar que sea un array antes de setear
+      if (Array.isArray(orgs)) {
+        setOrganizaciones(orgs)
+      } else {
+        console.error('La respuesta no es un array:', data)
+        setOrganizaciones([])
+        toast.error('Error: formato de datos inválido')
+      }
     } catch (error) {
       console.error('Error:', error)
       toast.error('Error al cargar organizaciones')
+      setOrganizaciones([]) // Asegurar que siempre sea array
     } finally {
       setLoading(false)
     }
@@ -296,7 +309,7 @@ export default function OrganizacionesSectionNew() {
         ? `/api/organizaciones/${editingOrg.id}` 
         : '/api/organizaciones'
 
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -323,7 +336,7 @@ export default function OrganizacionesSectionNew() {
 
     try {
       setLoading(true)
-      const response = await fetch(`/api/organizaciones/${id}`, {
+      const response = await authFetch(`/api/organizaciones/${id}`, {
         method: 'DELETE',
       })
 
@@ -339,13 +352,16 @@ export default function OrganizacionesSectionNew() {
     }
   }
 
-  const organizacionesFiltradas = organizaciones.filter(org =>
+  // Asegurar que organizaciones sea siempre un array antes de filtrar
+  const organizacionesArray = Array.isArray(organizaciones) ? organizaciones : []
+  
+  const organizacionesFiltradas = organizacionesArray.filter(org =>
     (org.nombreCompleto || org.nombre || '').toLowerCase().includes(busqueda.toLowerCase()) ||
     (org.departamento || '').toLowerCase().includes(busqueda.toLowerCase()) ||
     (org.municipio || '').toLowerCase().includes(busqueda.toLowerCase())
   )
 
-  if (loading && organizaciones.length === 0) {
+  if (loading && organizacionesArray.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -1012,7 +1028,7 @@ export default function OrganizacionesSectionNew() {
               <Building2 className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Total Organizaciones</p>
-                <p className="text-2xl font-bold">{organizaciones.length}</p>
+                <p className="text-2xl font-bold">{organizacionesArray.length}</p>
               </div>
             </div>
           </CardContent>
@@ -1023,7 +1039,7 @@ export default function OrganizacionesSectionNew() {
               <Building2 className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-gray-600">Activas</p>
-                <p className="text-2xl font-bold">{organizaciones.filter(o => o.estado === 'ACTIVA').length}</p>
+                <p className="text-2xl font-bold">{organizacionesArray.filter(o => o.estado === 'ACTIVA').length}</p>
               </div>
             </div>
           </CardContent>
@@ -1034,7 +1050,7 @@ export default function OrganizacionesSectionNew() {
               <Building2 className="h-5 w-5 text-yellow-600" />
               <div>
                 <p className="text-sm text-gray-600">Suspendidas</p>
-                <p className="text-2xl font-bold">{organizaciones.filter(o => o.estado === 'SUSPENDIDA').length}</p>
+                <p className="text-2xl font-bold">{organizacionesArray.filter(o => o.estado === 'SUSPENDIDA').length}</p>
               </div>
             </div>
           </CardContent>
@@ -1045,7 +1061,7 @@ export default function OrganizacionesSectionNew() {
               <Building2 className="h-5 w-5 text-red-600" />
               <div>
                 <p className="text-sm text-gray-600">Inactivas</p>
-                <p className="text-2xl font-bold">{organizaciones.filter(o => o.estado === 'INACTIVA').length}</p>
+                <p className="text-2xl font-bold">{organizacionesArray.filter(o => o.estado === 'INACTIVA').length}</p>
               </div>
             </div>
           </CardContent>
