@@ -1,20 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { FormsList, FormRenderer } from "@/components/form";
+import { FormsList, FormRenderer, FormBuilder } from "@/components/form";
 import { FormSectionType, FormTemplateWithQuestions } from "@/lib/types";
 
-export function FormulariosSection() {
-  const [viewingForm, setViewingForm] =
-    useState<FormTemplateWithQuestions | null>(null);
+type ViewMode = 'list' | 'view' | 'create' | 'edit';
 
-  if (viewingForm) {
+export function FormulariosSection() {
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [viewingForm, setViewingForm] = useState<FormTemplateWithQuestions | null>(null);
+  const [editingFormId, setEditingFormId] = useState<string | null>(null);
+
+  // Manejar visualización de formulario
+  const handleViewForm = (form: FormTemplateWithQuestions) => {
+    setViewingForm(form);
+    setViewMode('view');
+  };
+
+  // Manejar creación de formulario
+  const handleCreateForm = () => {
+    setViewMode('create');
+  };
+
+  // Manejar edición de formulario
+  const handleEditForm = (formId: string) => {
+    setEditingFormId(formId);
+    setViewMode('edit');
+  };
+
+  // Volver a la lista
+  const handleBackToList = () => {
+    setViewMode('list');
+    setViewingForm(null);
+    setEditingFormId(null);
+  };
+
+  // Vista de formulario (para responderlo)
+  if (viewMode === 'view' && viewingForm) {
     return (
       <div className="space-y-6">
-        {/* Botón de regresar - Estilo mejorado */}
+        {/* Botón de regresar */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <button
-            onClick={() => setViewingForm(null)}
+            onClick={handleBackToList}
             className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-[#e6235a] hover:text-[#e6235a] transition-all shadow-sm font-medium"
           >
             <i className="fas fa-arrow-left mr-2"></i>
@@ -22,17 +50,66 @@ export function FormulariosSection() {
           </button>
         </div>
 
-        {/* Form Renderer - Ya tiene su propio max-w-4xl */}
         <FormRenderer form={viewingForm} />
       </div>
     );
   }
 
+  // Vista de crear formulario
+  if (viewMode === 'create') {
+    return (
+      <div className="space-y-6">
+        {/* Botón de regresar */}
+        <div className="px-4 sm:px-6">
+          <button
+            onClick={handleBackToList}
+            className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-[#e6235a] hover:text-[#e6235a] transition-all shadow-sm font-medium"
+          >
+            <i className="fas fa-arrow-left mr-2"></i>
+            Cancelar
+          </button>
+        </div>
+
+        <FormBuilder
+          mode="create"
+          sectionLocation={FormSectionType.ORGANIZACIONES}
+        />
+      </div>
+    );
+  }
+
+  // Vista de editar formulario
+  if (viewMode === 'edit' && editingFormId) {
+    return (
+      <div className="space-y-6">
+        {/* Botón de regresar */}
+        <div className="px-4 sm:px-6">
+          <button
+            onClick={handleBackToList}
+            className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-[#e6235a] hover:text-[#e6235a] transition-all shadow-sm font-medium"
+          >
+            <i className="fas fa-arrow-left mr-2"></i>
+            Cancelar
+          </button>
+        </div>
+
+        <FormBuilder
+          mode="edit"
+          formId={editingFormId}
+          sectionLocation={FormSectionType.ORGANIZACIONES}
+        />
+      </div>
+    );
+  }
+
+  // Vista de lista
   return (
     <FormsList
       sectionLocation={FormSectionType.ORGANIZACIONES}
       locationName="Organizaciones"
-      onViewForm={setViewingForm}
+      onViewForm={handleViewForm}
+      onCreateForm={handleCreateForm}
+      onEditForm={handleEditForm}
     />
   );
 }

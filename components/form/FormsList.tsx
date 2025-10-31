@@ -23,9 +23,11 @@ interface FormsListProps {
   sectionLocation: FormSectionType
   locationName?: string
   onViewForm?: (form: FormTemplateWithQuestions) => void
+  onCreateForm?: () => void
+  onEditForm?: (formId: string) => void
 }
 
-export default function FormsList({ sectionLocation, locationName, onViewForm }: FormsListProps) {
+export default function FormsList({ sectionLocation, locationName, onViewForm, onCreateForm, onEditForm }: FormsListProps) {
   const [forms, setForms] = useState<FormTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -153,13 +155,23 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
           </p>
         </div>
 
-        <Link
-          href={`/dashboard/formularios/new?section=${sectionLocation}`}
-          className="px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium shadow-md flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Nuevo Formulario
-        </Link>
+        {onCreateForm ? (
+          <button
+            onClick={onCreateForm}
+            className="px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium shadow-md flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Nuevo Formulario
+          </button>
+        ) : (
+          <Link
+            href={`/dashboard/formularios/new?section=${sectionLocation}`}
+            className="px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium shadow-md flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Nuevo Formulario
+          </Link>
+        )}
       </div>
 
       {/* Buscador */}
@@ -272,13 +284,23 @@ export default function FormsList({ sectionLocation, locationName, onViewForm }:
 
                   {/* Botón Editar - Solo si no tiene respuestas */}
                   {!hasResponses ? (
-                    <Link
-                      href={`/dashboard/formularios/${form.id}/edit?section=${sectionLocation}`}
-                      title="Editar formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </Link>
+                    onEditForm ? (
+                      <button
+                        onClick={() => onEditForm(form.id)}
+                        title="Editar formulario"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/dashboard/formularios/${form.id}/edit?section=${sectionLocation}`}
+                        title="Editar formulario"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </Link>
+                    )
                   ) : (
                     <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed inline-flex items-center justify-center" title="No se puede editar (tiene respuestas)">
                       <Edit className="w-5 h-5" />
