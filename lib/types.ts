@@ -215,4 +215,69 @@ export interface QuestionWithRelations {
   } | null
 }
 
+// =====================================================
+// BENEFICIARIES TYPES
+// =====================================================
+
+export interface Beneficiary {
+  id: string
+  name: string
+  age: number
+  gender: 'Masculino' | 'Femenino'
+  dpi: string | null
+  program: string
+  photo_url: string | null
+  admission_date: string // ISO date string
+  is_active: boolean
+  department: string
+  municipality: string
+  village: string | null
+  address: string | null
+  google_maps_url: string | null
+  created_at: string
+  updated_at: string
+  created_by: string | null
+  deleted_at: string | null
+}
+
+export interface CreateBeneficiaryInput {
+  name: string
+  age: number
+  gender: 'Masculino' | 'Femenino'
+  dpi?: string
+  program: string
+  photo_url?: string
+  admission_date: string
+  is_active?: boolean
+  department: string
+  municipality: string
+  village?: string
+  address?: string
+  google_maps_url?: string
+}
+
+export interface UpdateBeneficiaryInput extends Partial<CreateBeneficiaryInput> {
+  id: string
+}
+
+export interface BeneficiaryFilters {
+  department?: string
+  municipality?: string
+  program?: string
+  is_active?: boolean
+  search?: string // Para buscar por nombre
+}
+
+export interface BeneficiaryStats {
+  total: number
+  active: number
+  inactive: number
+  by_gender: {
+    masculino: number
+    femenino: number
+  }
+  by_department: Record<string, number>
+  by_program: Record<string, number>
+  average_age: number
+}
 
