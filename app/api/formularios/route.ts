@@ -112,33 +112,17 @@ export async function GET(req: NextRequest) {
 
     console.log('✅ Formularios obtenidos:', forms?.length || 0)
 
-    // Obtener conteo de submissions para cada formulario usando una query agregada
-    // Intentar primero con count directo de form_submissions
+    // Obtener conteo de submissions para cada formulario usando el helper
     const formIds = (forms || []).map(f => f.id)
     
     let submissionCounts: Record<string, number> = {}
     
     if (formIds.length > 0) {
       try {
-        // Intentar obtener el conteo directamente desde form_submissions
-        // Esto puede fallar si RLS no permite acceso
-        const { data: submissions, error: subError } = await supabase
-          .from('form_submissions')
-          .select('form_template_id')
-          .in('form_template_id', formIds)
-
-        if (subError) {
-          console.warn('⚠️ No se puede acceder a form_submissions con anon key:', subError.message)
-          console.log('💡 Tip: Necesitas crear una política RLS en form_submissions que permita contar (SELECT) para anon role')
-        } else if (submissions) {
-          // Contar manualmente los submissions por form_template_id
-          submissionCounts = submissions.reduce((acc, sub) => {
-            acc[sub.form_template_id] = (acc[sub.form_template_id] || 0) + 1
-            return acc
-          }, {} as Record<string, number>)
-          
-          console.log('📊 Conteo de submissions por formulario:', submissionCounts)
-        }
+        // Usar el helper que distribuye las queries según section_location
+        const { getAllSubmissionsCounts } = await import('@/lib/supabase/submissions')
+        submissionCounts = await getAllSubmissionsCounts(formIds)
+        console.log('📊 Conteo de submissions por formulario:', submissionCounts)
       } catch (err) {
         console.error('❌ Error al obtener submissions:', err)
       }

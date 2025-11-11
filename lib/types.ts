@@ -6,7 +6,36 @@ export enum FormSectionType {
   ORGANIZACIONES = 'organizaciones',
   AUDITORIAS = 'auditorias',
   COMUNIDADES = 'comunidades',
-  VOLUNTARIADO = 'voluntariado'
+  VOLUNTARIADO = 'voluntariado',
+  ABRAZANDO_LEYENDAS = 'abrazando-leyendas'
+}
+
+// Mapper: section_location -> tabla de submissions correspondiente
+export const SUBMISSION_TABLES_MAP: Record<FormSectionType, { submissions: string; answers: string }> = {
+  [FormSectionType.ORGANIZACIONES]: {
+    submissions: 'organizations_submissions',
+    answers: 'organizations_answers'
+  },
+  [FormSectionType.AUDITORIAS]: {
+    submissions: 'audits_submissions',
+    answers: 'audits_answers'
+  },
+  [FormSectionType.PERFIL_COMUNITARIO]: {
+    submissions: 'community_profile_submissions',
+    answers: 'community_profile_answers'
+  },
+  [FormSectionType.VOLUNTARIADO]: {
+    submissions: 'volunteer_submissions',
+    answers: 'volunteer_answers'
+  },
+  [FormSectionType.COMUNIDADES]: {
+    submissions: 'communities_submissions',
+    answers: 'communities_answers'
+  },
+  [FormSectionType.ABRAZANDO_LEYENDAS]: {
+    submissions: 'embracing_legends_submissions',
+    answers: 'embracing_legends_answers'
+  }
 }
 
 export interface QuestionConfig {
