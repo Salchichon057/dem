@@ -5,8 +5,8 @@ import type { Beneficiary, BeneficiaryFilters, CreateBeneficiaryInput } from '@/
 
 /**
  * GET /api/beneficiaries
- * Lista beneficiarios con filtros opcionales
- * Query params: department, municipality, program, is_active, search
+ * Lista beneficiarios con filtros opcionales y paginación
+ * Query params: department, municipality, program, is_active, search, page, limit
  */
 export async function GET(request: NextRequest) {
   try {
@@ -19,41 +19,74 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || undefined
     }
 
+    // Parámetros de paginación
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
     const supabase = createClient()
+    
+    // Primero obtenemos el count total
+    let countQuery = supabase
+      .from('beneficiaries')
+      .select('*', { count: 'exact', head: true })
+      .is('deleted_at', null)
+
+    // Aplicar filtros al count
+    if (filters.department) {
+      countQuery = countQuery.eq('department', filters.department)
+    }
+    if (filters.municipality) {
+      countQuery = countQuery.eq('municipality', filters.municipality)
+    }
+    if (filters.program) {
+      countQuery = countQuery.eq('program', filters.program)
+    }
+    if (filters.is_active !== undefined) {
+      countQuery = countQuery.eq('is_active', filters.is_active)
+    }
+    if (filters.search) {
+      countQuery = countQuery.ilike('name', `%${filters.search}%`)
+    }
+
+    const { count, error: countError } = await countQuery
+    if (countError) throw countError
+
+    // Ahora obtenemos los datos paginados
     let query = supabase
       .from('beneficiaries')
       .select('*')
-      .is('deleted_at', null) // Solo no eliminados
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
+      .range(from, to)
 
     // Aplicar filtros
     if (filters.department) {
       query = query.eq('department', filters.department)
     }
-
     if (filters.municipality) {
       query = query.eq('municipality', filters.municipality)
     }
-
     if (filters.program) {
       query = query.eq('program', filters.program)
     }
-
     if (filters.is_active !== undefined) {
       query = query.eq('is_active', filters.is_active)
     }
-
     if (filters.search) {
       query = query.ilike('name', `%${filters.search}%`)
     }
 
     const { data: beneficiaries, error } = await query
-
     if (error) throw error
 
     return NextResponse.json({
       beneficiaries: beneficiaries as Beneficiary[],
-      total: beneficiaries?.length || 0
+      total: count || 0,
+      page,
+      limit,
+      totalPages: Math.ceil((count || 0) / limit)
     })
 
   } catch (error: any) {

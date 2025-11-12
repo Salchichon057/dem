@@ -1,10 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BeneficiaryStats } from '@/lib/types'
-import { Users, UserCheck, UserX, Calendar } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  Card,
+  DonutChart,
+  Grid,
+  Metric,
+  Text,
+  Flex,
+  Title,
+  BarChart,
+} from '@tremor/react'
+import GuatemalaMap from './guatemala-map'
 
 export default function BeneficiariesCharts() {
   const [stats, setStats] = useState<BeneficiaryStats | null>(null)
@@ -21,7 +30,8 @@ export default function BeneficiariesCharts() {
       const data = await response.json()
 
       if (response.ok) {
-        setStats(data)
+        console.log('Stats data received:', data) // Debug
+        setStats(data.stats) // Acceder a data.stats en lugar de data directamente
       } else {
         toast.error('Error al cargar estadísticas')
       }
@@ -52,21 +62,32 @@ export default function BeneficiariesCharts() {
   // Calculate percentages
   const activePercentage = stats.total > 0 ? Math.round((stats.active / stats.total) * 100) : 0
   const inactivePercentage = stats.total > 0 ? Math.round((stats.inactive / stats.total) * 100) : 0
-  const masculinoPercentage = stats.total > 0 
-    ? Math.round((stats.by_gender.masculino / stats.total) * 100) 
-    : 0
-  const femeninoPercentage = stats.total > 0 
-    ? Math.round((stats.by_gender.femenino / stats.total) * 100) 
-    : 0
 
-  // Get top departments (top 5)
-  const topDepartments = Object.entries(stats.by_department)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5)
+  // Prepare data for Tremor charts
+  const genderData = [
+    {
+      name: 'Femenino',
+      value: stats.by_gender?.femenino || 0,
+    },
+    {
+      name: 'Masculino',
+      value: stats.by_gender?.masculino || 0,
+    },
+  ]
 
-  // Get all programs
-  const programs = Object.entries(stats.by_program)
-    .sort(([, a], [, b]) => b - a)
+  const departmentData = Object.entries(stats.by_department || {})
+    .map(([name, value]) => ({
+      name,
+      value,
+    }))
+    .sort((a, b) => b.value - a.value)
+
+  const programData = Object.entries(stats.by_program || {})
+    .map(([name, value]) => ({
+      name,
+      value,
+    }))
+    .sort((a, b) => b.value - a.value)
 
   return (
     <div className="space-y-6">
@@ -75,164 +96,110 @@ export default function BeneficiariesCharts() {
         <p className="text-muted-foreground">Resumen visual de beneficiarios</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Summary Cards with Tremor */}
+      <Grid numItemsSm={2} numItemsLg={4} className="gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Beneficiarios</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Activos</CardTitle>
-            <UserCheck className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">{activePercentage}% del total</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inactivos</CardTitle>
-            <UserX className="h-4 w-4 text-gray-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-600">{stats.inactive}</div>
-            <p className="text-xs text-muted-foreground">{inactivePercentage}% del total</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Edad Promedio</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.average_age}</div>
-            <p className="text-xs text-muted-foreground">años</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Gender Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Distribución por Género</CardTitle>
-          <CardDescription>Total de beneficiarios por género</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Masculino */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Masculino</span>
-                <span className="text-sm text-muted-foreground">
-                  {stats.by_gender.masculino} ({masculinoPercentage}%)
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${masculinoPercentage}%` }}
-                ></div>
-              </div>
+          <Flex alignItems="start">
+            <div className="truncate">
+              <Text>Total Beneficiarios</Text>
+              <Metric>{stats.total}</Metric>
             </div>
+          </Flex>
+        </Card>
 
-            {/* Femenino */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Femenino</span>
-                <span className="text-sm text-muted-foreground">
-                  {stats.by_gender.femenino} ({femeninoPercentage}%)
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-pink-600 h-2.5 rounded-full"
-                  style={{ width: `${femeninoPercentage}%` }}
-                ></div>
-              </div>
+        <Card>
+          <Flex alignItems="start">
+            <div className="truncate">
+              <Text>Activos</Text>
+              <Metric className="text-green-600">{stats.active}</Metric>
+              <Text className="text-xs text-gray-500">{activePercentage}% del total</Text>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </Flex>
+        </Card>
 
-      {/* Top 5 Departments */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top 5 Departamentos</CardTitle>
-          <CardDescription>Departamentos con más beneficiarios</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {topDepartments.length > 0 ? (
-              topDepartments.map(([department, count]) => {
-                const percentage = Math.round((count / stats.total) * 100)
-                return (
-                  <div key={department}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{department}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {count} ({percentage}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <p className="text-sm text-muted-foreground">No hay datos disponibles</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <Flex alignItems="start">
+            <div className="truncate">
+              <Text>Inactivos</Text>
+              <Metric className="text-gray-600">{stats.inactive}</Metric>
+              <Text className="text-xs text-gray-500">{inactivePercentage}% del total</Text>
+            </div>
+          </Flex>
+        </Card>
 
-      {/* Programs Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Distribución por Programa</CardTitle>
-          <CardDescription>Total de beneficiarios por tipo de programa</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {programs.length > 0 ? (
-              programs.map(([program, count]) => {
-                const percentage = Math.round((count / stats.total) * 100)
-                return (
-                  <div key={program}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{program}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {count} ({percentage}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-green-600 h-2 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <p className="text-sm text-muted-foreground">No hay datos disponibles</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <Flex alignItems="start">
+            <div className="truncate">
+              <Text>Edad Promedio</Text>
+              <Metric>{stats.average_age}</Metric>
+              <Text className="text-xs text-gray-500">años</Text>
+            </div>
+          </Flex>
+        </Card>
+      </Grid>
+
+      {/* Maps and Charts Grid */}
+      <Grid numItemsLg={2} className="gap-6">
+        {/* Guatemala Map */}
+        <Card>
+          <Title>Beneficiarios por Departamento</Title>
+          <Text>Mapa interactivo de Guatemala</Text>
+          <GuatemalaMap data={stats.by_department || {}} />
+        </Card>
+
+        {/* Gender Distribution Donut Chart */}
+        <Card>
+          <Title>Distribución por Género</Title>
+          <Text>Proporción de beneficiarios por género</Text>
+          <DonutChart
+            data={genderData}
+            category="value"
+            index="name"
+            colors={["pink", "blue"]}
+            className="mt-6"
+            showLabel={true}
+            valueFormatter={(value) => `${value} personas`}
+          />
+        </Card>
+      </Grid>
+
+      {/* Bar Charts Grid */}
+      <Grid numItemsLg={2} className="gap-6">
+        {/* Programs Bar Chart */}
+        <Card>
+          <Title>Población por Programas</Title>
+          <Text>Distribución de beneficiarios por tipo de programa</Text>
+          <BarChart
+            data={programData}
+            index="name"
+            categories={["value"]}
+            colors={["emerald"]}
+            valueFormatter={(value: number) => `${value} beneficiarios`}
+            yAxisWidth={100}
+            className="mt-6 h-80"
+            showLegend={false}
+            showAnimation={true}
+          />
+        </Card>
+
+        {/* Departments Bar Chart */}
+        <Card>
+          <Title>Ranking por Departamento</Title>
+          <Text>Departamentos con más beneficiarios</Text>
+          <BarChart
+            data={departmentData.slice(0, 10)}
+            index="name"
+            categories={["value"]}
+            colors={["blue"]}
+            valueFormatter={(value: number) => `${value} beneficiarios`}
+            yAxisWidth={120}
+            className="mt-6 h-80"
+            showLegend={false}
+            layout="vertical"
+            showAnimation={true}
+          />
+        </Card>
+      </Grid>
     </div>
   )
 }
