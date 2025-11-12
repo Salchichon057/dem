@@ -1,0 +1,179 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/client'
+import type { UpdateBeneficiaryInput } from '@/lib/types'
+
+/**
+ * GET /api/beneficiaries/[id]
+ * Obtiene un beneficiario por ID
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params
+
+    const supabase = createClient()
+    const { data: beneficiary, error } = await supabase
+      .from('beneficiaries')
+      .select('*')
+      .eq('id', id)
+      .is('deleted_at', null)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Beneficiario no encontrado' },
+          { status: 404 }
+        )
+      }
+      throw error
+    }
+
+    return NextResponse.json({ beneficiary })
+
+  } catch (error: any) {
+    console.error('Error al obtener beneficiario:', error)
+    return NextResponse.json(
+      { error: error.message || 'Error al obtener beneficiario' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * PUT /api/beneficiaries/[id]
+ * Actualiza un beneficiario
+ */
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params
+    const body = await request.json() as Partial<UpdateBeneficiaryInput>
+
+    // Validaciones
+    if (body.age !== undefined && (body.age <= 0 || body.age > 120)) {
+      return NextResponse.json(
+        { error: 'La edad debe estar entre 1 y 120 años' },
+        { status: 400 }
+      )
+    }
+
+    if (body.gender && !['Masculino', 'Femenino'].includes(body.gender)) {
+      return NextResponse.json(
+        { error: 'El género debe ser Masculino o Femenino' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createClient()
+
+    // Verificar que el beneficiario existe
+    const { data: existing } = await supabase
+      .from('beneficiaries')
+      .select('id')
+      .eq('id', id)
+      .is('deleted_at', null)
+      .single()
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Beneficiario no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Preparar datos para actualizar
+    const updateData: any = {}
+    
+    if (body.name !== undefined) updateData.name = body.name
+    if (body.age !== undefined) updateData.age = body.age
+    if (body.gender !== undefined) updateData.gender = body.gender
+    if (body.dpi !== undefined) updateData.dpi = body.dpi
+    if (body.program !== undefined) updateData.program = body.program
+    if (body.photo_url !== undefined) updateData.photo_url = body.photo_url
+    if (body.admission_date !== undefined) updateData.admission_date = body.admission_date
+    if (body.is_active !== undefined) updateData.is_active = body.is_active
+    if (body.department !== undefined) updateData.department = body.department
+    if (body.municipality !== undefined) updateData.municipality = body.municipality
+    if (body.village !== undefined) updateData.village = body.village
+    if (body.address !== undefined) updateData.address = body.address
+    if (body.google_maps_url !== undefined) updateData.google_maps_url = body.google_maps_url
+
+    // Actualizar (updated_at se actualiza automáticamente por trigger)
+    const { data: beneficiary, error } = await supabase
+      .from('beneficiaries')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return NextResponse.json({
+      success: true,
+      beneficiary
+    })
+
+  } catch (error: any) {
+    console.error('❌ Error al actualizar beneficiario:', error)
+    return NextResponse.json(
+      { error: error.message || 'Error al actualizar beneficiario' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * DELETE /api/beneficiaries/[id]
+ * Soft delete de un beneficiario
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params
+
+    const supabase = createClient()
+
+    // Verificar que existe
+    const { data: existing } = await supabase
+      .from('beneficiaries')
+      .select('id')
+      .eq('id', id)
+      .is('deleted_at', null)
+      .single()
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Beneficiario no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Soft delete: marcar deleted_at
+    const { error } = await supabase
+      .from('beneficiaries')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) throw error
+
+    return NextResponse.json({
+      success: true,
+      message: 'Beneficiario eliminado correctamente'
+    })
+
+  } catch (error: any) {
+    console.error('❌ Error al eliminar beneficiario:', error)
+    return NextResponse.json(
+      { error: error.message || 'Error al eliminar beneficiario' },
+      { status: 500 }
+    )
+  }
+}

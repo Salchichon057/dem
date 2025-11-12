@@ -150,18 +150,6 @@ const menuItems = [
     id: 'abrazando-leyendas',
     title: 'Abrazando Leyendas',
     icon: Heart,
-    children: [
-      {
-        id: 'lista-beneficiarios',
-        title: 'Lista de beneficiarios',
-        icon: List,
-      },
-      {
-        id: 'estadistica-leyendas',
-        title: 'Estadística',
-        icon: BarChart3,
-      },
-    ]
   },
   {
     id: 'voluntariado',

@@ -14,7 +14,7 @@ import { EstadisticasComunidadesSection } from "@/components/estadisticas-comuni
 import { PlantillasComunidadesSection } from "@/components/plantillas-comunidades-section"
 import { FormulariosAuditoriaSection } from "@/components/formularios-auditoria-section"
 import { BasesDatosAuditoriaSection } from "@/components/bases-datos-auditoria-section"
-import { ListaBeneficiariosSection } from "@/components/lista-beneficiarios-section"
+import AbrazandoLeyendasSection from "@/components/abrazando-leyendas-section"
 import PimcoComunidadesSection from "@/components/pimco-comunidades-section"
 import PimcoGraficasEstadisticasSection from "@/components/pimco-graficas-estadisticas-section"
 import { PimcoBdEstadisticasSection } from "@/components/pimco-bd-estadisticas-section"
@@ -64,11 +64,11 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Auditoría</h2><p>Funcionalidad en desarrollo</p></div>
       case "semaforo":
         return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Semáforo</h2><p>Funcionalidad en desarrollo</p></div>
-      // Secciones de Abrazando Leyendas
+      // Secciones de Abrazando Leyendas (unificado en tabs)
+      case "abrazando-leyendas":
       case "lista-beneficiarios":
-        return <ListaBeneficiariosSection />
       case "estadistica-leyendas":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Leyendas</h2><p>Funcionalidad en desarrollo</p></div>
+        return <AbrazandoLeyendasSection />
       // Secciones de Voluntariado
       case "graficas-voluntariado":
         return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Gráficas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
