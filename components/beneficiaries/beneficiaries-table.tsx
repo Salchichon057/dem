@@ -30,6 +30,11 @@ export default function BeneficiariesTable() {
   const [allBeneficiaries, setAllBeneficiaries] = useState<Beneficiary[]>([]) // Para generar filtros dinámicos
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
+  
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [itemsPerPage] = useState(50) // 50 items por página
 
   // Form modal state
   const [formOpen, setFormOpen] = useState(false)
@@ -94,6 +99,10 @@ export default function BeneficiariesTable() {
       setLoading(true)
       const params = new URLSearchParams()
       
+      // Agregar paginación
+      params.append('page', currentPage.toString())
+      params.append('limit', itemsPerPage.toString())
+      
       if (searchTerm) params.append('search', searchTerm)
       if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
       if (selectedMunicipality && selectedMunicipality !== 'all') params.append('municipality', selectedMunicipality)
@@ -106,6 +115,7 @@ export default function BeneficiariesTable() {
       if (response.ok) {
         setBeneficiaries(data.beneficiaries)
         setTotal(data.total)
+        setTotalPages(data.totalPages || 1)
       } else {
         toast.error('Error al cargar beneficiarios')
       }
@@ -120,6 +130,11 @@ export default function BeneficiariesTable() {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchBeneficiaries()
+  }, [searchTerm, selectedDepartment, selectedMunicipality, selectedProgram, selectedStatus, currentPage])
+
+  // Reset a página 1 cuando cambian los filtros (excepto cuando cambia currentPage)
+  useEffect(() => {
+    setCurrentPage(1)
   }, [searchTerm, selectedDepartment, selectedMunicipality, selectedProgram, selectedStatus])
 
   // Delete beneficiary
@@ -150,6 +165,7 @@ export default function BeneficiariesTable() {
     setSelectedMunicipality('all')
     setSelectedProgram('all')
     setSelectedStatus('all')
+    setCurrentPage(1) // Reset a la primera página
   }
 
   // Open form for adding
@@ -352,6 +368,85 @@ export default function BeneficiariesTable() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Paginador */}
+      {!loading && beneficiaries.length > 0 && (
+        <div className="flex items-center justify-between px-2 py-4">
+          <div className="text-sm text-muted-foreground">
+            Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, total)} de {total} beneficiarios
+          </div>
+          
+          <div className="flex items-center gap-1">
+            {/* Primera página */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="w-9"
+            >
+              &laquo;
+            </Button>
+            
+            {/* Anterior */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="w-9"
+            >
+              &lsaquo;
+            </Button>
+            
+            {/* Números de página (solo 3) */}
+            <div className="flex items-center gap-1">
+              {(() => {
+                const startPage = Math.max(1, currentPage - 1)
+                const endPage = Math.min(totalPages, startPage + 2)
+                
+                const pages = []
+                for (let i = startPage; i <= endPage; i++) {
+                  pages.push(
+                    <Button
+                      key={i}
+                      variant={currentPage === i ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(i)}
+                      className="w-9"
+                    >
+                      {i}
+                    </Button>
+                  )
+                }
+                return pages
+              })()}
+            </div>
+            
+            {/* Siguiente */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="w-9"
+            >
+              &rsaquo;
+            </Button>
+            
+            {/* Última página */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="w-9"
+            >
+              &raquo;
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

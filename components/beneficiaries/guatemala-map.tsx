@@ -24,7 +24,9 @@ interface GeoFeature {
 
 export default function GuatemalaMap({ data }: GuatemalaMapProps) {
   const [tooltipContent, setTooltipContent] = useState('')
+  const [tooltipValue, setTooltipValue] = useState(0)
   const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [showTooltip, setShowTooltip] = useState(false)
 
   // Find max value for color scaling
   const maxValue = Math.max(...Object.values(data), 1)
@@ -76,17 +78,24 @@ export default function GuatemalaMap({ data }: GuatemalaMapProps) {
                         fill: '#f59e0b',
                         outline: 'none',
                         cursor: 'pointer',
+                        strokeWidth: 1.5,
+                        stroke: '#ffffff',
                       },
                       pressed: { outline: 'none' },
                     }}
                     onMouseEnter={(e: React.MouseEvent) => {
-                      setTooltipContent(
-                        `${departmentName}: ${value} beneficiario${value !== 1 ? 's' : ''}`
-                      )
-                      setPosition({ x: e.clientX, y: e.clientY })
+                      setTooltipContent(departmentName)
+                      setTooltipValue(value)
+                      setShowTooltip(true)
+                      const rect = (e.target as HTMLElement).getBoundingClientRect()
+                      setPosition({ x: rect.left + rect.width / 2, y: rect.top - 10 })
+                    }}
+                    onMouseMove={(e: React.MouseEvent) => {
+                      const rect = (e.target as HTMLElement).getBoundingClientRect()
+                      setPosition({ x: rect.left + rect.width / 2, y: rect.top - 10 })
                     }}
                     onMouseLeave={() => {
-                      setTooltipContent('')
+                      setShowTooltip(false)
                     }}
                   />
                 )
@@ -96,17 +105,20 @@ export default function GuatemalaMap({ data }: GuatemalaMapProps) {
         </ZoomableGroup>
       </ComposableMap>
 
-      {/* Tooltip */}
-      {tooltipContent && (
+      {/* Tooltip mejorado */}
+      {showTooltip && tooltipContent && (
         <div
-          className="absolute bg-gray-900 text-white px-3 py-2 rounded-md text-sm pointer-events-none z-50"
+          className="fixed bg-gray-900 text-white px-4 py-3 rounded-lg text-sm shadow-2xl pointer-events-none z-[9999] border border-gray-700"
           style={{
-            left: position.x + 10,
-            top: position.y - 30,
-            transform: 'translateX(-50%)',
+            left: `${position.x}px`,
+            top: `${position.y}px`,
+            transform: 'translate(-50%, -100%)',
           }}
         >
-          {tooltipContent}
+          <div className="font-semibold text-base mb-1">{tooltipContent}</div>
+          <div className="text-orange-300 font-bold text-lg">
+            {tooltipValue} beneficiario{tooltipValue !== 1 ? 's' : ''}
+          </div>
         </div>
       )}
 

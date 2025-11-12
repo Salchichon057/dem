@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
           inactive: 0,
           by_gender: { masculino: 0, femenino: 0 },
           by_department: {},
+          by_department_details: {},
           by_program: {},
           average_age: 0
         } as BeneficiaryStats
@@ -49,6 +50,34 @@ export async function GET(request: NextRequest) {
       by_department[b.department] = (by_department[b.department] || 0) + 1
     })
 
+    // Por departamento con detalles (género y programa)
+    const by_department_details: Record<string, any> = {}
+    beneficiaries.forEach(b => {
+      if (!by_department_details[b.department]) {
+        by_department_details[b.department] = {
+          total: 0,
+          masculino: 0,
+          femenino: 0,
+          programs: {} // Desglose dinámico por programa
+        }
+      }
+      by_department_details[b.department].total++
+      
+      // Contar por género
+      if (b.gender === 'Masculino') {
+        by_department_details[b.department].masculino++
+      } else if (b.gender === 'Femenino') {
+        by_department_details[b.department].femenino++
+      }
+      
+      // Contar por programa (dinámico)
+      const program = b.program
+      if (!by_department_details[b.department].programs[program]) {
+        by_department_details[b.department].programs[program] = 0
+      }
+      by_department_details[b.department].programs[program]++
+    })
+
     // Por programa
     const by_program: Record<string, number> = {}
     beneficiaries.forEach(b => {
@@ -68,6 +97,7 @@ export async function GET(request: NextRequest) {
         femenino
       },
       by_department,
+      by_department_details,
       by_program,
       average_age
     }

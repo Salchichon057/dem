@@ -4,16 +4,31 @@ import { useState, useEffect } from 'react'
 import { BeneficiaryStats } from '@/lib/types'
 import { toast } from 'sonner'
 import {
-  Card,
-  DonutChart,
-  Grid,
-  Metric,
-  Text,
-  Flex,
+  Chart as ChartJS,
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  BarElement,
   Title,
-  BarChart,
-} from '@tremor/react'
+  Tooltip,
+  Legend,
+  TooltipItem,
+} from 'chart.js'
+import { Doughnut, Bar } from 'react-chartjs-2'
+import { Card, Grid, Metric, Text, Flex, Title as TremorTitle } from '@tremor/react'
 import GuatemalaMap from './guatemala-map'
+import BeneficiariesSummaryTable from './beneficiaries-summary-table'
+
+// Registrar componentes de Chart.js
+ChartJS.register(
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 export default function BeneficiariesCharts() {
   const [stats, setStats] = useState<BeneficiaryStats | null>(null)
@@ -30,8 +45,8 @@ export default function BeneficiariesCharts() {
       const data = await response.json()
 
       if (response.ok) {
-        console.log('Stats data received:', data) // Debug
-        setStats(data.stats) // Acceder a data.stats en lugar de data directamente
+        console.log('Stats data received:', data)
+        setStats(data.stats)
       } else {
         toast.error('Error al cargar estadísticas')
       }
@@ -63,31 +78,159 @@ export default function BeneficiariesCharts() {
   const activePercentage = stats.total > 0 ? Math.round((stats.active / stats.total) * 100) : 0
   const inactivePercentage = stats.total > 0 ? Math.round((stats.inactive / stats.total) * 100) : 0
 
-  // Prepare data for Tremor charts
-  const genderData = [
-    {
-      name: 'Femenino',
-      value: stats.by_gender?.femenino || 0,
-    },
-    {
-      name: 'Masculino',
-      value: stats.by_gender?.masculino || 0,
-    },
-  ]
+  // Datos para gráfico de género (Doughnut)
+  const genderChartData = {
+    labels: ['Masculino', 'Femenino'],
+    datasets: [
+      {
+        label: 'Beneficiarios',
+        data: [stats.by_gender?.masculino || 0, stats.by_gender?.femenino || 0],
+        backgroundColor: ['#3b82f6', '#ec4899'],
+        borderColor: ['#ffffff', '#ffffff'],
+        borderWidth: 2,
+        hoverBackgroundColor: ['#2563eb', '#db2777'],
+        hoverBorderColor: ['#ffffff', '#ffffff'],
+        hoverBorderWidth: 3,
+      },
+    ],
+  }
 
-  const departmentData = Object.entries(stats.by_department || {})
-    .map(([name, value]) => ({
-      name,
-      value,
-    }))
-    .sort((a, b) => b.value - a.value)
+  const genderChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          font: { size: 14 },
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle',
+        },
+      },
+      tooltip: {
+        backgroundColor: '#1f2937',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: function (context: { label: string; parsed: number; dataset: { data: number[] } }) {
+            const label = context.label || ''
+            const value = context.parsed || 0
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0)
+            const percentage = ((value / total) * 100).toFixed(1)
+            return `${label}: ${value} (${percentage}%)`
+          },
+        },
+      },
+    },
+  }
 
+  // Datos para gráfico de programas
   const programData = Object.entries(stats.by_program || {})
-    .map(([name, value]) => ({
-      name,
-      value,
-    }))
+    .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
+
+  const programChartData = {
+    labels: programData.map((item) => item.name),
+    datasets: [
+      {
+        label: 'Beneficiarios',
+        data: programData.map((item) => item.value),
+        backgroundColor: '#10b981',
+        hoverBackgroundColor: '#059669',
+        borderRadius: 6,
+        barThickness: 40,
+      },
+    ],
+  }
+
+  const programChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y' as const,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1f2937',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: function (context: TooltipItem<'bar'>) {
+            return `${context.parsed.x} beneficiarios`
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: { color: '#e5e7eb' },
+        ticks: { font: { size: 12 } },
+      },
+      y: {
+        grid: { display: false },
+        ticks: { font: { size: 12 } },
+      },
+    },
+  }
+
+  // Datos para gráfico de departamentos (top 10)
+  const departmentData = Object.entries(stats.by_department || {})
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10)
+
+  const departmentChartData = {
+    labels: departmentData.map((item) => item.name),
+    datasets: [
+      {
+        label: 'Beneficiarios',
+        data: departmentData.map((item) => item.value),
+        backgroundColor: '#6366f1',
+        hoverBackgroundColor: '#4f46e5',
+        borderRadius: 6,
+      },
+    ],
+  }
+
+  const departmentChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1f2937',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: function (context: TooltipItem<'bar'>) {
+            return `${context.parsed.y} beneficiarios`
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { 
+          font: { size: 11 },
+          maxRotation: 45,
+          minRotation: 45,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: '#e5e7eb' },
+        ticks: { font: { size: 12 } },
+      },
+    },
+  }
 
   return (
     <div className="space-y-6">
@@ -96,7 +239,7 @@ export default function BeneficiariesCharts() {
         <p className="text-muted-foreground">Resumen visual de beneficiarios</p>
       </div>
 
-      {/* Summary Cards with Tremor */}
+      {/* Summary Cards */}
       <Grid numItemsSm={2} numItemsLg={4} className="gap-6">
         <Card>
           <Flex alignItems="start">
@@ -142,24 +285,18 @@ export default function BeneficiariesCharts() {
       <Grid numItemsLg={2} className="gap-6">
         {/* Guatemala Map */}
         <Card>
-          <Title>Beneficiarios por Departamento</Title>
+          <TremorTitle>Beneficiarios por Departamento</TremorTitle>
           <Text>Mapa interactivo de Guatemala</Text>
           <GuatemalaMap data={stats.by_department || {}} />
         </Card>
 
-        {/* Gender Distribution Donut Chart */}
+        {/* Gender Distribution Chart */}
         <Card>
-          <Title>Distribución por Género</Title>
+          <TremorTitle>Distribución por Género</TremorTitle>
           <Text>Proporción de beneficiarios por género</Text>
-          <DonutChart
-            data={genderData}
-            category="value"
-            index="name"
-            colors={["pink", "blue"]}
-            className="mt-6"
-            showLabel={true}
-            valueFormatter={(value) => `${value} personas`}
-          />
+          <div className="mt-6" style={{ height: '350px' }}>
+            <Doughnut data={genderChartData} options={genderChartOptions} />
+          </div>
         </Card>
       </Grid>
 
@@ -167,39 +304,25 @@ export default function BeneficiariesCharts() {
       <Grid numItemsLg={2} className="gap-6">
         {/* Programs Bar Chart */}
         <Card>
-          <Title>Población por Programas</Title>
+          <TremorTitle>Población por Programas</TremorTitle>
           <Text>Distribución de beneficiarios por tipo de programa</Text>
-          <BarChart
-            data={programData}
-            index="name"
-            categories={["value"]}
-            colors={["emerald"]}
-            valueFormatter={(value: number) => `${value} beneficiarios`}
-            yAxisWidth={100}
-            className="mt-6 h-80"
-            showLegend={false}
-            showAnimation={true}
-          />
+          <div className="mt-6" style={{ height: '400px' }}>
+            <Bar data={programChartData} options={programChartOptions} />
+          </div>
         </Card>
 
         {/* Departments Bar Chart */}
         <Card>
-          <Title>Ranking por Departamento</Title>
+          <TremorTitle>Ranking por Departamento</TremorTitle>
           <Text>Departamentos con más beneficiarios</Text>
-          <BarChart
-            data={departmentData.slice(0, 10)}
-            index="name"
-            categories={["value"]}
-            colors={["blue"]}
-            valueFormatter={(value: number) => `${value} beneficiarios`}
-            yAxisWidth={120}
-            className="mt-6 h-80"
-            showLegend={false}
-            layout="vertical"
-            showAnimation={true}
-          />
+          <div className="mt-6" style={{ height: '400px' }}>
+            <Bar data={departmentChartData} options={departmentChartOptions} />
+          </div>
         </Card>
       </Grid>
+
+      {/* Summary Table */}
+      <BeneficiariesSummaryTable stats={stats} />
     </div>
   )
 }

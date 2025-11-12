@@ -268,6 +268,13 @@ export interface BeneficiaryFilters {
   search?: string // Para buscar por nombre
 }
 
+export interface DepartmentDetails {
+  total: number
+  masculino: number
+  femenino: number
+  programs: Record<string, number> // Desglose dinámico por programa
+}
+
 export interface BeneficiaryStats {
   total: number
   active: number
@@ -277,6 +284,7 @@ export interface BeneficiaryStats {
     femenino: number
   }
   by_department: Record<string, number>
+  by_department_details: Record<string, DepartmentDetails>
   by_program: Record<string, number>
   average_age: number
 }
