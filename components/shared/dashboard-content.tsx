@@ -13,6 +13,7 @@ import { PlantillasComunidadesSection } from "@/components/communities/plantilla
 import { FormulariosAuditoriaSection } from "@/components/audits/formularios-auditoria-section"
 import AbrazandoLeyendasSection from "@/components/forms/abrazando-leyendas-section"
 import VoluntariadoSection from "@/components/forms/voluntariado-section"
+import { FormularioVoluntariadoSection } from "@/components/forms/formulario-voluntariado-section"
 import FormsList from "@/components/form/FormsList"
 import Image from "next/image"
 import { Construction, FileText } from "lucide-react"
@@ -63,13 +64,13 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "organizaciones-estadistica":
         return <UnderConstruction title="datos de organizaciones" variant="no-data" />
       case "organizaciones-formularios":
-        return <FormsList sectionLocation={FormSectionType.ORGANIZACIONES} locationName="Organizaciones" />
+        return <FormulariosSection />
       
       // Secciones de Comunidades
       case "comunidades-estadistica":
         return <UnderConstruction title="datos de comunidades" variant="no-data" />
       case "comunidades-formularios":
-        return <FormsList sectionLocation={FormSectionType.COMUNIDADES} locationName="Comunidades" />
+        return <PlantillasComunidadesSection />
       case "comunidades-plantillas":
         return <UnderConstruction title="Plantillas de Comunidades" />
       
@@ -77,7 +78,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "auditorias-estadistica":
         return <UnderConstruction title="datos de auditorías" variant="no-data" />
       case "auditorias-formularios":
-        return <FormsList sectionLocation={FormSectionType.AUDITORIAS} locationName="Auditorías" />
+        return <FormulariosAuditoriaSection />
       case "auditorias-tablero-consolidado":
         return <UnderConstruction title="Tablero Consolidado" />
       case "auditorias-semaforo":
@@ -91,7 +92,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "voluntariado-estadistica":
         return <VoluntariadoSection />
       case "voluntariado-formularios":
-        return <FormsList sectionLocation={FormSectionType.VOLUNTARIADO} locationName="Voluntariado" />
+        return <FormularioVoluntariadoSection />
       
       // Secciones de PIMCO
       case "pimco-comunidades":
