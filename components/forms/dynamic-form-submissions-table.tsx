@@ -26,7 +26,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import FilePreviewModal from './file-preview-modal'
 import GridPreviewModal from './grid-preview-modal'
 
@@ -216,35 +215,79 @@ export default function DynamicFormSubmissionsTable({
   }
 
   const allColumnsChecked = Object.values(visibleColumns).every(v => v)
-  const someColumnsChecked = Object.values(visibleColumns).some(v => v) && !allColumnsChecked
 
-  // Export to CSV
+  // Export to CSV (respetando columnas visibles)
   const exportToCSV = () => {
     if (filteredData.length === 0) {
       toast.error('No hay datos para exportar')
       return
     }
 
-    // Crear CSV headers
-    const headers = [
-      'Nombre Usuario',
-      'Email Usuario',
-      'Fecha Envío',
-      ...columns.map(col => col.title)
-    ]
+    // Función auxiliar para limpiar valores complejos para CSV
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cleanValueForCSV = (value: any, type?: string): string => {
+      if (value === null || value === undefined || value === '') return ''
+      
+      // Manejar arrays (checkboxes múltiples)
+      if (Array.isArray(value)) {
+        return value.join(', ')
+      }
+      
+      // Manejar objetos (GRID, etc)
+      if (typeof value === 'object') {
+        // Para GRID, convertir a formato legible
+        const entries = Object.entries(value)
+        return entries.map(([k, v]) => `${k}: ${v}`).join(' | ')
+      }
+      
+      // Manejar booleanos
+      if (typeof value === 'boolean') {
+        return value ? 'Sí' : 'No'
+      }
+      
+      // Manejar fechas
+      if (type === 'DATE') {
+        try {
+          return new Date(value).toLocaleDateString('es-GT')
+        } catch {
+          return String(value)
+        }
+      }
+      
+      // Escapar comillas dobles
+      return String(value).replace(/"/g, '""')
+    }
 
-    // Crear filas CSV
-    const rows = filteredData.map(row => [
-      row.user_name,
-      row.user_email,
-      new Date(row.submitted_at).toLocaleString('es-GT'),
-      ...columns.map(col => {
-        const value = row[col.id]
-        // Manejar valores null/undefined y escapar comillas
-        if (value === null || value === undefined) return ''
-        return String(value).replace(/"/g, '""')
+    // Crear headers solo con columnas visibles
+    const headers: string[] = []
+    if (visibleColumns.user_name) headers.push('Nombre Usuario')
+    if (visibleColumns.user_email) headers.push('Email Usuario')
+    if (visibleColumns.submitted_at) headers.push('Fecha Envío')
+    
+    columns.forEach(col => {
+      if (visibleColumns[col.id]) {
+        headers.push(col.title)
+      }
+    })
+
+    // Crear filas CSV solo con columnas visibles
+    const rows = filteredData.map(row => {
+      const rowData: string[] = []
+      
+      if (visibleColumns.user_name) rowData.push(cleanValueForCSV(row.user_name))
+      if (visibleColumns.user_email) rowData.push(cleanValueForCSV(row.user_email))
+      if (visibleColumns.submitted_at) {
+        rowData.push(new Date(row.submitted_at).toLocaleString('es-GT'))
+      }
+      
+      columns.forEach(col => {
+        if (visibleColumns[col.id]) {
+          rowData.push(cleanValueForCSV(row[col.id], col.type))
+        }
       })
-    ])
+      
+      return rowData
+    })
 
     // Crear contenido CSV
     const csvContent = [
@@ -263,7 +306,7 @@ export default function DynamicFormSubmissionsTable({
     link.click()
     document.body.removeChild(link)
     
-    toast.success('Archivo CSV exportado')
+    toast.success(`Archivo CSV exportado (${filteredData.length} filas, ${headers.length} columnas)`)
   }
 
   // Render value based on question type
@@ -528,76 +571,136 @@ export default function DynamicFormSubmissionsTable({
               </Button>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon" title="Configurar columnas">
+                  <Button variant="outline" className="gap-2">
                     <Settings2 className="w-4 h-4" />
+                    Columnas
+                    {Object.values(visibleColumns).filter(Boolean).length < Object.keys(visibleColumns).length && (
+                      <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                        {Object.values(visibleColumns).filter(Boolean).length}/{Object.keys(visibleColumns).length}
+                      </span>
+                    )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 max-h-[400px] overflow-y-auto" align="end">
-                  <div className="space-y-4">
-                    <h3 className="font-medium text-sm">Columnas visibles</h3>
-                    <div className="space-y-3">
-                      {/* Select All */}
-                      <div className="flex items-center space-x-2 pb-2 border-b">
-                        <Checkbox
-                          id="col-all"
-                          checked={allColumnsChecked}
-                          onCheckedChange={toggleAllColumns}
-                          className={someColumnsChecked ? "data-[state=checked]:bg-primary/50" : ""}
-                        />
-                        <Label htmlFor="col-all" className="text-sm cursor-pointer font-medium">
-                          Seleccionar todo
-                        </Label>
-                      </div>
-                      
+                <PopoverContent className="w-80 max-h-[500px] overflow-hidden flex flex-col" align="end">
+                  <div className="space-y-3">
+                    {/* Header con Select All */}
+                    <div className="flex items-center justify-between pb-3 border-b">
+                      <h3 className="font-semibold text-sm">Columnas visibles</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleAllColumns}
+                        className="h-7 text-xs"
+                      >
+                        {allColumnsChecked ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                      </Button>
+                    </div>
+                    
+                    {/* Lista de columnas con scroll */}
+                    <div className="overflow-y-auto max-h-[380px] pr-2 space-y-2">
                       {/* Fixed columns */}
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="col-user_name"
-                          checked={visibleColumns.user_name}
-                          onCheckedChange={() => toggleColumn('user_name')}
-                        />
-                        <Label htmlFor="col-user_name" className="text-sm cursor-pointer">Nombre Usuario</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="col-user_email"
-                          checked={visibleColumns.user_email}
-                          onCheckedChange={() => toggleColumn('user_email')}
-                        />
-                        <Label htmlFor="col-user_email" className="text-sm cursor-pointer">Email Usuario</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="col-submitted_at"
-                          checked={visibleColumns.submitted_at}
-                          onCheckedChange={() => toggleColumn('submitted_at')}
-                        />
-                        <Label htmlFor="col-submitted_at" className="text-sm cursor-pointer">Fecha Envío</Label>
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                          Campos del sistema
+                        </p>
+                        
+                        <label 
+                          htmlFor="col-user_name" 
+                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors hover:bg-accent group ${
+                            visibleColumns.user_name ? 'bg-accent/50' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <Checkbox
+                              id="col-user_name"
+                              checked={visibleColumns.user_name}
+                              onCheckedChange={() => toggleColumn('user_name')}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <span className="text-sm truncate">Nombre Usuario</span>
+                          </div>
+                          {visibleColumns.user_name && (
+                            <span className="text-xs text-blue-600 font-medium ml-2">●</span>
+                          )}
+                        </label>
+
+                        <label 
+                          htmlFor="col-user_email" 
+                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors hover:bg-accent group ${
+                            visibleColumns.user_email ? 'bg-accent/50' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <Checkbox
+                              id="col-user_email"
+                              checked={visibleColumns.user_email}
+                              onCheckedChange={() => toggleColumn('user_email')}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <span className="text-sm truncate">Email Usuario</span>
+                          </div>
+                          {visibleColumns.user_email && (
+                            <span className="text-xs text-blue-600 font-medium ml-2">●</span>
+                          )}
+                        </label>
+
+                        <label 
+                          htmlFor="col-submitted_at" 
+                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors hover:bg-accent group ${
+                            visibleColumns.submitted_at ? 'bg-accent/50' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <Checkbox
+                              id="col-submitted_at"
+                              checked={visibleColumns.submitted_at}
+                              onCheckedChange={() => toggleColumn('submitted_at')}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <span className="text-sm truncate">Fecha Envío</span>
+                          </div>
+                          {visibleColumns.submitted_at && (
+                            <span className="text-xs text-blue-600 font-medium ml-2">●</span>
+                          )}
+                        </label>
                       </div>
                       
                       {/* Dynamic columns from form */}
                       {columns.length > 0 && (
-                        <>
-                          <div className="border-t pt-2 mt-2">
-                            <p className="text-xs text-muted-foreground mb-2">Preguntas del formulario</p>
-                          </div>
+                        <div className="space-y-2 pt-3 border-t mt-3">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                            Preguntas del formulario ({columns.length})
+                          </p>
                           {columns.map((col) => (
-                            <div key={col.id} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`col-${col.id}`}
-                                checked={visibleColumns[col.id]}
-                                onCheckedChange={() => toggleColumn(col.id)}
-                              />
-                              <Label 
-                                htmlFor={`col-${col.id}`} 
-                                className="text-sm cursor-pointer truncate"
-                                title={col.title}
-                              >
-                                {col.title}
-                              </Label>
-                            </div>
+                            <label 
+                              key={col.id}
+                              htmlFor={`col-${col.id}`}
+                              className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors hover:bg-accent group ${
+                                visibleColumns[col.id] ? 'bg-accent/50' : ''
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <Checkbox
+                                  id={`col-${col.id}`}
+                                  checked={visibleColumns[col.id]}
+                                  onCheckedChange={() => toggleColumn(col.id)}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className="text-sm truncate" title={col.title}>
+                                    {col.title}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {col.type}
+                                  </span>
+                                </div>
+                              </div>
+                              {visibleColumns[col.id] && (
+                                <span className="text-xs text-blue-600 font-medium ml-2">●</span>
+                              )}
+                            </label>
                           ))}
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -670,8 +773,40 @@ export default function DynamicFormSubmissionsTable({
                 </TableRow>
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 1} className="text-center py-8 text-muted-foreground">
-                    {searchTerm ? 'No se encontraron resultados' : 'No hay submissions para este formulario'}
+                  <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 1} className="text-center py-16">
+                    <div className="flex flex-col items-center justify-center gap-4">
+                      {searchTerm ? (
+                        <>
+                          <div className="rounded-full bg-gray-100 p-4">
+                            <Search className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <div className="text-center">
+                            <p className="text-base font-medium text-gray-900 mb-1">
+                              No se encontraron resultados
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Intenta con otros términos de búsqueda
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="rounded-full bg-blue-50 p-4">
+                            <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-base font-medium text-gray-900 mb-1">
+                              No se registró ningún formulario
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Aún no hay respuestas enviadas para este formulario
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
