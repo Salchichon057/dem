@@ -54,7 +54,8 @@ export default function BeneficiaryForm({
   const [dpi, setDpi] = useState('')
   const [program, setProgram] = useState('')
   const [photoUrl, setPhotoUrl] = useState('')
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState('')
   const [admissionDate, setAdmissionDate] = useState('')
   const [isActive, setIsActive] = useState(true)
 
@@ -105,6 +106,15 @@ export default function BeneficiaryForm({
     }
   }, [beneficiary, open])
 
+  // Cleanup preview URL cuando se desmonte
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview)
+      }
+    }
+  }, [photoPreview])
+
   const resetForm = () => {
     setName('')
     setAge('')
@@ -112,6 +122,8 @@ export default function BeneficiaryForm({
     setDpi('')
     setProgram('')
     setPhotoUrl('')
+    setPhotoFile(null)
+    setPhotoPreview('')
     setAdmissionDate('')
     setIsActive(true)
     setDepartment('')
@@ -121,8 +133,8 @@ export default function BeneficiaryForm({
     setGoogleMapsUrl('')
   }
 
-  // Manejar selección de archivo de foto
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Manejar selección de archivo de foto (solo preview, no subir aún)
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -138,34 +150,25 @@ export default function BeneficiaryForm({
       return
     }
 
-    // Subir archivo inmediatamente
-    try {
-      setUploadingPhoto(true)
-      
-      if (!user?.id) {
-        toast.error('Debes iniciar sesión para subir archivos')
-        return
-      }
-      
-      // Usar ID temporal para nuevos beneficiarios
-      const resourceId = beneficiary?.id || `temp-${Date.now()}`
-      
-      const relativePath = await uploadBeneficiaryPhoto(file, user.id, resourceId)
-      const publicUrl = getFileUrl(relativePath)
-      
-      setPhotoUrl(publicUrl)
-      toast.success('Foto subida exitosamente')
-    } catch (error) {
-      console.error('Error uploading photo:', error)
-      toast.error('Error al subir la foto')
-    } finally {
-      setUploadingPhoto(false)
-    }
+    // Guardar archivo en stage y crear preview local
+    setPhotoFile(file)
+    const previewUrl = URL.createObjectURL(file)
+    setPhotoPreview(previewUrl)
+    toast.success('Foto lista para subir')
   }
 
   // Remover foto
   const handleRemovePhoto = () => {
-    setPhotoUrl('')
+    // Limpiar preview URL para evitar memory leak
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview)
+    }
+    
+    setPhotoFile(null)
+    setPhotoPreview('')
+    if (isEdit) {
+      setPhotoUrl('') // Si estamos editando, también limpiar la URL existente
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,6 +177,20 @@ export default function BeneficiaryForm({
 
     try {
       setLoading(true)
+
+      // Subir foto si hay un archivo nuevo
+      let finalPhotoUrl = photoUrl
+      if (photoFile) {
+        if (!user?.id) {
+          toast.error('Debes iniciar sesión para subir archivos')
+          setLoading(false)
+          return
+        }
+        
+        const resourceId = beneficiary?.id || `temp-${Date.now()}`
+        const relativePath = await uploadBeneficiaryPhoto(photoFile, user.id, resourceId)
+        finalPhotoUrl = getFileUrl(relativePath)
+      }
 
       // Preparar datos
       const ageNum = parseInt(age)
@@ -184,7 +201,7 @@ export default function BeneficiaryForm({
         gender: gender as 'Masculino' | 'Femenino',
         dpi: dpi || '',
         program,
-        photo_url: photoUrl || '',
+        photo_url: finalPhotoUrl || '',
         admission_date: admissionDate,
         is_active: isActive,
         department,
@@ -377,10 +394,10 @@ export default function BeneficiaryForm({
                   Foto
                 </Label>
                 <div className="flex items-start gap-4">
-                  {photoUrl ? (
+                  {(photoPreview || photoUrl) ? (
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200">
                       <Image
-                        src={photoUrl}
+                        src={photoPreview || photoUrl}
                         alt="Foto del beneficiario"
                         fill
                         className="object-cover"
@@ -394,6 +411,11 @@ export default function BeneficiaryForm({
                       >
                         <X className="w-3 h-3" />
                       </button>
+                      {photoPreview && (
+                        <div className="absolute bottom-1 left-1 right-1 bg-blue-500/90 text-white text-xs px-2 py-1 rounded text-center">
+                          Lista para subir
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
@@ -406,18 +428,17 @@ export default function BeneficiaryForm({
                       type="file"
                       accept="image/*"
                       onChange={handlePhotoChange}
-                      disabled={uploadingPhoto}
+                      disabled={loading}
                       className="cursor-pointer"
                     />
                     <p className="text-xs text-gray-500">
                       Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB
+                      {photoFile && (
+                        <span className="block text-blue-600 font-medium mt-1">
+                          ✓ Foto seleccionada: {photoFile.name}
+                        </span>
+                      )}
                     </p>
-                    {uploadingPhoto && (
-                      <div className="flex items-center gap-2 text-sm text-blue-600">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Subiendo foto...
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
