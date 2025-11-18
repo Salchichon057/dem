@@ -12,7 +12,6 @@ import { EstadisticasComunidadesSection } from "@/components/communities/estadis
 import { PlantillasComunidadesSection } from "@/components/communities/plantillas-comunidades-section"
 import { FormulariosAuditoriaSection } from "@/components/audits/formularios-auditoria-section"
 import AbrazandoLeyendasSection from "@/components/forms/abrazando-leyendas-section"
-import VoluntariadoSection from "@/components/forms/voluntariado-section"
 import { FormularioVoluntariadoSection } from "@/components/forms/formulario-voluntariado-section"
 import { OrganizacionesEstadisticaSection } from "@/components/statistics/organizaciones-estadistica-section"
 import { ComunidadesEstadisticaSection } from "@/components/statistics/comunidades-estadistica-section"

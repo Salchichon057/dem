@@ -6,7 +6,7 @@ import type { FormTemplateWithQuestions, QuestionWithRelations, FormSectionType 
 import SuccessModal from './SuccessModal'
 import ErrorModal from './ErrorModal'
 import ValidationModal from './ValidationModal'
-import { uploadFormFile, getFileUrl, STORAGE_BUCKETS } from '@/lib/storage/handler'
+import { uploadFormFile, STORAGE_BUCKETS } from '@/lib/storage/handler'
 import { useUser } from '@/hooks/use-user'
 
 interface FormRendererProps {
