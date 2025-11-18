@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut, MapPin, List, Users, Shield, Database, Activity, Heart, UserCheck, TrendingUp } from 'lucide-react'
+import { Building2, BarChart3, FileText, Settings, User, ChevronDown, LogOut, MapPin, Shield, Activity, Heart, UserCheck, TrendingUp } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -22,6 +22,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const menuItems = [
+  // Perfil Comunitario - Subniveles en sidebar
   {
     id: 'pimco',
     title: 'Perfil Comunitario',
@@ -33,21 +34,16 @@ const menuItems = [
         icon: MapPin,
       },
       {
-        id: 'pimco-graficas-estadisticas',
-        title: 'Gráficas y Estadísticas',
+        id: 'pimco-estadistica',
+        title: 'Estadística',
         icon: BarChart3,
-        children: [
-          {
-            id: 'pimco-graficas-estadisticas-dashboard',
-            title: 'Dashboard',
-            icon: BarChart3,
-          },
-          {
-            id: 'pimco-bd-estadisticas',
-            title: 'BD Estadísticas',
-            icon: Database,
-          },
-        ]
+        requiresData: true, // Bloqueado si no hay datos
+      },
+      {
+        id: 'pimco-formularios',
+        title: 'Formularios',
+        icon: FileText,
+        requiresData: true, // Solo si hay formularios
       },
       {
         id: 'pimco-entrevistas',
@@ -61,109 +57,100 @@ const menuItems = [
       },
     ]
   },
+  // Organizaciones - Subniveles en sidebar (Estadística + Formularios)
   {
-    id: 'organizacion',
+    id: 'organizaciones',
     title: 'Organizaciones',
     icon: Building2,
     children: [
       {
-        id: 'organizaciones',
-        title: 'Lista de Organizaciones',
-        icon: Building2,
-      },
-      {
-        id: 'estadisticas',
-        title: 'Estadísticas',
+        id: 'organizaciones-estadistica',
+        title: 'Estadística',
         icon: BarChart3,
+        requiresData: true, // Bloqueado si no hay datos
       },
       {
-        id: 'plantillas',
-        title: 'Plantillas',
-        icon: FileTemplate,
-      },
-      {
-        id: 'formularios',
+        id: 'organizaciones-formularios',
         title: 'Formularios',
         icon: FileText,
+        requiresData: true, // Solo si hay formularios
       },
     ]
   },
+  // Comunidades - Subniveles en sidebar (Estadística + Formularios + Plantillas)
   {
     id: 'comunidades',
     title: 'Comunidades',
     icon: MapPin,
     children: [
       {
-        id: 'lista-comunidades',
-        title: 'Lista de Comunidades',
-        icon: List,
-      },
-      {
-        id: 'perfil-comunitario',
-        title: 'Perfil Comunitario',
-        icon: Users,
-      },
-      {
-        id: 'estadistica-comunidades',
+        id: 'comunidades-estadistica',
         title: 'Estadística',
         icon: BarChart3,
+        requiresData: true, // Bloqueado si no hay datos
       },
       {
-        id: 'plantilla-comunidades',
-        title: 'Plantilla',
-        icon: FileTemplate,
+        id: 'comunidades-formularios',
+        title: 'Formularios',
+        icon: FileText,
+        requiresData: true, // Solo si hay formularios
+      },
+      {
+        id: 'comunidades-plantillas',
+        title: 'Plantillas',
+        icon: FileText,
       },
     ]
   },
+  // Auditorías - Subniveles en sidebar
   {
     id: 'auditorias',
     title: 'Auditorías',
     icon: Shield,
     children: [
       {
-        id: 'formularios-auditoria',
+        id: 'auditorias-estadistica',
+        title: 'Estadística',
+        icon: BarChart3,
+        requiresData: true, // Bloqueado si no hay datos
+      },
+      {
+        id: 'auditorias-formularios',
         title: 'Formularios',
         icon: FileText,
+        requiresData: true, // Solo si hay formularios
       },
       {
-        id: 'bases-datos-auditoria',
-        title: 'Bases de datos',
-        icon: Database,
-      },
-      {
-        id: 'tablero-consolidado',
+        id: 'auditorias-tablero-consolidado',
         title: 'Tablero Consolidado',
         icon: Activity,
       },
       {
-        id: 'estadistica-auditoria',
-        title: 'Estadística',
-        icon: BarChart3,
-      },
-      {
-        id: 'semaforo',
+        id: 'auditorias-semaforo',
         title: 'Semáforo',
         icon: TrendingUp,
       },
     ]
   },
+  // Abrazando Leyendas - Clic directo (sin subniveles)
   {
     id: 'abrazando-leyendas',
     title: 'Abrazando Leyendas',
     icon: Heart,
   },
+  // Voluntariado - Subniveles en sidebar (Estadística + Formularios) - ESTRUCTURA ORIGINAL CORRECTA
   {
     id: 'voluntariado',
     title: 'Voluntariado',
     icon: UserCheck,
     children: [
       {
-        id: 'estadistica-voluntariado',
+        id: 'voluntariado-estadistica',
         title: 'Estadística',
         icon: BarChart3,
       },
       {
-        id: 'formularios-voluntariado',
+        id: 'voluntariado-formularios',
         title: 'Formularios',
         icon: FileText,
       },
@@ -267,65 +254,24 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                       {expandedItems.includes(item.id) && (
                         <div className="ml-6 mt-1 space-y-1">
                           {item.children.map((subItem) => (
-                            <div key={subItem.id}>
-                              {subItem.children ? (
-                                <div>
-                                  <SidebarMenuButton
-                                    onClick={() => toggleExpanded(subItem.id)}
-                                    className="w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300"
-                                  >
-                                    <subItem.icon className="h-3 w-3 text-gray-500" />
-                                    <span className="text-sm font-medium">{subItem.title}</span>
-                                    <ChevronDown className={`ml-auto h-3 w-3 transition-transform ${
-                                      expandedItems.includes(subItem.id) ? 'rotate-180' : ''
-                                    }`} />
-                                  </SidebarMenuButton>
-                                  {expandedItems.includes(subItem.id) && (
-                                    <div className="ml-6 mt-1 space-y-1">
-                                      {subItem.children.map((subSubItem) => (
-                                        <SidebarMenuButton
-                                          key={subSubItem.id}
-                                          isActive={activeSection === subSubItem.id}
-                                          onClick={() => setActiveSection(subSubItem.id)}
-                                          className={`
-                                            w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
-                                            ${activeSection === subSubItem.id 
-                                              ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
-                                              : ''
-                                            }
-                                          `}
-                                        >
-                                          <subSubItem.icon className={`h-2 w-2 ${activeSection === subSubItem.id ? 'text-white' : 'text-gray-500'}`} />
-                                          <span className="text-xs font-medium">{subSubItem.title}</span>
-                                          {activeSection === subSubItem.id && (
-                                            <div className="ml-auto w-1 h-1 bg-white rounded-full animate-pulse"></div>
-                                          )}
-                                        </SidebarMenuButton>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <SidebarMenuButton
-                                  key={subItem.id}
-                                  isActive={activeSection === subItem.id}
-                                  onClick={() => setActiveSection(subItem.id)}
-                                  className={`
-                                    w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
-                                    ${activeSection === subItem.id 
-                                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
-                                      : ''
-                                    }
-                                  `}
-                                >
-                                  <subItem.icon className={`h-3 w-3 ${activeSection === subItem.id ? 'text-white' : 'text-gray-500'}`} />
-                                  <span className="text-sm font-medium">{subItem.title}</span>
-                                  {activeSection === subItem.id && (
-                                    <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                                  )}
-                                </SidebarMenuButton>
+                            <SidebarMenuButton
+                              key={subItem.id}
+                              isActive={activeSection === subItem.id}
+                              onClick={() => setActiveSection(subItem.id)}
+                              className={`
+                                w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
+                                ${activeSection === subItem.id 
+                                  ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
+                                  : ''
+                                }
+                              `}
+                            >
+                              <subItem.icon className={`h-3 w-3 ${activeSection === subItem.id ? 'text-white' : 'text-gray-500'}`} />
+                              <span className="text-sm font-medium">{subItem.title}</span>
+                              {activeSection === subItem.id && (
+                                <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                               )}
-                            </div>
+                            </SidebarMenuButton>
                           ))}
                         </div>
                       )}

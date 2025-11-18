@@ -2,36 +2,58 @@
 
 @layer base {
   :root {
+    /* Paleta de colores basada en el login */
+    /* Purple - Color principal */
+    --color-purple-primary: 147 51 234; /* purple-600 */
+    --color-purple-hover: 126 34 206; /* purple-700 */
+    --color-purple-light: 216 180 254; /* purple-300 */
+    
+    /* Blue - Color secundario */
+    --color-blue-primary: 37 99 235; /* blue-600 */
+    --color-blue-hover: 29 78 216; /* blue-700 */
+    --color-blue-light: 147 197 253; /* blue-300 */
+    
+    /* Cyan - Color acento */
+    --color-cyan-primary: 8 145 178; /* cyan-600 */
+    --color-cyan-hover: 14 116 144; /* cyan-700 */
+    --color-cyan-light: 103 232 249; /* cyan-300 */
+    
+    /* Pink - Color complementario */
+    --color-pink-primary: 219 39 119; /* pink-600 */
+    --color-pink-hover: 190 24 93; /* pink-700 */
+    --color-pink-light: 249 168 212; /* pink-300 */
+
+    /* Sistema de colores base */
     --color-background: 249 250 251;
     --color-foreground: 17 24 39;
     --color-card: 255 255 255;
     --color-card-foreground: 17 24 39;
     --color-popover: 255 255 255;
     --color-popover-foreground: 17 24 39;
-    --color-primary: 79 70 229;
+    --color-primary: 147 51 234; /* purple-600 */
     --color-primary-foreground: 255 255 255;
     --color-secondary: 243 244 246;
     --color-secondary-foreground: 17 24 39;
     --color-muted: 243 244 246;
     --color-muted-foreground: 107 114 128;
-    --color-accent: 243 244 246;
-    --color-accent-foreground: 17 24 39;
+    --color-accent: 37 99 235; /* blue-600 */
+    --color-accent-foreground: 255 255 255;
     --color-destructive: 239 68 68;
     --color-destructive-foreground: 255 255 255;
     --color-border: 229 231 235;
     --color-input: 229 231 235;
-    --color-ring: 79 70 229;
+    --color-ring: 147 51 234; /* purple-600 */
     --radius: 0.5rem;
 
-    /* Sidebar variables - BLANCO */
+    /* Sidebar variables - BLANCO con acentos purple */
     --color-sidebar-background: 255 255 255;
     --color-sidebar-foreground: 17 24 39;
-    --color-sidebar-primary: 79 70 229;
+    --color-sidebar-primary: 147 51 234; /* purple-600 */
     --color-sidebar-primary-foreground: 255 255 255;
-    --color-sidebar-accent: 79 70 229;
+    --color-sidebar-accent: 147 51 234; /* purple-600 */
     --color-sidebar-accent-foreground: 255 255 255;
     --color-sidebar-border: 229 231 235;
-    --color-sidebar-ring: 79 70 229;
+    --color-sidebar-ring: 147 51 234; /* purple-600 */
   }
 
   body {
@@ -195,25 +217,50 @@
   background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
 }
 
-/* Forzar estilos del sidebar BLANCO */
+/* Forzar estilos del sidebar BLANCO con purple accent */
 [data-sidebar="sidebar"] {
   background-color: white !important;
   color: #374151 !important;
   border-right: 1px solid #e5e7eb !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
-[data-sidebar="sidebar"] * {
-  color: #374151 !important;
+[data-sidebar="sidebar"] {
+  color: #374151;
 }
 
 [data-sidebar="menu-button"][data-active="true"] {
-  background-color: #4f46e5 !important;
+  background: linear-gradient(to right, rgb(147 51 234), rgb(37 99 235)) !important;
   color: white !important;
   font-weight: 500 !important;
 }
 
+[data-sidebar="menu-button"] {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+[data-sidebar="menu-button"] span {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: inline-block !important;
+  max-width: 100% !important;
+}
+
+[data-sidebar="menu-button"][data-active="true"] * {
+  color: white !important;
+}
+
 [data-sidebar="menu-button"][data-active="true"]:hover {
-  background-color: #4338ca !important;
+  background: linear-gradient(to right, rgb(126 34 206), rgb(29 78 216)) !important;
+  color: white !important;
+}
+
+[data-sidebar="menu-button"][data-active="true"]:hover * {
   color: white !important;
 }
 
@@ -238,5 +285,156 @@
 }
 
 [data-sidebar="content"] {
-  background-color: white !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: calc(100vh - 200px) !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgb(147 51 234 / 0.3) transparent !important;
 }
+
+[data-sidebar="content"]::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-thumb {
+  background: rgb(147 51 234 / 0.3) !important;
+  border-radius: 3px !important;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-thumb:hover {
+  background: rgb(147 51 234 / 0.5) !important;
+}
+
+/* Estilos globales para botones consistentes */
+@layer components {
+  /* Botón primario - Purple to Blue gradient */
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+  }
+  
+  /* Botón secundario - Cyan to Purple gradient */
+  .btn-secondary {
+    @apply bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+  }
+  
+  /* Botón outline - Purple border */
+  .btn-outline {
+    @apply border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-semibold transition-all duration-300;
+  }
+  
+  /* Botón success - Green gradient */
+  .btn-success {
+    @apply bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+  }
+  
+  /* Botón warning - Orange gradient */
+  .btn-warning {
+    @apply bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+  }
+  
+  /* Botón danger - Red gradient */
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+  }
+  
+  /* Botón ghost - Sin fondo */
+  .btn-ghost {
+    @apply text-purple-600 hover:bg-purple-50 font-semibold transition-all duration-200;
+  }
+  
+  /* Input consistente */
+  .input-primary {
+    @apply bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-purple-500 focus:ring-purple-500 transition-all;
+  }
+  
+  /* Card con efecto hover */
+  .card-interactive {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1;
+  }
+  
+  /* Badge con gradiente */
+  .badge-gradient {
+    @apply bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 font-medium px-3 py-1 rounded-full text-sm;
+  }
+}
+
+/* Animaciones para el login */
+@keyframes backgroundShift {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(2deg);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-30px) translateX(-15px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-delay {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-fade-in-delay {
+  animation: fade-in-delay 1.2s ease-out;
+}
+

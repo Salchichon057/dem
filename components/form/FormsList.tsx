@@ -243,7 +243,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
         {onCreateForm ? (
           <button
             onClick={onCreateForm}
-            className="px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium shadow-md flex items-center gap-2"
+            className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
             Nuevo Formulario
@@ -251,7 +251,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
         ) : (
           <Link
             href={`/dashboard/formularios/new?section=${sectionLocation}`}
-            className="px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium shadow-md flex items-center gap-2"
+            className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
             Nuevo Formulario
@@ -267,7 +267,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Buscar formularios..."
-          className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+          className="input-primary w-full pl-12 pr-4 py-3 rounded-lg"
         />
       </div>
 
@@ -288,7 +288,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
           {!searchTerm && (
             <Link
               href={`/dashboard/formularios/new?section=${sectionLocation}`}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium"
+              className="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg"
             >
               <Plus className="w-5 h-5" />
               Crear Formulario
@@ -349,10 +349,10 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                       onClick={() => handleViewForm(form.id)}
                       disabled={loadingFormId === form.id}
                       title="Ver formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loadingFormId === form.id ? (
-                        <Loader2 className="w-5 h-5 mx-auto animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                       ) : (
                         <Eye className="w-5 h-5 mx-auto" />
                       )}
@@ -361,7 +361,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                     <Link
                       href={`/dashboard/formularios/${form.id}/view`}
                       title="Ver formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
                     >
                       <Eye className="w-5 h-5" />
                     </Link>
@@ -373,7 +373,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                       <button
                         onClick={() => onEditForm(form.id)}
                         title="Editar formulario"
-                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
                       >
                         <Edit className="w-5 h-5" />
                       </button>
@@ -381,7 +381,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                       <Link
                         href={`/dashboard/formularios/${form.id}/edit?section=${sectionLocation}`}
                         title="Editar formulario"
-                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-[#e6235a]/5 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
                       >
                         <Edit className="w-5 h-5" />
                       </Link>
