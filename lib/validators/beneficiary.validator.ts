@@ -58,8 +58,14 @@ export const createBeneficiarySchema = z.object({
   google_maps_url: z.string()
     .url('Debe ser una URL válida')
     .refine(
-      (url) => url.includes('google.com/maps') || url.includes('goo.gl/maps'),
-      'Debe ser una URL de Google Maps válida'
+      (url) => {
+        const lowerUrl = url.toLowerCase()
+        return lowerUrl.includes('google.com/maps') || 
+               lowerUrl.includes('maps.google.com') || 
+               lowerUrl.includes('goo.gl') || 
+               lowerUrl.includes('maps.app.goo.gl')
+      },
+      'Debe ser una URL válida de Google Maps (que contenga google.com/maps, maps.google.com, goo.gl o maps.app.goo.gl)'
     )
     .optional()
     .or(z.literal('')),
@@ -131,8 +137,14 @@ export const updateBeneficiarySchema = z.object({
   google_maps_url: z.string()
     .url('Debe ser una URL válida')
     .refine(
-      (url) => url.includes('google.com/maps') || url.includes('goo.gl/maps'),
-      'Debe ser una URL de Google Maps válida'
+      (url) => {
+        const lowerUrl = url.toLowerCase()
+        return lowerUrl.includes('google.com/maps') || 
+               lowerUrl.includes('maps.google.com') || 
+               lowerUrl.includes('goo.gl') || 
+               lowerUrl.includes('maps.app.goo.gl')
+      },
+      'Debe ser una URL válida de Google Maps (que contenga google.com/maps, maps.google.com, goo.gl o maps.app.goo.gl)'
     )
     .optional()
     .or(z.literal('')),

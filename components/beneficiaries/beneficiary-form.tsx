@@ -601,11 +601,11 @@ export default function BeneficiaryForm({
                   type="url"
                   value={googleMapsUrl}
                   onChange={(e) => setGoogleMapsUrl(e.target.value)}
-                  placeholder="https://maps.google.com/... o https://goo.gl/maps/..."
+                  placeholder="https://maps.google.com/... o https://maps.app.goo.gl/..."
                   className={`w-full ${validationErrors.google_maps_url ? 'border-red-500' : ''}`}
                 />
                 <p className="text-xs text-gray-500">
-                  Debe ser una URL válida de Google Maps (que contenga &apos;google.com/maps&apos; o &apos;goo.gl/maps&apos;)
+                  Acepta cualquier URL de Google Maps (google.com/maps, maps.google.com, goo.gl, maps.app.goo.gl)
                 </p>
                 {validationErrors.google_maps_url && (
                   <p className="text-xs text-red-500">{validationErrors.google_maps_url}</p>
