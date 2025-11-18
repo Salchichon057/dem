@@ -14,6 +14,11 @@ import { FormulariosAuditoriaSection } from "@/components/audits/formularios-aud
 import AbrazandoLeyendasSection from "@/components/forms/abrazando-leyendas-section"
 import VoluntariadoSection from "@/components/forms/voluntariado-section"
 import { FormularioVoluntariadoSection } from "@/components/forms/formulario-voluntariado-section"
+import { OrganizacionesEstadisticaSection } from "@/components/statistics/organizaciones-estadistica-section"
+import { ComunidadesEstadisticaSection } from "@/components/statistics/comunidades-estadistica-section"
+import { AuditoriasEstadisticaSection } from "@/components/statistics/auditorias-estadistica-section"
+import { VoluntariadoEstadisticaSection } from "@/components/statistics/voluntariado-estadistica-section"
+import { PimcoEstadisticaSection } from "@/components/statistics/pimco-estadistica-section"
 import FormsList from "@/components/form/FormsList"
 import Image from "next/image"
 import { Construction, FileText } from "lucide-react"
@@ -62,13 +67,13 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
     switch (activeSection) {
       // Secciones principales - Organizaciones
       case "organizaciones-estadistica":
-        return <UnderConstruction title="datos de organizaciones" variant="no-data" />
+        return <OrganizacionesEstadisticaSection />
       case "organizaciones-formularios":
         return <FormulariosSection />
       
       // Secciones de Comunidades
       case "comunidades-estadistica":
-        return <UnderConstruction title="datos de comunidades" variant="no-data" />
+        return <ComunidadesEstadisticaSection />
       case "comunidades-formularios":
         return <PlantillasComunidadesSection />
       case "comunidades-plantillas":
@@ -76,7 +81,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       
       // Secciones de Auditorías
       case "auditorias-estadistica":
-        return <UnderConstruction title="datos de auditorías" variant="no-data" />
+        return <AuditoriasEstadisticaSection />
       case "auditorias-formularios":
         return <FormulariosAuditoriaSection />
       case "auditorias-tablero-consolidado":
@@ -90,7 +95,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       
       // Secciones de Voluntariado
       case "voluntariado-estadistica":
-        return <VoluntariadoSection />
+        return <VoluntariadoEstadisticaSection />
       case "voluntariado-formularios":
         return <FormularioVoluntariadoSection />
       
@@ -98,7 +103,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "pimco-comunidades":
         return <UnderConstruction title="PIMCO - Comunidades" />
       case "pimco-estadistica":
-        return <UnderConstruction title="datos del perfil comunitario" variant="no-data" />
+        return <PimcoEstadisticaSection />
       case "pimco-formularios":
         return <FormsList sectionLocation={FormSectionType.PERFIL_COMUNITARIO} locationName="Perfil Comunitario" />
       case "pimco-entrevistas":

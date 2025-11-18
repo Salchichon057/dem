@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth-server'
-import { FormSectionType, SUBMISSION_TABLES_MAP } from '@/lib/types'
+
+// Mapeo de section_location a nombre de vista
+const SECTION_TO_VIEW_MAP: Record<string, string> = {
+  'organizaciones': 'organizations_submissions_view',
+  'auditorias': 'audits_submissions_view',
+  'comunidades': 'communities_submissions_view',
+  'voluntariado': 'volunteer_submissions_view',
+  'perfil-comunitario': 'community_profile_submissions_view',
+  'abrazando-leyendas': 'embracing_legends_submissions_view'
+}
 
 /**
  * GET /api/submissions/[formId]
- * Obtiene todas las submissions de un formulario específico
+ * Obtiene todas las submissions de un formulario específico usando vistas SQL
  * Retorna datos en formato tabla con columnas dinámicas
  */
 export async function GET(
@@ -38,56 +47,39 @@ export async function GET(
       )
     }
 
-    const sectionLocation = formTemplate.section_location as FormSectionType
-    const tables = SUBMISSION_TABLES_MAP[sectionLocation]
-
-    // 2. Obtener todas las preguntas del formulario ordenadas
-    const { data: questions, error: questionsError } = await supabase
-      .from('questions')
-      .select(`
-        id,
-        title,
-        order_index,
-        question_types (
-          code
-        )
-      `)
-      .eq('form_template_id', formId)
-      .order('order_index')
-
-    if (questionsError) {
+    // 2. Obtener nombre de la vista según section_location
+    const viewName = SECTION_TO_VIEW_MAP[formTemplate.section_location]
+    if (!viewName) {
       return NextResponse.json(
-        { error: 'Error al obtener preguntas', details: questionsError },
-        { status: 500 }
+        { error: `No existe vista para section_location: ${formTemplate.section_location}` },
+        { status: 400 }
       )
     }
 
-    // 3. Obtener todas las submissions
-    const { data: submissions, error: submissionsError } = await supabase
-      .from(tables.submissions)
-      .select(`
-        id,
-        submitted_at,
-        user_id,
-        users (
-          name,
-          email
-        )
-      `)
+    // 3. Query directo a la vista
+    const { data: viewData, error: viewError } = await supabase
+      .from(viewName)
+      .select('*')
       .eq('form_template_id', formId)
       .order('submitted_at', { ascending: false })
+      .order('order_index', { ascending: true })
 
-    if (submissionsError) {
+    if (viewError) {
+      console.error('❌ Error al consultar vista:', viewError)
       return NextResponse.json(
-        { error: 'Error al obtener submissions', details: submissionsError },
+        { error: 'Error al obtener submissions', details: viewError },
         { status: 500 }
       )
     }
 
-    // 4. Obtener todas las respuestas de esas submissions
-    const submissionIds = submissions.map(s => s.id)
-    
-    if (submissionIds.length === 0) {
+    if (!viewData || viewData.length === 0) {
+      // Obtener preguntas aunque no haya submissions
+      const { data: questions } = await supabase
+        .from('questions')
+        .select('id, title, order_index, question_types(code)')
+        .eq('form_template_id', formId)
+        .order('order_index')
+
       return NextResponse.json({
         formName: formTemplate.name,
         columns: questions?.map(q => ({
@@ -100,56 +92,54 @@ export async function GET(
       })
     }
 
-    const { data: answers, error: answersError } = await supabase
-      .from(tables.answers)
-      .select('submission_id, question_id, answer_value')
-      .in('submission_id', submissionIds)
-
-    if (answersError) {
-      return NextResponse.json(
-        { error: 'Error al obtener respuestas', details: answersError },
-        { status: 500 }
-      )
-    }
-
-    // 5. Transformar a formato tabla
+    // 4. Transformar datos de la vista a formato tabla
+    // Agrupar por submission_id
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tableData = submissions.map((submission: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const submissionAnswers = answers?.filter((a: any) => a.submission_id === submission.id) || []
-      
-      const row: Record<string, unknown> = {
-        submission_id: submission.id,
-        submitted_at: submission.submitted_at,
-        user_name: submission.users?.name || 'N/A',
-        user_email: submission.users?.email || 'N/A'
+    const submissionsMap = new Map<string, any>()
+    const questionsSet = new Set<string>()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    viewData.forEach((row: any) => {
+      if (!submissionsMap.has(row.submission_id)) {
+        submissionsMap.set(row.submission_id, {
+          submission_id: row.submission_id,
+          submitted_at: row.submitted_at,
+          user_name: row.user_name || row.user_email?.split('@')[0] || 'N/A',
+          user_email: row.user_email || 'N/A'
+        })
       }
 
-      // Agregar cada respuesta como columna
-      questions?.forEach(question => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const answer = submissionAnswers.find((a: any) => a.question_id === question.id)
-        row[question.id] = answer?.answer_value?.value || null
-      })
+      // Agregar respuesta si existe question_id
+      if (row.question_id) {
+        questionsSet.add(JSON.stringify({
+          id: row.question_id,
+          title: row.question_title,
+          type: row.question_type || 'TEXT',
+          order: row.order_index
+        }))
 
-      return row
+        const submission = submissionsMap.get(row.submission_id)
+        submission[row.question_id] = row.answer_value?.value || null
+      }
     })
+
+    // 5. Ordenar preguntas y crear columnas
+    const questions = Array.from(questionsSet)
+      .map(q => JSON.parse(q))
+      .sort((a, b) => a.order - b.order)
+
+    const columns = questions.map(q => ({
+      id: q.id,
+      title: q.title,
+      type: q.type
+    }))
+
+    const data = Array.from(submissionsMap.values())
 
     return NextResponse.json({
       formName: formTemplate.name,
-      columns: [
-        { id: 'submission_id', title: 'ID', type: 'TEXT' },
-        { id: 'submitted_at', title: 'Fecha', type: 'TEXT' },
-        { id: 'user_name', title: 'Usuario', type: 'TEXT' },
-        { id: 'user_email', title: 'Email', type: 'TEXT' },
-        ...(questions?.map(q => ({
-          id: q.id,
-          title: q.title,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          type: (q.question_types as any)?.code || 'TEXT'
-        })) || [])
-      ],
-      data: tableData
+      columns,
+      data
     })
 
   } catch (error) {

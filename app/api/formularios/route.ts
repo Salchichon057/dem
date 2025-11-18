@@ -29,9 +29,9 @@ export async function GET(req: NextRequest) {
     const { error: authError } = await withAuth()
     if (authError) return authError
 
-    // Obtener el parámetro section_location
+    // Obtener el parámetro section_location o section
     const searchParams = req.nextUrl.searchParams
-    const sectionLocation = searchParams.get('section_location')
+    const sectionLocation = searchParams.get('section_location') || searchParams.get('section')
 
     // Validar que sea un tipo válido si se proporciona
     if (sectionLocation && !Object.values(FormSectionType).includes(sectionLocation as FormSectionType)) {
