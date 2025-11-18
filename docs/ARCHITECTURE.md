@@ -1,5 +1,56 @@
 # Arquitectura Técnica - Dashboard ONG
 
+## Principio: API-First Architecture
+
+Este proyecto implementa una **arquitectura API-First** donde toda la lógica de datos se centraliza en rutas API REST del servidor, y los componentes del cliente consumen estas APIs mediante hooks personalizados.
+
+### Flujo de Datos
+
+```
+┌─────────────┐      ┌──────────┐      ┌─────────────┐      ┌──────────┐
+│  Componente │ ───▶ │   Hook   │ ───▶ │  API Route  │ ───▶ │ Supabase │
+│    (UI)     │      │ (Estado) │      │  (Lógica)   │      │   (DB)   │
+└─────────────┘      └──────────┘      └─────────────┘      └──────────┘
+     React             useState           Validación         PostgreSQL
+     Render            useEffect          Autenticación      RLS
+     Events            fetch()            Transformación     Triggers
+```
+
+### Ventajas de este Enfoque
+
+1. **Seguridad**: Validación y autenticación centralizadas en el servidor
+2. **Performance**: APIs pueden implementar caché y optimizaciones
+3. **Mantenibilidad**: Lógica de datos en un solo lugar (API Routes)
+4. **Escalabilidad**: Fácil migrar backend sin cambiar frontend
+5. **Testabilidad**: Hooks y APIs se testean independientemente
+
+### Responsabilidades por Capa
+
+**Componentes (Cliente)**:
+- ✅ Renderizar UI y manejar eventos
+- ✅ Llamar hooks para obtener/modificar datos
+- ❌ NO acceden directamente a Supabase
+- ❌ NO contienen lógica de negocio
+
+**Hooks (Cliente)**:
+- ✅ Gestionar estado local (useState, useEffect)
+- ✅ Llamar APIs REST (fetch)
+- ✅ Manejar errores y notificaciones
+- ❌ NO acceden directamente a Supabase
+- ❌ NO contienen validación de negocio
+
+**API Routes (Servidor)**:
+- ✅ Validar datos de entrada
+- ✅ Autenticar y autorizar
+- ✅ Acceder a Supabase
+- ✅ Transformar datos para el cliente
+- ✅ Implementar lógica de negocio
+
+**Supabase (Base de Datos)**:
+- ✅ Almacenar y persistir datos
+- ✅ Aplicar RLS (Row Level Security)
+- ❌ Solo accesible desde servidor (API Routes)
+
 ## Arquitectura General
 
 ### Patrón de Arquitectura
