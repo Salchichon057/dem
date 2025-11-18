@@ -14,7 +14,8 @@ import {
   Loader2, 
   Save,
   Edit,
-  FileText
+  FileText,
+  Copy
 } from 'lucide-react'
 import QuestionTypeSelector from './QuestionTypeSelector'
 import QuestionEditor from './QuestionEditor'
@@ -229,6 +230,33 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
     setSections([...sections, newSection])
   }
 
+  // Duplicar sección
+  const handleDuplicateSection = (sectionTempId: string) => {
+    const sectionToDuplicate = sections.find(s => s.tempId === sectionTempId)
+    if (!sectionToDuplicate) return
+
+    const newSection: BuilderSection = {
+      tempId: `section-${Date.now()}`,
+      title: `${sectionToDuplicate.title} (Copia)`,
+      description: sectionToDuplicate.description,
+      order_index: sections.length,
+      questions: sectionToDuplicate.questions.map((q, idx) => ({
+        ...q,
+        tempId: `question-${Date.now()}-${idx}`,
+        order_index: idx
+      }))
+    }
+
+    setSections([...sections, newSection])
+    
+    setModal({
+      isOpen: true,
+      type: 'success',
+      title: 'Sección Duplicada',
+      message: `La sección "${sectionToDuplicate.title}" ha sido duplicada exitosamente.`
+    })
+  }
+
   // Eliminar sección
   const handleDeleteSection = (sectionTempId: string) => {
     setModal({
@@ -283,6 +311,43 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
 
     setShowQuestionTypeSelector(false)
     setCurrentSectionId(null)
+  }
+
+  // Duplicar pregunta
+  const handleDuplicateQuestion = (sectionTempId: string, questionTempId: string) => {
+    setSections(sections.map(s => {
+      if (s.tempId === sectionTempId) {
+        const questionIndex = s.questions.findIndex(q => q.tempId === questionTempId)
+        if (questionIndex === -1) return s
+
+        const questionToDuplicate = s.questions[questionIndex]
+        const newQuestion: BuilderQuestion = {
+          ...questionToDuplicate,
+          tempId: `question-${Date.now()}`,
+          title: `${questionToDuplicate.title} (Copia)`,
+          order_index: 0 // Se recalculará después
+        }
+
+        const updatedQuestions = [
+          ...s.questions.slice(0, questionIndex + 1),
+          newQuestion,
+          ...s.questions.slice(questionIndex + 1)
+        ]
+        
+        // Recalcular order_index
+        updatedQuestions.forEach((q, idx) => q.order_index = idx)
+        
+        return { ...s, questions: updatedQuestions }
+      }
+      return s
+    }))
+    
+    setModal({
+      isOpen: true,
+      type: 'success',
+      title: 'Pregunta Duplicada',
+      message: 'La pregunta ha sido duplicada exitosamente.'
+    })
   }
 
   // Eliminar pregunta
@@ -565,13 +630,22 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                   />
                 </div>
                 
-                <button
-                  onClick={() => handleDeleteSection(section.tempId)}
-                  className="ml-4 text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                  title="Eliminar sección"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2 ml-4">
+                  <button
+                    onClick={() => handleDuplicateSection(section.tempId)}
+                    className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                    title="Duplicar sección"
+                  >
+                    <Copy className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSection(section.tempId)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                    title="Eliminar sección"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               {/* Preguntas de la sección */}
@@ -614,6 +688,15 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                               <ArrowDown className="w-4 h-4" />
                             </button>
                           )}
+                          
+                          {/* Duplicar */}
+                          <button
+                            onClick={() => handleDuplicateQuestion(section.tempId, question.tempId)}
+                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1.5 rounded transition-colors"
+                            title="Duplicar pregunta"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
                           
                           {/* Eliminar */}
                           <button
