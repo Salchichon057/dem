@@ -1,40 +1,20 @@
 "use client"
 
-import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { FormsList, FormRenderer, FormBuilder } from "@/components/form"
-import { FormSectionType, FormTemplateWithQuestions } from "@/lib/types"
-
-type ViewMode = 'list' | 'view' | 'create' | 'edit';
+import { FormSectionType } from "@/lib/types"
+import { useFormView } from "@/hooks/use-form-view"
 
 export function FormulariosSection() {
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [viewingForm, setViewingForm] = useState<FormTemplateWithQuestions | null>(null);
-  const [editingFormId, setEditingFormId] = useState<string | null>(null);
-
-  // Manejar visualización de formulario
-  const handleViewForm = (form: FormTemplateWithQuestions) => {
-    setViewingForm(form);
-    setViewMode('view');
-  };
-
-  // Manejar creación de formulario
-  const handleCreateForm = () => {
-    setViewMode('create');
-  };
-
-  // Manejar edición de formulario
-  const handleEditForm = (formId: string) => {
-    setEditingFormId(formId);
-    setViewMode('edit');
-  };
-
-  // Volver a la lista
-  const handleBackToList = () => {
-    setViewMode('list');
-    setViewingForm(null);
-    setEditingFormId(null);
-  };
+  const {
+    viewMode,
+    viewingForm,
+    editingFormId,
+    handleViewForm,
+    handleCreateForm,
+    handleEditForm,
+    handleBackToList
+  } = useFormView('list')
 
   // Vista de formulario (para responderlo)
   if (viewMode === 'view' && viewingForm) {

@@ -9,13 +9,13 @@ import type { UpdateBeneficiaryInput } from '@/lib/types'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { supabase, error } = await withAuth()
     if (error) return error
 
-    const { id } = params
+    const { id } = await params
 
     const { data: beneficiary, error: dbError } = await supabase
       .from('beneficiaries')
@@ -51,13 +51,13 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { supabase, error } = await withAuth()
     if (error) return error
 
-    const { id } = params
+    const { id } = await params
     const body = await request.json() as Partial<UpdateBeneficiaryInput>
 
     // Validaciones
@@ -137,13 +137,13 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { supabase, error } = await withAuth()
     if (error) return error
 
-    const { id } = params
+    const { id } = await params
 
     // Verificar que existe
     const { data: existing } = await supabase

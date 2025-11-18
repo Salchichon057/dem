@@ -10,19 +10,17 @@ import {
   FileText, 
   UserPlus, 
   Database,
-  Settings,
-  BarChart3
+  Settings
 } from "lucide-react"
-import { AdminComunidadesSection } from "@/components/admin-comunidades-section"
-import { AdminOrganizacionesSection } from "@/components/admin-organizaciones-section"
-import { AdminBeneficiariosSection } from "@/components/admin-beneficiarios-section"
-import { AdminVoluntariosSection } from "@/components/admin-voluntarios-section"
-import { AdminFormulariosSection } from "@/components/admin-formularios-section"
-import { AdminEstadisticasSection } from "@/components/admin-estadisticas-section"
-import AdminUsuariosSection from "@/components/admin-usuarios-section"
+// Componentes movidos a carpeta admin/ (algunos ya fueron eliminados)
+// AdminComunidadesSection, AdminOrganizacionesSection, AdminEstadisticasSection, AdminUsuariosSection
+// fueron eliminados porque usaban Prisma o tenían datos dummy
+import { AdminBeneficiariosSection } from "@/components/admin/beneficiarios-section"
+import { AdminVoluntariosSection } from "@/components/admin/voluntarios-section"
+import { AdminFormulariosSection } from "@/components/admin/formularios-section"
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState("comunidades")
+  const [activeTab, setActiveTab] = useState("beneficiarios")
 
   const estadisticasGenerales = {
     comunidades: 24,
@@ -109,15 +107,7 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
-                <TabsTrigger value="comunidades" className="flex items-center space-x-1">
-                  <MapPin className="h-4 w-4" />
-                  <span className="hidden sm:inline">Comunidades</span>
-                </TabsTrigger>
-                <TabsTrigger value="organizaciones" className="flex items-center space-x-1">
-                  <Building2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Organizaciones</span>
-                </TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="beneficiarios" className="flex items-center space-x-1">
                   <Users className="h-4 w-4" />
                   <span className="hidden sm:inline">Beneficiarios</span>
@@ -130,23 +120,9 @@ export default function AdminPage() {
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Formularios</span>
                 </TabsTrigger>
-                <TabsTrigger value="estadisticas" className="flex items-center space-x-1">
-                  <BarChart3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Estadísticas</span>
-                </TabsTrigger>
-                <TabsTrigger value="usuarios" className="flex items-center space-x-1">
-                  <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">Usuarios</span>
-                </TabsTrigger>
               </TabsList>
 
               <div className="mt-6">
-                <TabsContent value="comunidades">
-                  <AdminComunidadesSection />
-                </TabsContent>
-                <TabsContent value="organizaciones">
-                  <AdminOrganizacionesSection />
-                </TabsContent>
                 <TabsContent value="beneficiarios">
                   <AdminBeneficiariosSection />
                 </TabsContent>
@@ -155,12 +131,6 @@ export default function AdminPage() {
                 </TabsContent>
                 <TabsContent value="formularios">
                   <AdminFormulariosSection />
-                </TabsContent>
-                <TabsContent value="estadisticas">
-                  <AdminEstadisticasSection />
-                </TabsContent>
-                <TabsContent value="usuarios">
-                  <AdminUsuariosSection />
                 </TabsContent>
               </div>
             </Tabs>

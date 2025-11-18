@@ -8,13 +8,13 @@ import { withAuth } from '@/lib/auth-server'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { supabase, error: authError } = await withAuth()
     if (authError) return authError
 
-    const { id } = params
+    const { id } = await params
 
     const { data: volunteer, error: queryError } = await supabase
       .from('volunteers')
@@ -49,14 +49,14 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { supabase, error: authError } = await withAuth()
     if (authError) return authError
 
     const body = await request.json()
-    const { id } = params
+    const { id } = await params
 
     const updateData: any = {
       updated_at: new Date().toISOString()
@@ -112,13 +112,13 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { supabase, error: authError } = await withAuth()
     if (authError) return authError
 
-    const { id } = params
+    const { id } = await params
 
     // Soft delete
     const { data: volunteer, error: deleteError } = await supabase

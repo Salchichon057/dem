@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,40 +8,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User, Mail, Calendar, Shield, Camera } from "lucide-react"
 import { toast } from "sonner"
+import { useUser } from "@/hooks/use-user"
 
 export function PerfilSection() {
-  const [user, setUser] = useState<{ name?: string; email?: string } | null>(null)
+  const { profile, loading, updateProfile, getUserInitials } = useUser()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: profile?.name || "",
+    email: profile?.email || "",
   })
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser({
-          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuario',
-          email: data.user.email || ''
-        })
-        setFormData({
-          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuario',
-          email: data.user.email || ''
-        })
-      }
-    })
-  }, [])
-
-  const handleSave = () => {
-    // Aquí implementarías la lógica para actualizar el perfil
-    toast.success("Perfil actualizado correctamente")
-    setIsEditing(false)
+  const handleSave = async () => {
+    const result = await updateProfile(formData)
+    if (result.success) {
+      toast.success("Perfil actualizado correctamente")
+      setIsEditing(false)
+    } else {
+      toast.error(result.error || "Error al actualizar perfil")
+    }
   }
 
-  const getUserInitials = (name: string | undefined | null) => {
-    if (!name) return 'U'
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  if (loading) {
+    return <div>Cargando perfil...</div>
   }
 
   return (
@@ -64,9 +51,9 @@ export function PerfilSection() {
           <CardHeader className="text-center">
             <div className="relative mx-auto">
               <Avatar className="h-24 w-24 ring-4 ring-purple-200">
-                <AvatarImage src={user?.avatar || '/placeholder.svg?height=96&width=96'} />
+                <AvatarImage src={profile?.avatar || '/placeholder.svg?height=96&width=96'} />
                 <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl font-bold">
-                  {getUserInitials(user?.name)}
+                  {getUserInitials(profile?.name)}
                 </AvatarFallback>
               </Avatar>
               <Button 
@@ -76,9 +63,9 @@ export function PerfilSection() {
                 <Camera className="h-4 w-4" />
               </Button>
             </div>
-            <CardTitle className="text-lg">{user?.name || 'Usuario'}</CardTitle>
+            <CardTitle className="text-lg">{profile?.name || 'Usuario'}</CardTitle>
             <CardDescription className="text-sm text-gray-500">
-              {user?.role || 'Usuario'}
+              {profile?.role || 'Usuario'}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -121,7 +108,7 @@ export function PerfilSection() {
                 ) : (
                   <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                     <User className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-900">{user?.name || 'No especificado'}</span>
+                    <span className="text-gray-900">{profile?.name || 'No especificado'}</span>
                   </div>
                 )}
               </div>
@@ -141,7 +128,7 @@ export function PerfilSection() {
                 ) : (
                   <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                     <Mail className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-900">{user?.email || 'No especificado'}</span>
+                    <span className="text-gray-900">{profile?.email || 'No especificado'}</span>
                   </div>
                 )}
               </div>
@@ -153,7 +140,7 @@ export function PerfilSection() {
                 <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                   <Calendar className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-900">
-                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES') : 'No disponible'}
+                    {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('es-ES') : 'No disponible'}
                   </span>
                 </div>
               </div>
@@ -164,7 +151,7 @@ export function PerfilSection() {
                 </Label>
                 <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                   <Shield className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-900">{user?.role || 'Usuario'}</span>
+                  <span className="text-gray-900">{profile?.role || 'Usuario'}</span>
                 </div>
               </div>
             </div>

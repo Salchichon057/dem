@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
-import { DashboardContent } from "@/components/dashboard-content"
-import { AuthWrapper } from "@/components/auth-wrapper"
+import { AppSidebar } from "@/components/shared/app-sidebar"
+import { DashboardContent } from "@/components/shared/dashboard-content"
+import { AuthWrapper } from "@/components/shared/auth-wrapper"
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("organizaciones")
