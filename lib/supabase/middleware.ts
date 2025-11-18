@@ -66,6 +66,20 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
+  // Manejar la ruta raíz '/'
+  if (request.nextUrl.pathname === '/') {
+    const url = request.nextUrl.clone();
+    if (data) {
+      // Si está autenticado, redirigir a dashboard
+      url.pathname = '/dashboard';
+      return NextResponse.redirect(url);
+    } else {
+      // Si no está autenticado, redirigir a login
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Si no está autenticado y no es ruta pública, redirigir a login
   if (!data && !isPublicRoute) {
     const url = request.nextUrl.clone();
