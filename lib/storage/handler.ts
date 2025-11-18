@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase/client'
 
 /**
  * Storage Handler Singleton
- * Maneja el upload/download de archivos (principalmente fotos)
- * Usa paths relativos para facilitar migración a otro storage
+ * Maneja el upload/download de archivos de forma agnóstica al proveedor
+ * Usa paths relativos para facilitar migración a S3, Azure Blob u otro storage
  */
 
 // Nombres de buckets según sección
@@ -21,7 +21,26 @@ export const STORAGE_BUCKETS = {
 
 type BucketName = typeof STORAGE_BUCKETS[keyof typeof STORAGE_BUCKETS]
 
-const PUBLIC_URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+// Base URL del storage provider (configurable vía .env)
+const STORAGE_BASE_URL = process.env.NEXT_PUBLIC_STORAGE_BASE_URL || ''
+
+/**
+ * Genera un nombre de archivo único y trazable
+ * Formato: {userId}_{resourceType}_{resourceId}_{timestamp}_{hash}.{ext}
+ * Ejemplo: abc123_form_xyz789_1700000000000_a1b2c3.jpg
+ */
+export function generateUniqueFileName(
+  userId: string,
+  resourceType: 'form' | 'beneficiary' | 'volunteer' | 'submission' | 'profile',
+  resourceId: string,
+  originalFileName: string
+): string {
+  const timestamp = Date.now()
+  const randomHash = Math.random().toString(36).substring(2, 8)
+  const extension = originalFileName.split('.').pop()?.toLowerCase() || 'jpg'
+  
+  return `${userId}_${resourceType}_${resourceId}_${timestamp}_${randomHash}.${extension}`
+}
 
 class StorageHandler {
   private static instance: StorageHandler
@@ -37,62 +56,68 @@ class StorageHandler {
   }
 
   /**
-   * Sube una foto y retorna el path relativo
+   * Sube un archivo y retorna el path relativo puro (sin storage URL)
    * @param file - Archivo a subir
    * @param bucket - Nombre del bucket (usa STORAGE_BUCKETS)
-   * @param folder - Carpeta dentro del bucket (ej: "beneficiaries", "submissions")
-   * @param id - ID del recurso (opcional, para nombrar archivo como {id}-{type}.ext)
-   * @param type - Tipo de archivo (ej: "beneficiary", "photo", "document")
-   * @returns Path relativo ej: "/photos/beneficiaries/uuid-beneficiary.jpg"
+   * @param userId - ID del usuario que sube el archivo
+   * @param resourceType - Tipo de recurso ('form', 'beneficiary', 'volunteer', etc.)
+   * @param resourceId - ID del recurso (formulario, beneficiario, etc.)
+   * @returns Path relativo puro ej: "form-comunidades/abc123_form_xyz789_1700000000000_a1b2c3.jpg"
    */
-  async uploadPhoto(
-    file: File, 
-    bucket: BucketName = STORAGE_BUCKETS.BENEFICIARIES,
-    folder: string = 'beneficiaries', 
-    id?: string,
-    type: string = 'photo'
+  async uploadFile(
+    file: File,
+    bucket: BucketName,
+    userId: string,
+    resourceType: 'form' | 'beneficiary' | 'volunteer' | 'submission' | 'profile',
+    resourceId: string
   ): Promise<string> {
     try {
-      // Validar tamaño (máx 5MB)
-      const maxSize = 5 * 1024 * 1024 // 5MB
+      // Validar tamaño (máx 10MB para archivos, 5MB para imágenes)
+      const isImage = file.type.startsWith('image/')
+      const maxSize = isImage ? 5 * 1024 * 1024 : 10 * 1024 * 1024
       if (file.size > maxSize) {
-        throw new Error('El archivo no puede exceder 5MB')
+        throw new Error(`El archivo no puede exceder ${isImage ? '5MB' : '10MB'}`)
       }
 
       // Validar tipo de archivo
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      const allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ]
       if (!allowedTypes.includes(file.type)) {
-        throw new Error('Solo se permiten imágenes (JPEG, PNG, WebP)')
+        throw new Error('Tipo de archivo no permitido')
       }
 
-      // Generar nombre único con formato {id}-{type}.{extension}
-      const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-      const uniqueId = id || `${Date.now()}-${Math.random().toString(36).substring(7)}`
-      const fileName = `${uniqueId}-${type}.${extension}`
-      const filePath = `${folder}/${fileName}`
+      // Generar nombre único y trazable
+      const fileName = generateUniqueFileName(userId, resourceType, resourceId, file.name)
 
       // Upload a Supabase Storage
       const { data, error } = await this.supabase.storage
         .from(bucket)
-        .upload(filePath, file, {
+        .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
         })
 
       if (error) throw error
 
-      // Retornar path relativo con bucket incluido
-      return `/storage/${bucket}/${filePath}`
+      // Retornar SOLO el path relativo (sin storage URL)
+      // Formato: "bucket-name/fileName"
+      return `${bucket}/${fileName}`
     } catch (error: any) {
-      console.error('Error uploading photo:', error)
-      throw new Error(`Error al subir foto: ${error.message}`)
+      console.error('Error uploading file:', error)
+      throw new Error(`Error al subir archivo: ${error.message}`)
     }
   }
 
   /**
-   * Obtiene la URL pública de una foto desde el path relativo
-   * @param relativePath - Path relativo ej: "/storage/bucket-name/folder/file.jpg"
-   * @returns URL pública completa
+   * Obtiene la URL pública completa de un archivo desde su path relativo
+   * @param relativePath - Path relativo ej: "bucket-name/userId_form_id_timestamp_hash.jpg"
+   * @returns URL pública completa del storage provider
    */
   getPublicUrl(relativePath: string): string {
     if (!relativePath) return ''
@@ -100,90 +125,89 @@ class StorageHandler {
     // Si ya es una URL completa, retornarla
     if (relativePath.startsWith('http')) return relativePath
     
-    // Extraer bucket y path del formato: /storage/{bucket}/{path}
-    const match = relativePath.match(/^\/storage\/([^/]+)\/(.+)$/)
-    if (!match) {
-      // Formato antiguo, usar bucket por defecto
-      const cleanPath = relativePath.replace(/^\/photos\//, '')
+    // Si no hay base URL configurada, usar método de Supabase
+    if (!STORAGE_BASE_URL) {
+      // Extraer bucket y path
+      const parts = relativePath.split('/')
+      if (parts.length < 2) return ''
+      
+      const bucket = parts[0]
+      const filePath = parts.slice(1).join('/')
+      
       const { data } = this.supabase.storage
-        .from(STORAGE_BUCKETS.BENEFICIARIES)
-        .getPublicUrl(cleanPath)
+        .from(bucket)
+        .getPublicUrl(filePath)
+      
       return data.publicUrl
     }
 
-    const [, bucket, path] = match
-    const { data } = this.supabase.storage
-      .from(bucket)
-      .getPublicUrl(path)
-    
-    return data.publicUrl
+    // Usar base URL configurada (agnóstico del proveedor)
+    // Formato: STORAGE_BASE_URL/relativePath
+    const cleanPath = relativePath.replace(/^\/+/, '') // Remover slashes iniciales
+    return `${STORAGE_BASE_URL}/${cleanPath}`
   }
 
   /**
-   * Elimina una foto del storage
-   * @param relativePath - Path relativo ej: "/storage/bucket-name/folder/file.jpg"
+   * Elimina un archivo del storage
+   * @param relativePath - Path relativo ej: "bucket-name/userId_form_id_timestamp_hash.jpg"
    */
-  async deletePhoto(relativePath: string): Promise<void> {
+  async deleteFile(relativePath: string): Promise<void> {
     try {
       if (!relativePath) return
       
       // Extraer bucket y path
-      const match = relativePath.match(/^\/storage\/([^/]+)\/(.+)$/)
-      if (!match) {
-        // Formato antiguo
-        const cleanPath = relativePath.replace(/^\/photos\//, '')
-        const { error } = await this.supabase.storage
-          .from(STORAGE_BUCKETS.BENEFICIARIES)
-          .remove([cleanPath])
-        if (error) throw error
-        return
+      const parts = relativePath.split('/')
+      if (parts.length < 2) {
+        throw new Error('Path relativo inválido')
       }
+      
+      const bucket = parts[0]
+      const filePath = parts.slice(1).join('/')
 
-      const [, bucket, path] = match
       const { error } = await this.supabase.storage
         .from(bucket)
-        .remove([path])
+        .remove([filePath])
 
       if (error) throw error
     } catch (error: any) {
-      console.error('Error deleting photo:', error)
-      throw new Error(`Error al eliminar foto: ${error.message}`)
+      console.error('Error deleting file:', error)
+      throw new Error(`Error al eliminar archivo: ${error.message}`)
     }
   }
 
   /**
-   * Reemplaza una foto (elimina la anterior y sube una nueva)
-   * @param oldPath - Path relativo de la foto anterior
-   * @param newFile - Nueva foto a subir
+   * Reemplaza un archivo (elimina el anterior y sube uno nuevo)
+   * @param oldPath - Path relativo del archivo anterior
+   * @param newFile - Nuevo archivo a subir
    * @param bucket - Nombre del bucket
-   * @param folder - Carpeta destino
-   * @param id - ID del recurso (opcional)
-   * @param type - Tipo de archivo
+   * @param userId - ID del usuario
+   * @param resourceType - Tipo de recurso
+   * @param resourceId - ID del recurso
    * @returns Nuevo path relativo
    */
-  async replacePhoto(
-    oldPath: string, 
-    newFile: File, 
-    bucket: BucketName = STORAGE_BUCKETS.BENEFICIARIES,
-    folder: string = 'beneficiaries', 
-    id?: string,
-    type: string = 'photo'
+  async replaceFile(
+    oldPath: string,
+    newFile: File,
+    bucket: BucketName,
+    userId: string,
+    resourceType: 'form' | 'beneficiary' | 'volunteer' | 'submission' | 'profile',
+    resourceId: string
   ): Promise<string> {
     try {
-      // Subir nueva foto
-      const newPath = await this.uploadPhoto(newFile, bucket, folder, id, type)
+      // Subir nuevo archivo
+      const newPath = await this.uploadFile(newFile, bucket, userId, resourceType, resourceId)
       
-      // Eliminar foto anterior (si existe)
+      // Eliminar archivo anterior (si existe)
       if (oldPath) {
-        await this.deletePhoto(oldPath).catch(err => {
-          console.warn('No se pudo eliminar foto anterior:', err)
+        await this.deleteFile(oldPath).catch(err => {
+          console.warn('No se pudo eliminar archivo anterior:', err)
         })
       }
       
       return newPath
     } catch (error: any) {
-      console.error('Error replacing photo:', error)
-      throw new Error(`Error al reemplazar foto: ${error.message}`)
+      console.error('Error replacing file:', error)
+      throw new Error(`Error al reemplazar archivo: ${error.message}`)
     }
   }
 
@@ -223,39 +247,63 @@ class StorageHandler {
 // Export singleton instance
 export const storageHandler = StorageHandler.getInstance()
 
+// ============================================
 // Helper functions para usar directamente
+// ============================================
 
 /**
  * Sube una foto para beneficiarios
+ * @param file - Archivo de imagen
+ * @param userId - ID del usuario que sube la foto
+ * @param beneficiaryId - ID del beneficiario
+ * @returns Path relativo del archivo
  */
-export const uploadBeneficiaryPhoto = (file: File, id?: string) => 
-  storageHandler.uploadPhoto(file, STORAGE_BUCKETS.BENEFICIARIES, 'photos', id, 'beneficiary')
+export const uploadBeneficiaryPhoto = (file: File, userId: string, beneficiaryId: string) => 
+  storageHandler.uploadFile(file, STORAGE_BUCKETS.BENEFICIARIES, userId, 'beneficiary', beneficiaryId)
 
 /**
- * Sube una foto en un formulario (genérico)
+ * Sube un archivo en un formulario (genérico)
+ * @param file - Archivo a subir
+ * @param formSection - Sección del formulario (determina el bucket)
+ * @param userId - ID del usuario que sube el archivo
+ * @param submissionId - ID del submission del formulario
+ * @returns Path relativo del archivo
  */
-export const uploadFormPhoto = (file: File, formSection: keyof typeof STORAGE_BUCKETS, id?: string) => {
+export const uploadFormFile = (
+  file: File,
+  formSection: 'FORM_ABRAZANDO_LEYENDAS' | 'FORM_COMUNIDADES' | 'FORM_AUDITORIAS' | 'FORM_ORGANIZACIONES' | 'FORM_PERFIL_COMUNITARIO' | 'FORM_VOLUNTARIADO',
+  userId: string,
+  submissionId: string
+) => {
   const bucket = STORAGE_BUCKETS[formSection]
-  return storageHandler.uploadPhoto(file, bucket, 'submissions', id, 'photo')
+  return storageHandler.uploadFile(file, bucket, userId, 'submission', submissionId)
 }
 
 /**
- * Obtiene URL pública de una foto
+ * Obtiene URL pública completa de un archivo
+ * @param relativePath - Path relativo (ej: "bucket-name/userId_form_id_timestamp_hash.jpg")
+ * @returns URL pública completa
  */
-export const getPhotoUrl = (relativePath: string) => 
+export const getFileUrl = (relativePath: string) => 
   storageHandler.getPublicUrl(relativePath)
 
 /**
- * Elimina una foto
+ * Elimina un archivo del storage
+ * @param relativePath - Path relativo del archivo
  */
-export const deletePhoto = (relativePath: string) => 
-  storageHandler.deletePhoto(relativePath)
+export const deleteFile = (relativePath: string) => 
+  storageHandler.deleteFile(relativePath)
 
 /**
  * Reemplaza una foto de beneficiario
+ * @param oldPath - Path relativo de la foto anterior
+ * @param newFile - Nueva foto
+ * @param userId - ID del usuario
+ * @param beneficiaryId - ID del beneficiario
+ * @returns Nuevo path relativo
  */
-export const replaceBeneficiaryPhoto = (oldPath: string, newFile: File, id?: string) => 
-  storageHandler.replacePhoto(oldPath, newFile, STORAGE_BUCKETS.BENEFICIARIES, 'photos', id, 'beneficiary')
+export const replaceBeneficiaryPhoto = (oldPath: string, newFile: File, userId: string, beneficiaryId: string) => 
+  storageHandler.replaceFile(oldPath, newFile, STORAGE_BUCKETS.BENEFICIARIES, userId, 'beneficiary', beneficiaryId)
 
 /**
  * Crea todos los buckets necesarios

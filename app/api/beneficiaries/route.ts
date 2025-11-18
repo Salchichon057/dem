@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/client'
+import { withAuth } from '@/lib/auth-server'
 import type { Beneficiary, BeneficiaryFilters, CreateBeneficiaryInput } from '@/lib/types'
 
 /**
@@ -10,6 +10,9 @@ import type { Beneficiary, BeneficiaryFilters, CreateBeneficiaryInput } from '@/
  */
 export async function GET(request: NextRequest) {
   try {
+    const { supabase, error: authError } = await withAuth()
+    if (authError) return authError
+
     const { searchParams } = new URL(request.url)
     const filters: BeneficiaryFilters = {
       department: searchParams.get('department') || undefined,
@@ -24,8 +27,6 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const from = (page - 1) * limit
     const to = from + limit - 1
-
-    const supabase = createClient()
     
     // Primero obtenemos el count total
     let countQuery = supabase
@@ -104,6 +105,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const { supabase, user, error: authError } = await withAuth()
+    if (authError) return authError
+
     const body = await request.json() as CreateBeneficiaryInput
     
     // Validaciones básicas
@@ -129,11 +133,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
-
-    // TODO: Obtener user_id del usuario autenticado
-    const created_by = '4157e293-5629-4369-bcdb-5a0197596e3c' // Hardcoded por ahora
-
     const { data: beneficiary, error } = await supabase
       .from('beneficiaries')
       .insert({
@@ -144,13 +143,13 @@ export async function POST(request: NextRequest) {
         program: body.program,
         photo_url: body.photo_url || null,
         admission_date: body.admission_date,
-        is_active: body.is_active ?? true, // Default true
+        is_active: body.is_active ?? true,
         department: body.department,
         municipality: body.municipality,
         village: body.village || null,
         address: body.address || null,
         google_maps_url: body.google_maps_url || null,
-        created_by
+        created_by: user.id  // ID del usuario autenticado
       })
       .select()
       .single()

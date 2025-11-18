@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-server'
+import { withAuth } from '@/lib/auth-server'
 import { createClient } from '@supabase/supabase-js'
 import { FormSectionType } from '@/lib/types'
 
@@ -26,13 +26,8 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export async function GET(req: NextRequest) {
   try {
     // Verificar autenticación
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
-    }
+    const { error: authError } = await withAuth()
+    if (authError) return authError
 
     // Obtener el parámetro section_location
     const searchParams = req.nextUrl.searchParams
@@ -88,8 +83,7 @@ export async function GET(req: NextRequest) {
         message: error.message,
         details: error.details,
         hint: error.hint,
-        sectionLocation,
-        userId: user.id
+        sectionLocation
       })
       
       // Si es error de permisos, dar más información
@@ -155,13 +149,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Verificar autenticación
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
-    }
+    const { user, error: authError } = await withAuth()
+    if (authError) return authError
 
     const body = await req.json()
     const { name, description, section_location, is_public = true, sections = [] } = body
@@ -174,9 +163,6 @@ export async function POST(req: NextRequest) {
     console.log('- is_public:', is_public)
     console.log('- sections:', JSON.stringify(sections, null, 2))
     console.log('- user.id:', user.id)
-
-    // TEMPORAL: Usar UUID fijo porque el auth está generando CUIDs
-    const userId = '4157e293-5629-4369-bcdb-5a0197596e3c'
 
     // Validar campos requeridos
     if (!name || !section_location) {
@@ -214,7 +200,7 @@ export async function POST(req: NextRequest) {
         description: description || null,
         section_location,
         is_public,
-        created_by: userId, // Usar userId hardcodeado
+        created_by: user.id,
         version: 1,
         is_active: true
       })
@@ -260,23 +246,36 @@ export async function POST(req: NextRequest) {
 
         // Crear preguntas de la sección
         if (section.questions && section.questions.length > 0) {
-          const questionsToInsert = section.questions.map((q: any) => ({
-            form_template_id: newForm.id,
-            section_id: newSection.id,
-            question_type_id: q.question_type_id,
-            title: q.title,
-            help_text: q.help_text || null,
-            is_required: q.is_required || false,
-            order_index: q.order_index,
-            config: q.config || {}
-          }))
+          const questionsToInsert = section.questions.map((q: any) => {
+            console.log(`📝 Procesando pregunta: ${q.title}`)
+            console.log(`   - question_type_id: ${q.question_type_id}`)
+            console.log(`   - config:`, JSON.stringify(q.config, null, 2))
+            
+            return {
+              form_template_id: newForm.id,
+              section_id: newSection.id,
+              question_type_id: q.question_type_id,
+              title: q.title,
+              help_text: q.help_text || null,
+              is_required: q.is_required || false,
+              order_index: q.order_index,
+              config: q.config || {}
+            }
+          })
+
+          console.log(`🔍 Insertando ${questionsToInsert.length} preguntas:`)
+          console.log(JSON.stringify(questionsToInsert, null, 2))
 
           const { error: questionsError } = await supabase
             .from('questions')
             .insert(questionsToInsert)
 
           if (questionsError) {
-            console.error('Error al crear preguntas:', questionsError)
+            console.error('❌ Error al crear preguntas:', questionsError)
+            console.error('   - Code:', questionsError.code)
+            console.error('   - Message:', questionsError.message)
+            console.error('   - Details:', questionsError.details)
+            console.error('   - Hint:', questionsError.hint)
             // Intentar eliminar el formulario si falló la creación de preguntas
             await supabase.from('form_templates').delete().eq('id', newForm.id)
             return NextResponse.json(
@@ -308,13 +307,8 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     // Verificar autenticación
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
-    }
+    const { error: authError } = await withAuth()
+    if (authError) return authError
 
     const body = await req.json()
     const { id, name, description, section_location, is_public, is_active } = body
@@ -376,13 +370,8 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     // Verificar autenticación
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
-    }
+    const { error: authError } = await withAuth()
+    if (authError) return authError
 
     const searchParams = req.nextUrl.searchParams
     const id = searchParams.get('id')

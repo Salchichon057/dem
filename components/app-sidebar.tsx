@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut, MapPin, List, Users, Shield, Database, Activity, Heart, UserCheck, TrendingUp, FileSpreadsheet, Search } from 'lucide-react'
-import { useAuth } from '@/contexts/auth-context'
+import { Building2, BarChart3, FileIcon as FileTemplate, FileText, Settings, User, ChevronDown, LogOut, MapPin, List, Users, Shield, Database, Activity, Heart, UserCheck, TrendingUp } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 import {
   Sidebar,
@@ -157,24 +158,14 @@ const menuItems = [
     icon: UserCheck,
     children: [
       {
-        id: 'graficas-voluntariado',
-        title: 'Gráficas',
+        id: 'estadistica-voluntariado',
+        title: 'Estadística',
         icon: BarChart3,
       },
       {
-        id: 'formulario-voluntariado',
-        title: 'Formulario',
+        id: 'formularios-voluntariado',
+        title: 'Formularios',
         icon: FileText,
-      },
-      {
-        id: 'estadistica-voluntariado',
-        title: 'Estadística',
-        icon: FileSpreadsheet,
-      },
-      {
-        id: 'indicadores',
-        title: 'Indicadores',
-        icon: Search,
       },
     ]
   },
@@ -186,19 +177,35 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
-  const { user, logout } = useAuth()
+  const supabase = createClient()
+  const [user, setUser] = useState<SupabaseUser | null>(null)
   const [expandedItems, setExpandedItems] = useState<string[]>([])
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems(prev => 
       prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
+      ? prev.filter(id => id !== itemId)
+      : [...prev, itemId]
     )
   }
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/login'
   }
 
   const handleProfile = () => {
@@ -230,7 +237,7 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
         </div>
         <div className="mt-2 text-xs text-gray-600">
           <span className="font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Bienvenido, {user?.email || 'Usuario'}
+            Bienvenido, {user?.email?.split('@')[0] || 'Usuario'}
           </span>
         </div>
       </SidebarHeader>
@@ -359,13 +366,13 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="w-full text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 rounded-lg transition-all duration-300">
                   <Avatar className="h-6 w-6 ring-2 ring-purple-200">
-                    <AvatarImage src={user?.avatar || '/placeholder.svg?height=24&width=24'} />
+                    <AvatarImage src={user?.user_metadata?.avatar_url || '/placeholder.svg?height=24&width=24'} />
                     <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold">
-                      {getUserInitials(user?.name)}
+                      {getUserInitials(user?.user_metadata?.name || user?.email || 'U')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-medium text-gray-900">{user?.name || 'Usuario'}</span>
+                    <span className="text-sm font-medium text-gray-900">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario'}</span>
                     <span className="text-xs text-gray-500">{user?.email}</span>
                   </div>
                   <ChevronDown className="ml-auto h-4 w-4 text-gray-500" />

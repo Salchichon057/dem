@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { verifyPassword, generateToken, excludePassword } from '@/lib/auth'
 import { z } from 'zod'
 

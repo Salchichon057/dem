@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '@/contexts/auth-context'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,8 +13,9 @@ import { toast } from 'sonner'
 import Image from 'next/image'
 
 export default function AuthPage() {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const { login, register } = useAuth()
+  const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -24,10 +26,16 @@ export default function AuthPage() {
     const password = formData.get('password') as string
 
     try {
-      await login(email, password)
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) throw error
+      
       toast.success('¡Bienvenido!')
-      // Redirección directa al dashboard
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
+      router.refresh()
     } catch (error) {
       console.error('Error en login:', error)
       toast.error('Error al iniciar sesión. Verifica tus credenciales.')
@@ -46,7 +54,18 @@ export default function AuthPage() {
     const password = formData.get('password') as string
 
     try {
-      await register(name, email, password)
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          },
+        },
+      })
+      
+      if (error) throw error
+      
       toast.success('¡Cuenta creada exitosamente!')
       // Redirección directa al dashboard
       window.location.href = '/dashboard'

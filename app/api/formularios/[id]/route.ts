@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-server'
+import { withAuth } from '@/lib/auth-server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -27,13 +27,8 @@ export async function GET(
 ) {
   try {
     // Verificar autenticación
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
-    }
+    const { user, error: authError } = await withAuth()
+    if (authError) return authError
 
     const { id } = await params
 
@@ -186,13 +181,8 @@ export async function PUT(
 ) {
   try {
     // Verificar autenticación
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
-    }
+    const { user, error: authError } = await withAuth()
+    if (authError) return authError
 
     const { id } = await params
     const body = await req.json()
@@ -211,12 +201,8 @@ export async function PUT(
       )
     }
 
-    const userId = '4157e293-5629-4369-bcdb-5a0197596e3c' // ID del admin hardcoded
-
-    // Permitir si:
-    // 1. Es el creador del formulario
-    // 2. O si el formulario fue creado por el admin hardcoded (cualquier usuario autenticado puede editar)
-    if (formCheck.created_by !== user.id && formCheck.created_by !== userId) {
+    // Solo el creador puede modificar el formulario
+    if (formCheck.created_by !== user.id) {
       return NextResponse.json(
         { error: 'No tienes permiso para modificar este formulario' },
         { status: 403 }

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useAuth } from "@/contexts/auth-context"
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,12 +11,28 @@ import { User, Mail, Calendar, Shield, Camera } from "lucide-react"
 import { toast } from "sonner"
 
 export function PerfilSection() {
-  const { user } = useAuth()
+  const [user, setUser] = useState<{ name?: string; email?: string } | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
+    name: "",
+    email: "",
   })
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setUser({
+          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuario',
+          email: data.user.email || ''
+        })
+        setFormData({
+          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuario',
+          email: data.user.email || ''
+        })
+      }
+    })
+  }, [])
 
   const handleSave = () => {
     // Aquí implementarías la lógica para actualizar el perfil

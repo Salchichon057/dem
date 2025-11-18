@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/client'
+import { withAuth } from '@/lib/auth-server'
 import type { BeneficiaryStats } from '@/lib/types'
 
 /**
@@ -10,15 +10,16 @@ import type { BeneficiaryStats } from '@/lib/types'
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const { supabase, user, error } = await withAuth()
+    if (error) return error
 
     // Obtener todos los beneficiarios no eliminados
-    const { data: beneficiaries, error } = await supabase
+    const { data: beneficiaries, error: fetchError } = await supabase
       .from('beneficiaries')
       .select('*')
       .is('deleted_at', null)
 
-    if (error) throw error
+    if (fetchError) throw fetchError
 
     if (!beneficiaries || beneficiaries.length === 0) {
       return NextResponse.json({

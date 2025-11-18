@@ -1,39 +1,51 @@
 "use client"
 
-import { useAuth } from "@/contexts/auth-context"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import OrganizacionesSectionNew from "@/components/organizaciones-section-new"
 import { EstadisticasSection } from "@/components/estadisticas-section"
 import { PlantillasSection } from "@/components/plantillas-section"
 import { FormulariosSection } from "@/components/formularios-section"
 import { PerfilSection } from "@/components/perfil-section"
 import { ConfiguracionSection } from "@/components/configuracion-section"
-import ListaComunidadesSection from "@/components/lista-comunidades-section"
 import { PerfilComunitarioSection } from "@/components/perfil-comunitario-section"
 import { EstadisticasComunidadesSection } from "@/components/estadisticas-comunidades-section"
 import { PlantillasComunidadesSection } from "@/components/plantillas-comunidades-section"
 import { FormulariosAuditoriaSection } from "@/components/formularios-auditoria-section"
-import { BasesDatosAuditoriaSection } from "@/components/bases-datos-auditoria-section"
 import AbrazandoLeyendasSection from "@/components/abrazando-leyendas-section"
-import PimcoComunidadesSection from "@/components/pimco-comunidades-section"
-import PimcoGraficasEstadisticasSection from "@/components/pimco-graficas-estadisticas-section"
-import { PimcoBdEstadisticasSection } from "@/components/pimco-bd-estadisticas-section"
-import { PIMCOEntrevistasSection } from "@/components/pimco-entrevistas-section"
-import { PimcoDiagnosticoComunitarioSection } from "@/components/pimco-diagnostico-comunitario-section"
 import { FormularioVoluntariadoSection } from "@/components/formulario-voluntariado-section"
+import VoluntariadoSection from "@/components/voluntariado-section"
 import Image from "next/image"
+import { Construction } from "lucide-react"
 
 interface DashboardContentProps {
   activeSection: string
 }
 
+// Componente para secciones en desarrollo
+const UnderConstruction = ({ title }: { title: string }) => (
+  <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-6">
+      <Construction className="w-12 h-12 text-purple-600" />
+    </div>
+    <h2 className="text-3xl font-bold text-gray-800 mb-3">{title}</h2>
+    <p className="text-gray-600 text-lg mb-2">Estamos trabajando en esta sección</p>
+    <p className="text-gray-500 text-sm">Pronto estará disponible</p>
+    <div className="mt-8 flex gap-2">
+      <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+      <div className="w-2 h-2 bg-pink-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+    </div>
+  </div>
+)
+
 export function DashboardContent({ activeSection }: DashboardContentProps) {
-  const { user } = useAuth()
+  // Obtener usuario de Supabase Auth en el futuro
+  const user = { name: 'Usuario', email: 'usuario@example.com' }
 
   const renderSection = () => {
     switch (activeSection) {
+      // Secciones principales
       case "organizaciones":
-        return <OrganizacionesSectionNew />
+        return <UnderConstruction title="Organizaciones" />
       case "estadisticas":
         return <EstadisticasSection />
       case "plantillas":
@@ -44,53 +56,55 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return <PerfilSection />
       case "configuracion":
         return <ConfiguracionSection />
+      
       // Secciones de Comunidades
       case "lista-comunidades":
-        return <ListaComunidadesSection />
+        return <UnderConstruction title="Lista de Comunidades" />
       case "perfil-comunitario":
         return <PerfilComunitarioSection />
       case "estadisticas-comunidades":
         return <EstadisticasComunidadesSection />
       case "plantillas-comunidades":
         return <PlantillasComunidadesSection />
+      
       // Secciones de Auditorías
       case "formularios-auditoria":
         return <FormulariosAuditoriaSection />
       case "bases-datos-auditoria":
-        return <BasesDatosAuditoriaSection />
+        return <UnderConstruction title="Bases de Datos" />
       case "tablero-consolidado":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Tablero Consolidado</h2><p>Funcionalidad en desarrollo</p></div>
+        return <UnderConstruction title="Tablero Consolidado" />
       case "estadistica-auditoria":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Auditoría</h2><p>Funcionalidad en desarrollo</p></div>
+        return <UnderConstruction title="Estadísticas de Auditoría" />
       case "semaforo":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Semáforo</h2><p>Funcionalidad en desarrollo</p></div>
-      // Secciones de Abrazando Leyendas (unificado en tabs)
+        return <UnderConstruction title="Semáforo" />
+      
+      // Secciones de Abrazando Leyendas
       case "abrazando-leyendas":
       case "lista-beneficiarios":
       case "estadistica-leyendas":
         return <AbrazandoLeyendasSection />
+      
       // Secciones de Voluntariado
-      case "graficas-voluntariado":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Gráficas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
-      case "formulario-voluntariado":
-        return <FormularioVoluntariadoSection />
       case "estadistica-voluntariado":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Estadísticas de Voluntariado</h2><p>Funcionalidad en desarrollo</p></div>
-      case "indicadores":
-        return <div className="p-8 text-center"><h2 className="text-2xl font-bold">Indicadores</h2><p>Funcionalidad en desarrollo</p></div>
+        return <VoluntariadoSection />
+      case "formularios-voluntariado":
+        return <FormularioVoluntariadoSection />
+      
       // Secciones de PIMCO
       case "pimco-comunidades":
-        return <PimcoComunidadesSection />
+        return <UnderConstruction title="PIMCO - Comunidades" />
       case "pimco-graficas-estadisticas-dashboard":
-        return <PimcoGraficasEstadisticasSection />
+        return <UnderConstruction title="PIMCO - Gráficas y Estadísticas" />
       case "pimco-bd-estadisticas":
-        return <PimcoBdEstadisticasSection />
+        return <UnderConstruction title="PIMCO - Base de Datos Estadísticas" />
       case "pimco-entrevistas":
-        return <PIMCOEntrevistasSection />
+        return <UnderConstruction title="PIMCO - Entrevistas" />
       case "pimco-diagnostico-comunitario":
-        return <PimcoDiagnosticoComunitarioSection />
+        return <UnderConstruction title="PIMCO - Diagnóstico Comunitario" />
+      
       default:
-        return <OrganizacionesSectionNew />
+        return <FormulariosSection />
     }
   }
 
@@ -134,14 +148,10 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "estadistica-leyendas":
         return "Estadísticas de Leyendas"
       // Títulos para Voluntariado
-      case "graficas-voluntariado":
-        return "Gráficas de Voluntariado"
-      case "formulario-voluntariado":
-        return "Formulario de Voluntariado"
       case "estadistica-voluntariado":
         return "Estadísticas de Voluntariado"
-      case "indicadores":
-        return "Indicadores"
+      case "formularios-voluntariado":
+        return "Formularios de Voluntariado"
       // Títulos para PIMCO
       case "pimco-comunidades":
         return "PIMCO - Comunidades"

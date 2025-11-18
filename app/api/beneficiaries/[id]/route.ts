@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/client'
+import { withAuth } from '@/lib/auth-server'
 import type { UpdateBeneficiaryInput } from '@/lib/types'
 
 /**
@@ -12,24 +12,26 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { supabase, error } = await withAuth()
+    if (error) return error
+
     const { id } = params
 
-    const supabase = createClient()
-    const { data: beneficiary, error } = await supabase
+    const { data: beneficiary, error: dbError } = await supabase
       .from('beneficiaries')
       .select('*')
       .eq('id', id)
       .is('deleted_at', null)
       .single()
 
-    if (error) {
-      if (error.code === 'PGRST116') {
+    if (dbError) {
+      if (dbError.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Beneficiario no encontrado' },
           { status: 404 }
         )
       }
-      throw error
+      throw dbError
     }
 
     return NextResponse.json({ beneficiary })
@@ -52,6 +54,9 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { supabase, error } = await withAuth()
+    if (error) return error
+
     const { id } = params
     const body = await request.json() as Partial<UpdateBeneficiaryInput>
 
@@ -69,8 +74,6 @@ export async function PUT(
         { status: 400 }
       )
     }
-
-    const supabase = createClient()
 
     // Verificar que el beneficiario existe
     const { data: existing } = await supabase
@@ -105,14 +108,14 @@ export async function PUT(
     if (body.google_maps_url !== undefined) updateData.google_maps_url = body.google_maps_url
 
     // Actualizar (updated_at se actualiza automáticamente por trigger)
-    const { data: beneficiary, error } = await supabase
+    const { data: beneficiary, error: updateError } = await supabase
       .from('beneficiaries')
       .update(updateData)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw error
+    if (updateError) throw updateError
 
     return NextResponse.json({
       success: true,
@@ -137,9 +140,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params
+    const { supabase, error } = await withAuth()
+    if (error) return error
 
-    const supabase = createClient()
+    const { id } = params
 
     // Verificar que existe
     const { data: existing } = await supabase
@@ -157,12 +161,12 @@ export async function DELETE(
     }
 
     // Soft delete: marcar deleted_at
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from('beneficiaries')
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', id)
 
-    if (error) throw error
+    if (deleteError) throw deleteError
 
     return NextResponse.json({
       success: true,

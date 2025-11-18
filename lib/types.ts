@@ -289,3 +289,62 @@ export interface BeneficiaryStats {
   average_age: number
 }
 
+// ============================================
+// VOLUNTEERS TYPES
+// ============================================
+
+export interface Volunteer {
+  id: string
+  name: string
+  volunteer_type: 'Individual' | 'Comunidad' | 'ONG Aliada'
+  organization: string | null
+  shift: 'Diurno' | 'Nocturno'
+  entry_time: string
+  exit_time: string
+  total_hours: number
+  receives_benefit: boolean
+  benefit_number: string | null
+  agricultural_pounds: number
+  unit_cost_q: number | null
+  unit_cost_usd: number | null
+  viveres_bags: number | null
+  average_cost_30lbs: number | null
+  picking_gtq: number | null
+  picking_5lbs: number | null
+  total_amount_q: number | null
+  group_number: number | null
+  department: string | null
+  municipality: string | null
+  village: string | null
+  work_date: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  created_by: string | null
+  deleted_at: string | null
+}
+
+export interface VolunteerFilters {
+  volunteer_type?: string
+  organization?: string
+  shift?: string
+  is_active?: boolean
+  work_date?: string
+  search?: string
+}
+
+export interface VolunteerStats {
+  total: number
+  active: number
+  inactive: number
+  total_hours: number
+  total_with_benefit: number
+  by_type: Record<string, number>
+  by_organization: Record<string, number>
+  by_shift: Record<string, number>
+  by_date: Record<string, {
+    volunteers: number
+    hours: number
+  }>
+}
+
