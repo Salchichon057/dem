@@ -107,7 +107,9 @@ class StorageHandler {
 
       // Retornar SOLO el path relativo (sin storage URL)
       // Formato: "bucket-name/fileName"
-      return `${bucket}/${fileName}`
+      const relativePath = `${bucket}/${fileName}`
+      console.log('✅ uploadFile - Path relativo generado:', relativePath)
+      return relativePath
     } catch (error: any) {
       console.error('Error uploading file:', error)
       throw new Error(`Error al subir archivo: ${error.message}`)
@@ -275,8 +277,12 @@ export const uploadFormFile = (
   userId: string,
   submissionId: string
 ) => {
+  console.log('📁 uploadFormFile - Input:', { fileName: file.name, formSection, userId, submissionId })
   const bucket = STORAGE_BUCKETS[formSection]
-  return storageHandler.uploadFile(file, bucket, userId, 'submission', submissionId)
+  console.log('🪣 Bucket seleccionado:', bucket)
+  const result = storageHandler.uploadFile(file, bucket, userId, 'submission', submissionId)
+  console.log('📤 uploadFormFile - Resultado:', result)
+  return result
 }
 
 /**

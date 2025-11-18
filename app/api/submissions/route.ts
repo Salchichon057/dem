@@ -17,6 +17,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { form_template_id, answers } = body
 
+    // Debug: Ver qué llega al servidor
+    console.log('🔍 API /submissions - Body recibido:', JSON.stringify(body, null, 2))
+    console.log('🔍 API /submissions - Answers:', answers)
+    console.log('🔍 API /submissions - User ID:', user.id)
+
     if (!form_template_id || !answers) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos: form_template_id, answers' },
@@ -63,8 +68,12 @@ export async function POST(request: NextRequest) {
       created_at: new Date().toISOString()
     }))
 
+    console.log('💾 Preparando answers para insertar:', JSON.stringify(answersData, null, 2))
+
     // Crear las respuestas en la tabla correspondiente
     const createdAnswers = await createAnswers(sectionLocation, answersData)
+
+    console.log('✅ Answers creados exitosamente:', createdAnswers)
 
     return NextResponse.json({
       success: true,

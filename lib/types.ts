@@ -118,6 +118,7 @@ export interface FormTemplateWithQuestions {
   slug: string
   name: string
   description: string | null
+  section_location: FormSectionType | null
   version: number
   is_active: boolean
   is_public: boolean

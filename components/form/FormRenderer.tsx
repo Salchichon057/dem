@@ -2,20 +2,35 @@
 
 import { useState, useTransition, Fragment } from 'react'
 import Image from 'next/image'
-import type { FormTemplateWithQuestions, QuestionWithRelations } from '@/lib/types'
+import type { FormTemplateWithQuestions, QuestionWithRelations, FormSectionType } from '@/lib/types'
 import SuccessModal from './SuccessModal'
 import ErrorModal from './ErrorModal'
 import ValidationModal from './ValidationModal'
+import { uploadFormFile, getFileUrl, STORAGE_BUCKETS } from '@/lib/storage/handler'
+import { useUser } from '@/hooks/use-user'
 
 interface FormRendererProps {
   form: FormTemplateWithQuestions
 }
 
+// Mapeo de FormSectionType a las keys de STORAGE_BUCKETS
+const SECTION_TO_BUCKET_KEY: Record<FormSectionType, keyof typeof STORAGE_BUCKETS> = {
+  'abrazando-leyendas': 'FORM_ABRAZANDO_LEYENDAS',
+  'comunidades': 'FORM_COMUNIDADES',
+  'auditorias': 'FORM_AUDITORIAS',
+  'organizaciones': 'FORM_ORGANIZACIONES',
+  'perfil-comunitario': 'FORM_PERFIL_COMUNITARIO',
+  'voluntariado': 'FORM_VOLUNTARIADO',
+}
+
 export default function FormRenderer({ form }: FormRendererProps) {
+  const { user } = useUser()
   const [answers, setAnswers] = useState<Record<string, unknown>>({})
   const [isPending, startTransition] = useTransition()
   const [currentSection, setCurrentSection] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({})
+  const [pendingFiles, setPendingFiles] = useState<Record<string, File>>({}) // 🔥 Archivos pendientes de subir
   
   // Estados para modales
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -23,6 +38,59 @@ export default function FormRenderer({ form }: FormRendererProps) {
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [missingFields, setMissingFields] = useState<string[]>([])
+
+  // Función para subir archivo a Supabase Storage usando el sistema existente
+  const uploadFileToStorage = async (file: File, questionId: string): Promise<string | null> => {
+    try {
+      setUploadingFiles(prev => ({ ...prev, [questionId]: true }))
+      
+      // Obtener userId del usuario autenticado
+      const userId = user?.id
+      if (!userId) {
+        console.error('Usuario no autenticado')
+        setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
+        return null
+      }
+      
+      // Validar que el form tenga section_location
+      const sectionLocation = form.section_location
+      if (!sectionLocation) {
+        console.error('❌ El formulario no tiene section_location definido')
+        setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
+        return null
+      }
+      
+      // Mapear section_location a bucket key
+      const bucketKey = SECTION_TO_BUCKET_KEY[sectionLocation]
+      if (!bucketKey) {
+        console.error('❌ Section location no válido:', sectionLocation, 'Valores permitidos:', Object.keys(SECTION_TO_BUCKET_KEY))
+        setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
+        return null
+      }
+      
+      // Type guard: verificar que bucketKey no sea BENEFICIARIES
+      if (bucketKey === 'BENEFICIARIES') {
+        console.error('❌ BENEFICIARIES no es un bucket válido para formularios')
+        setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
+        return null
+      }
+      
+      // Generar un ID temporal para el submission (se reemplazará después)
+      const tempSubmissionId = `temp-${Date.now()}`
+      
+      // Subir archivo usando el handler existente
+      console.log('📤 Subiendo archivo:', file.name, 'Bucket:', bucketKey)
+      const relativePath = await uploadFormFile(file, bucketKey, userId, tempSubmissionId)
+      console.log('✅ Archivo subido, path relativo:', relativePath)
+      
+      setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
+      return relativePath // Guardamos el path relativo, no la URL
+    } catch (error) {
+      console.error('Error en upload:', error)
+      setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
+      return null
+    }
+  }
 
   // Función para limpiar el formulario
   const resetForm = () => {
@@ -99,10 +167,20 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
     currentQuestions.forEach(q => {
       if (q.is_required) {
-        const answer = answers[q.id]
-        if (!answer || answer === '' || (Array.isArray(answer) && answer.length === 0)) {
-          newErrors[q.id] = 'Este campo es obligatorio'
-          isValid = false
+        // Para FILE_UPLOAD, verificar pendingFiles
+        if (q.question_types?.code === 'FILE_UPLOAD') {
+          const hasFile = pendingFiles[q.id] !== undefined
+          if (!hasFile) {
+            newErrors[q.id] = 'Este campo es obligatorio'
+            isValid = false
+          }
+        } else {
+          // Para otros tipos, verificar answers
+          const answer = answers[q.id]
+          if (!answer || answer === '' || (Array.isArray(answer) && answer.length === 0)) {
+            newErrors[q.id] = 'Este campo es obligatorio'
+            isValid = false
+          }
         }
       }
     })
@@ -130,11 +208,40 @@ export default function FormRenderer({ form }: FormRendererProps) {
       return
     }
 
+    // Verificar si hay archivos subiendo en este momento
+    const uploadingFileQuestions = Object.entries(uploadingFiles)
+      .filter(([, isUploading]) => isUploading)
+      .map(([questionId]) => {
+        const question = form.questions.find(q => q.id === questionId)
+        return question?.title || 'Archivo'
+      })
+
+    if (uploadingFileQuestions.length > 0) {
+      setErrorMessage(`Por favor espera a que termine de subir: ${uploadingFileQuestions.join(', ')}`)
+      setShowErrorModal(true)
+      return
+    }
+
+    // Validar que las preguntas de tipo FILE_UPLOAD requeridas tengan archivo seleccionado
+    const fileUploadQuestions = form.questions.filter(q => 
+      q.question_types?.code === 'FILE_UPLOAD' && q.is_required
+    )
+    
+    const missingFiles = fileUploadQuestions.filter(q => !pendingFiles[q.id])
+
+    if (missingFiles.length > 0) {
+      setMissingFields(missingFiles.map(q => q.title))
+      setShowValidationModal(true)
+      return
+    }
+
     // Validar todas las preguntas requeridas del formulario
     const allRequiredQuestions = form.questions.filter(q => 
       q.is_required && q.question_types?.code !== 'PAGE_BREAK'
     )
-    const missingAnswers = allRequiredQuestions.filter(q => !answers[q.id])
+    const missingAnswers = allRequiredQuestions.filter(q => 
+      !answers[q.id] && !pendingFiles[q.id] // Considerar archivos pendientes
+    )
 
     if (missingAnswers.length > 0) {
       setMissingFields(missingAnswers.map(q => q.title))
@@ -144,32 +251,62 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
     startTransition(async () => {
       try {
-        const response = await fetch('/api/forms/submit', {
+        // PASO 1: Subir todos los archivos pendientes
+        console.log('📤 Subiendo archivos pendientes:', Object.keys(pendingFiles))
+        const uploadedPaths: Record<string, string> = {}
+        
+        for (const [questionId, file] of Object.entries(pendingFiles)) {
+          console.log(`📎 Subiendo ${file.name} para question ${questionId}`)
+          const relativePath = await uploadFileToStorage(file, questionId)
+          
+          if (!relativePath) {
+            throw new Error(`Error al subir el archivo: ${file.name}`)
+          }
+          
+          uploadedPaths[questionId] = relativePath
+          console.log(`✅ Archivo subido: ${relativePath}`)
+        }
+
+        // PASO 2: Combinar answers con los paths de archivos subidos
+        const finalAnswers = { ...answers, ...uploadedPaths }
+        console.log('📦 Answers finales (con archivos):', finalAnswers)
+
+        // PASO 3: Preparar el payload
+        const payload = {
+          form_template_id: form.id,
+          answers: Object.entries(finalAnswers).map(([questionId, answerValue]) => ({
+            question_id: questionId,
+            answer_value: {
+              value: answerValue
+            }
+          }))
+        }
+
+        console.log('📤 Enviando formulario:', payload)
+
+        const response = await fetch('/api/submissions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            form_template_id: form.id,
-            answers: Object.fromEntries(
-              Object.entries(answers).map(([questionId, answerValue]) => [
-                questionId,
-                answerValue
-              ])
-            )
-          })
+          body: JSON.stringify(payload)
         })
 
         const result = await response.json()
 
+        console.log('📥 Respuesta del servidor:', result)
+
         if (result.success) {
+          // Limpiar archivos pendientes
+          setPendingFiles({})
           setShowSuccessModal(true)
         } else {
           setErrorMessage(result.error || 'Ha ocurrido un error al enviar el formulario')
           setShowErrorModal(true)
         }
-      } catch {
-        setErrorMessage('Error de conexión. Por favor, intenta de nuevo.')
+      } catch (error) {
+        console.error('❌ Error al enviar:', error)
+        setErrorMessage(error instanceof Error ? error.message : 'Error de conexión. Por favor, intenta de nuevo.')
         setShowErrorModal(true)
       }
     })
@@ -463,25 +600,60 @@ export default function FormRenderer({ form }: FormRendererProps) {
         )
 
       case 'FILE_UPLOAD':
+        const isUploading = uploadingFiles[question.id] || false
+        const pendingFile = pendingFiles[question.id]
+        const fileName = pendingFile?.name || ''
+        
         return (
           <div>
             <input
               type="file"
               required={question.is_required}
               accept={config.allowedTypes?.join(',') || '*'}
+              disabled={isUploading}
               onChange={(e) => {
                 const file = e.target.files?.[0]
                 if (file) {
-                  // TODO: Implementar upload a Supabase Storage
-                  handleAnswerChange(question.id, file.name)
+                  const maxSize = (config.maxSize as number) || 5
+                  if (file.size > maxSize * 1024 * 1024) {
+                    setErrors({
+                      ...errors,
+                      [question.id]: `El archivo no debe superar ${maxSize}MB`
+                    })
+                    e.target.value = ''
+                    return
+                  }
+
+                  // Solo guardamos el archivo, NO lo subimos todavía
+                  console.log('📎 Archivo seleccionado:', file.name)
+                  setPendingFiles(prev => ({ ...prev, [question.id]: file }))
+                  setErrors({ ...errors, [question.id]: '' })
                 }
               }}
-              className="w-full border border-gray-300 rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#e6235a] file:text-white hover:file:bg-[#c41e4d] file:cursor-pointer transition-all"
+              className="w-full border border-gray-300 rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-purple-600 file:to-blue-600 file:text-white hover:file:from-purple-700 hover:file:to-blue-700 file:cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             />
+            {isUploading && (
+              <p className="text-sm text-purple-600 mt-2 flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Subiendo archivo...
+              </p>
+            )}
+            {fileName && !isUploading && (
+              <p className="text-sm text-blue-600 mt-2 flex items-center gap-2">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                {fileName} - Listo para subir
+              </p>
+            )}
             <p className="text-xs text-gray-500 mt-2">
               {config.allowedTypes?.length 
                 ? `Formatos permitidos: ${config.allowedTypes.join(', ')}` 
                 : 'Todos los formatos permitidos'}
+              {config.maxSize && ` • Tamaño máximo: ${config.maxSize}MB`}
             </p>
           </div>
         )

@@ -68,7 +68,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                   value={option}
                   onChange={(e) => handleUpdateOption(index, e.target.value)}
                   placeholder={`Opción ${index + 1}`}
-                  className="flex-1 border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                  className="flex-1 border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
                 />
                 <button
                   onClick={() => handleDeleteOption(index)}
@@ -80,7 +80,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
             ))}
             <button
               onClick={handleAddOption}
-              className="text-[#e6235a] hover:text-[#c41e4d] text-sm font-medium"
+              className="text-[purple-600] hover:text-[purple-700] text-sm font-medium"
             >
               <i className="fa-solid fa-plus-circle mr-1"></i>
               Agregar opción
@@ -99,7 +99,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                 value={(question.config.min as number) ?? ''}
                 onChange={(e) => handleConfigUpdate('min', e.target.value ? parseFloat(e.target.value) : null)}
                 placeholder="Sin límite"
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
               />
             </div>
             <div>
@@ -109,7 +109,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                 value={(question.config.max as number) ?? ''}
                 onChange={(e) => handleConfigUpdate('max', e.target.value ? parseFloat(e.target.value) : null)}
                 placeholder="Sin límite"
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
               />
             </div>
             <div>
@@ -119,7 +119,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                 value={(question.config.step as number) ?? 1}
                 onChange={(e) => handleConfigUpdate('step', parseFloat(e.target.value) || 1)}
                 placeholder="1"
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
               />
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
               onChange={(e) => handleConfigUpdate('maxLength', e.target.value ? parseInt(e.target.value) : null)}
               placeholder="Sin límite"
               min="1"
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
             />
           </div>
         )
@@ -159,7 +159,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
               onChange={(e) => handleConfigUpdate('maxLength', parseInt(e.target.value) || 5000)}
               placeholder="5000"
               min="1"
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
             />
           </div>
         )
@@ -174,14 +174,14 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                 type="number"
                 value={(question.config.min as number) ?? 0}
                 onChange={(e) => handleConfigUpdate('min', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
               />
               <input
                 type="text"
                 value={(question.config.minLabel as string) ?? ''}
                 onChange={(e) => handleConfigUpdate('minLabel', e.target.value)}
                 placeholder="Etiqueta mínima"
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
               />
             </div>
             <div>
@@ -190,14 +190,14 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                 type="number"
                 value={(question.config.max as number) ?? 10}
                 onChange={(e) => handleConfigUpdate('max', parseInt(e.target.value) || 10)}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
               />
               <input
                 type="text"
                 value={(question.config.maxLabel as string) ?? ''}
                 onChange={(e) => handleConfigUpdate('maxLabel', e.target.value)}
                 placeholder="Etiqueta máxima"
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
               />
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
               value={(question.config.imageUrl as string) ?? ''}
               onChange={(e) => handleConfigUpdate('imageUrl', e.target.value)}
               placeholder="https://ejemplo.com/imagen.jpg"
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
             />
           </div>
         )
@@ -228,7 +228,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
               value={(question.config.videoUrl as string) ?? ''}
               onChange={(e) => handleConfigUpdate('videoUrl', e.target.value)}
               placeholder="https://youtube.com/watch?v=..."
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
             />
             <p className="text-xs text-gray-500 mt-1">
               Soporta YouTube, Vimeo y URLs directas de video
@@ -238,19 +238,62 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
 
       // File upload
       case 'FILE_UPLOAD':
+        const fileTypeOptions = [
+          { value: '.pdf', label: 'PDF (.pdf)' },
+          { value: '.doc', label: 'Word (.doc)' },
+          { value: '.docx', label: 'Word (.docx)' },
+          { value: '.xls', label: 'Excel (.xls)' },
+          { value: '.xlsx', label: 'Excel (.xlsx)' },
+          { value: '.ppt', label: 'PowerPoint (.ppt)' },
+          { value: '.pptx', label: 'PowerPoint (.pptx)' },
+          { value: '.txt', label: 'Texto (.txt)' },
+          { value: '.csv', label: 'CSV (.csv)' },
+          { value: 'image/*', label: 'Imágenes (todas)' },
+          { value: '.jpg', label: 'JPEG (.jpg)' },
+          { value: '.jpeg', label: 'JPEG (.jpeg)' },
+          { value: '.png', label: 'PNG (.png)' },
+          { value: '.gif', label: 'GIF (.gif)' },
+          { value: '.svg', label: 'SVG (.svg)' },
+          { value: '.zip', label: 'ZIP (.zip)' },
+          { value: '.rar', label: 'RAR (.rar)' },
+        ]
+        
+        const selectedTypes = (question.config.allowedTypes as string[]) || []
+        
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tipos de archivo permitidos
               </label>
-              <input
-                type="text"
-                value={(question.config.allowedTypes as string[])?.join(', ') ?? ''}
-                onChange={(e) => handleConfigUpdate('allowedTypes', e.target.value.split(',').map(t => t.trim()))}
-                placeholder="image/*, .pdf, .doc"
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
-              />
+              <div className="border border-gray-300 rounded-lg p-3 max-h-64 overflow-y-auto bg-white">
+                <div className="space-y-2">
+                  {fileTypeOptions.map((option) => (
+                    <label
+                      key={option.value}
+                      className="flex items-center gap-2 p-2 hover:bg-purple-50 rounded cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedTypes.includes(option.value)}
+                        onChange={(e) => {
+                          const newTypes = e.target.checked
+                            ? [...selectedTypes, option.value]
+                            : selectedTypes.filter(t => t !== option.value)
+                          handleConfigUpdate('allowedTypes', newTypes)
+                        }}
+                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                      />
+                      <span className="text-sm text-gray-700">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {selectedTypes.length > 0 && (
+                <p className="text-xs text-gray-600 mt-2">
+                  Seleccionados: {selectedTypes.join(', ')}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -261,7 +304,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                 value={(question.config.maxSize as number) ?? 5}
                 onChange={(e) => handleConfigUpdate('maxSize', parseInt(e.target.value) || 5)}
                 min="1"
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-600 focus:border-purple-600"
               />
             </div>
           </div>
@@ -285,7 +328,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                       handleConfigUpdate('rows', newRows)
                     }}
                     placeholder={`Fila ${index + 1}`}
-                    className="flex-1 border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                    className="flex-1 border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
                   />
                   <button
                     onClick={() => {
@@ -304,7 +347,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                   const currentRows = [...((question.config.rows as Array<{ text: string }>) || [])]
                   handleConfigUpdate('rows', [...currentRows, { text: '' }])
                 }}
-                className="text-[#e6235a] hover:text-[#c41e4d] text-sm font-medium"
+                className="text-[purple-600] hover:text-[purple-700] text-sm font-medium"
               >
                 <i className="fa-solid fa-plus-circle mr-1"></i>
                 Agregar fila
@@ -325,7 +368,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                       handleConfigUpdate('columns', newCols)
                     }}
                     placeholder={`Columna ${index + 1}`}
-                    className="flex-1 border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                    className="flex-1 border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
                   />
                   <button
                     onClick={() => {
@@ -344,7 +387,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                   const currentCols = [...((question.config.columns as Array<{ text: string }>) || [])]
                   handleConfigUpdate('columns', [...currentCols, { text: '' }])
                 }}
-                className="text-[#e6235a] hover:text-[#c41e4d] text-sm font-medium"
+                className="text-[purple-600] hover:text-[purple-700] text-sm font-medium"
               >
                 <i className="fa-solid fa-plus-circle mr-1"></i>
                 Agregar columna
@@ -375,7 +418,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
           value={question.title}
           onChange={(e) => onUpdate({ title: e.target.value })}
           placeholder="Escribe tu pregunta aquí..."
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
         />
       </div>
 
@@ -389,7 +432,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
           value={question.help_text || ''}
           onChange={(e) => onUpdate({ help_text: e.target.value })}
           placeholder="Texto adicional para orientar al usuario..."
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent text-sm"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent text-sm"
         />
       </div>
 
@@ -403,7 +446,7 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
           id={`required-${question.tempId}`}
           checked={question.is_required}
           onChange={(e) => onUpdate({ is_required: e.target.checked })}
-          className="h-5 w-5 text-[#e6235a] focus:ring-[#e6235a] border-gray-300 rounded"
+          className="h-5 w-5 text-[purple-600] focus:ring-[purple-600] border-gray-300 rounded"
         />
         <label htmlFor={`required-${question.tempId}`} className="ml-3 text-sm font-medium text-gray-700">
           Pregunta requerida

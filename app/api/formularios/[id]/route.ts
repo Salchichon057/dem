@@ -133,6 +133,7 @@ export async function GET(
       version: formWithSections.version,
       is_active: formWithSections.is_active,
       is_public: formWithSections.is_public,
+      section_location: formWithSections.section_location, // 🔥 AGREGADO
       created_by: formWithSections.created_by,
       created_at: formWithSections.created_at,
       updated_at: formWithSections.updated_at,
