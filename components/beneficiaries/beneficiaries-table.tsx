@@ -20,10 +20,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Search, Eye, Pencil, Trash2, Settings2 } from 'lucide-react'
+import { Plus, Search, Eye, Pencil, Trash2, Settings2, Image as ImageIcon, MapPin, ExternalLink } from 'lucide-react'
 import { Beneficiary, } from '@/lib/types'
 import { toast } from 'sonner'
 import BeneficiaryForm from './beneficiary-form'
+import PhotoPreviewModal from './photo-preview-modal'
+import Image from 'next/image'
 import {
   Popover,
   PopoverContent,
@@ -47,6 +49,10 @@ export default function BeneficiariesTable() {
   const [formOpen, setFormOpen] = useState(false)
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null)
   
+  // Photo modal state
+  const [photoModalOpen, setPhotoModalOpen] = useState(false)
+  const [selectedPhoto, setSelectedPhoto] = useState<{url: string, name: string} | null>(null)
+  
   // Filters
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all')
@@ -61,12 +67,14 @@ export default function BeneficiariesTable() {
 
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState({
+    photo: true,
     name: true,
     ageGender: true,
     department: true,
     municipality: true,
     village: true,
     program: true,
+    googleMaps: true,
     status: true,
     admissionDate: true,
   })
@@ -220,6 +228,17 @@ export default function BeneficiariesTable() {
     fetchBeneficiaries()
   }
 
+  // Abrir modal de foto
+  const handleViewPhoto = (photoUrl: string, name: string) => {
+    setSelectedPhoto({ url: photoUrl, name })
+    setPhotoModalOpen(true)
+  }
+
+  // Abrir Google Maps en nueva pestaña
+  const handleOpenMaps = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div className="space-y-6">
       {/* Form Modal */}
@@ -229,6 +248,16 @@ export default function BeneficiariesTable() {
         beneficiary={selectedBeneficiary}
         onSuccess={handleFormSuccess}
       />
+
+      {/* Photo Preview Modal */}
+      {selectedPhoto && (
+        <PhotoPreviewModal
+          open={photoModalOpen}
+          onOpenChange={setPhotoModalOpen}
+          photoUrl={selectedPhoto.url}
+          beneficiaryName={selectedPhoto.name}
+        />
+      )}
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -258,6 +287,14 @@ export default function BeneficiariesTable() {
                     <Label htmlFor="col-all" className="text-sm cursor-pointer font-medium">
                       Seleccionar todo
                     </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-photo"
+                      checked={visibleColumns.photo}
+                      onCheckedChange={() => toggleColumn('photo')}
+                    />
+                    <Label htmlFor="col-photo" className="text-sm cursor-pointer">Foto</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -306,6 +343,14 @@ export default function BeneficiariesTable() {
                       onCheckedChange={() => toggleColumn('program')}
                     />
                     <Label htmlFor="col-program" className="text-sm cursor-pointer">Programa</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-maps"
+                      checked={visibleColumns.googleMaps}
+                      onCheckedChange={() => toggleColumn('googleMaps')}
+                    />
+                    <Label htmlFor="col-maps" className="text-sm cursor-pointer">Google Maps</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -423,12 +468,14 @@ export default function BeneficiariesTable() {
         <Table>
           <TableHeader>
             <TableRow>
+              {visibleColumns.photo && <TableHead>Foto</TableHead>}
               {visibleColumns.name && <TableHead>Nombre</TableHead>}
               {visibleColumns.ageGender && <TableHead>Edad / Género</TableHead>}
               {visibleColumns.department && <TableHead>Departamento</TableHead>}
               {visibleColumns.municipality && <TableHead>Municipio</TableHead>}
               {visibleColumns.village && <TableHead>Aldea</TableHead>}
               {visibleColumns.program && <TableHead>Programa</TableHead>}
+              {visibleColumns.googleMaps && <TableHead>Google Maps</TableHead>}
               {visibleColumns.status && <TableHead>Estado</TableHead>}
               {visibleColumns.admissionDate && <TableHead>Fecha Ingreso</TableHead>}
               <TableHead className="text-right">Acciones</TableHead>
@@ -450,6 +497,32 @@ export default function BeneficiariesTable() {
             ) : (
               beneficiaries.map((beneficiary) => (
                 <TableRow key={beneficiary.id}>
+                  {visibleColumns.photo && (
+                    <TableCell>
+                      {beneficiary.photo_url ? (
+                        <button
+                          onClick={() => handleViewPhoto(beneficiary.photo_url!, beneficiary.name)}
+                          className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition-colors cursor-pointer group"
+                          title="Ver foto"
+                        >
+                          <Image
+                            src={beneficiary.photo_url}
+                            alt={`Foto de ${beneficiary.name}`}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <ImageIcon className="w-6 h-6 text-white" />
+                          </div>
+                        </button>
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center" title="Sin foto">
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                    </TableCell>
+                  )}
                   {visibleColumns.name && <TableCell className="font-medium">{beneficiary.name}</TableCell>}
                   {visibleColumns.ageGender && (
                     <TableCell>
@@ -460,6 +533,24 @@ export default function BeneficiariesTable() {
                   {visibleColumns.municipality && <TableCell>{beneficiary.municipality}</TableCell>}
                   {visibleColumns.village && <TableCell>{beneficiary.village || '-'}</TableCell>}
                   {visibleColumns.program && <TableCell>{beneficiary.program}</TableCell>}
+                  {visibleColumns.googleMaps && (
+                    <TableCell>
+                      {beneficiary.google_maps_url ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenMaps(beneficiary.google_maps_url!)}
+                          className="gap-2 text-blue-600 hover:text-blue-700"
+                          title="Abrir en Google Maps"
+                        >
+                          <MapPin className="w-4 h-4" />
+                          <ExternalLink className="w-3 h-3" />
+                        </Button>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
+                    </TableCell>
+                  )}
                   {visibleColumns.status && (
                     <TableCell>
                       <Badge variant={beneficiary.is_active ? 'default' : 'secondary'}>

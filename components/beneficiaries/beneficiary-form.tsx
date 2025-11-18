@@ -24,7 +24,10 @@ import { Beneficiary, CreateBeneficiaryInput, UpdateBeneficiaryInput } from '@/l
 import { getDepartamentos, getMunicipiosByDepartamento } from '@/lib/data/guatemala-helper'
 import { validateBeneficiary } from '@/lib/validators/beneficiary.validator'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X, Image as ImageIcon } from 'lucide-react'
+import { uploadBeneficiaryPhoto, getFileUrl } from '@/lib/storage/handler'
+import Image from 'next/image'
+import { useUser } from '@/hooks/use-user'
 
 interface BeneficiaryFormProps {
   open: boolean
@@ -39,6 +42,7 @@ export default function BeneficiaryForm({
   beneficiary,
   onSuccess,
 }: BeneficiaryFormProps) {
+  const { user } = useUser()
   const isEdit = !!beneficiary
   const [loading, setLoading] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
@@ -49,6 +53,8 @@ export default function BeneficiaryForm({
   const [gender, setGender] = useState<'Masculino' | 'Femenino' | ''>('')
   const [dpi, setDpi] = useState('')
   const [program, setProgram] = useState('')
+  const [photoUrl, setPhotoUrl] = useState('')
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [admissionDate, setAdmissionDate] = useState('')
   const [isActive, setIsActive] = useState(true)
 
@@ -86,6 +92,7 @@ export default function BeneficiaryForm({
       setGender(beneficiary.gender)
       setDpi(beneficiary.dpi || '')
       setProgram(beneficiary.program)
+      setPhotoUrl(beneficiary.photo_url || '')
       setAdmissionDate(beneficiary.admission_date.split('T')[0]) // Format for input[type="date"]
       setIsActive(beneficiary.is_active)
       setDepartment(beneficiary.department)
@@ -104,6 +111,7 @@ export default function BeneficiaryForm({
     setGender('')
     setDpi('')
     setProgram('')
+    setPhotoUrl('')
     setAdmissionDate('')
     setIsActive(true)
     setDepartment('')
@@ -111,6 +119,53 @@ export default function BeneficiaryForm({
     setVillage('')
     setAddress('')
     setGoogleMapsUrl('')
+  }
+
+  // Manejar selección de archivo de foto
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor selecciona una imagen válida')
+      return
+    }
+
+    // Validar tamaño (máx 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen no puede exceder 5MB')
+      return
+    }
+
+    // Subir archivo inmediatamente
+    try {
+      setUploadingPhoto(true)
+      
+      if (!user?.id) {
+        toast.error('Debes iniciar sesión para subir archivos')
+        return
+      }
+      
+      // Usar ID temporal para nuevos beneficiarios
+      const resourceId = beneficiary?.id || `temp-${Date.now()}`
+      
+      const relativePath = await uploadBeneficiaryPhoto(file, user.id, resourceId)
+      const publicUrl = getFileUrl(relativePath)
+      
+      setPhotoUrl(publicUrl)
+      toast.success('Foto subida exitosamente')
+    } catch (error) {
+      console.error('Error uploading photo:', error)
+      toast.error('Error al subir la foto')
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
+  // Remover foto
+  const handleRemovePhoto = () => {
+    setPhotoUrl('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,6 +184,7 @@ export default function BeneficiaryForm({
         gender: gender as 'Masculino' | 'Femenino',
         dpi: dpi || '',
         program,
+        photo_url: photoUrl || '',
         admission_date: admissionDate,
         is_active: isActive,
         department,
@@ -314,6 +370,59 @@ export default function BeneficiaryForm({
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">Programa</h3>
             
+            <div className="space-y-4">
+              {/* Foto */}
+              <div className="space-y-2">
+                <Label htmlFor="photo" className="text-sm font-medium">
+                  Foto
+                </Label>
+                <div className="flex items-start gap-4">
+                  {photoUrl ? (
+                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200">
+                      <Image
+                        src={photoUrl}
+                        alt="Foto del beneficiario"
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                        title="Eliminar foto"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                      <ImageIcon className="w-12 h-12 text-gray-400" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      id="photo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      disabled={uploadingPhoto}
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB
+                    </p>
+                    {uploadingPhoto && (
+                      <div className="flex items-center gap-2 text-sm text-blue-600">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Subiendo foto...
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label 
@@ -471,9 +580,12 @@ export default function BeneficiaryForm({
                   type="url"
                   value={googleMapsUrl}
                   onChange={(e) => setGoogleMapsUrl(e.target.value)}
-                  placeholder="https://maps.google.com/..."
+                  placeholder="https://maps.google.com/... o https://goo.gl/maps/..."
                   className={`w-full ${validationErrors.google_maps_url ? 'border-red-500' : ''}`}
                 />
+                <p className="text-xs text-gray-500">
+                  Debe ser una URL válida de Google Maps (que contenga &apos;google.com/maps&apos; o &apos;goo.gl/maps&apos;)
+                </p>
                 {validationErrors.google_maps_url && (
                   <p className="text-xs text-red-500">{validationErrors.google_maps_url}</p>
                 )}
