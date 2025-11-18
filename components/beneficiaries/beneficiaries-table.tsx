@@ -20,10 +20,17 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Search, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Search, Eye, Pencil, Trash2, Settings2 } from 'lucide-react'
 import { Beneficiary, } from '@/lib/types'
 import { toast } from 'sonner'
 import BeneficiaryForm from './beneficiary-form'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 export default function BeneficiariesTable() {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([])
@@ -51,6 +58,34 @@ export default function BeneficiariesTable() {
   const [departments, setDepartments] = useState<string[]>([])
   const [municipalities, setMunicipalities] = useState<string[]>([])
   const [programs, setPrograms] = useState<string[]>([])
+
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState({
+    name: true,
+    ageGender: true,
+    department: true,
+    municipality: true,
+    village: true,
+    program: true,
+    status: true,
+    admissionDate: true,
+  })
+
+  const toggleColumn = (column: keyof typeof visibleColumns) => {
+    setVisibleColumns(prev => ({ ...prev, [column]: !prev[column] }))
+  }
+
+  const toggleAllColumns = () => {
+    const allChecked = Object.values(visibleColumns).every(v => v)
+    const newState = Object.keys(visibleColumns).reduce((acc, key) => {
+      acc[key as keyof typeof visibleColumns] = !allChecked
+      return acc
+    }, {} as typeof visibleColumns)
+    setVisibleColumns(newState)
+  }
+
+  const allColumnsChecked = Object.values(visibleColumns).every(v => v)
+  const someColumnsChecked = Object.values(visibleColumns).some(v => v) && !allColumnsChecked
 
   // Load all beneficiaries once to generate filter options
   useEffect(() => {
@@ -195,16 +230,108 @@ export default function BeneficiariesTable() {
         onSuccess={handleFormSuccess}
       />
 
-      {/* Header con botón agregar */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Lista de Beneficiarios</h2>
           <p className="text-muted-foreground">Total: {total} beneficiarios</p>
         </div>
-        <Button className="gap-2" onClick={handleAdd}>
-          <Plus className="w-4 h-4" />
-          Agregar Beneficiario
-        </Button>
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon" title="Configurar columnas">
+                <Settings2 className="w-4 h-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                <h3 className="font-medium text-sm">Columnas visibles</h3>
+                <div className="space-y-3">
+                  {/* Select All */}
+                  <div className="flex items-center space-x-2 pb-2 border-b">
+                    <Checkbox
+                      id="col-all"
+                      checked={allColumnsChecked}
+                      onCheckedChange={toggleAllColumns}
+                      className={someColumnsChecked ? "data-[state=checked]:bg-primary/50" : ""}
+                    />
+                    <Label htmlFor="col-all" className="text-sm cursor-pointer font-medium">
+                      Seleccionar todo
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-name"
+                      checked={visibleColumns.name}
+                      onCheckedChange={() => toggleColumn('name')}
+                    />
+                    <Label htmlFor="col-name" className="text-sm cursor-pointer">Nombre</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-age"
+                      checked={visibleColumns.ageGender}
+                      onCheckedChange={() => toggleColumn('ageGender')}
+                    />
+                    <Label htmlFor="col-age" className="text-sm cursor-pointer">Edad / Género</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-dept"
+                      checked={visibleColumns.department}
+                      onCheckedChange={() => toggleColumn('department')}
+                    />
+                    <Label htmlFor="col-dept" className="text-sm cursor-pointer">Departamento</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-muni"
+                      checked={visibleColumns.municipality}
+                      onCheckedChange={() => toggleColumn('municipality')}
+                    />
+                    <Label htmlFor="col-muni" className="text-sm cursor-pointer">Municipio</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-village"
+                      checked={visibleColumns.village}
+                      onCheckedChange={() => toggleColumn('village')}
+                    />
+                    <Label htmlFor="col-village" className="text-sm cursor-pointer">Aldea</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-program"
+                      checked={visibleColumns.program}
+                      onCheckedChange={() => toggleColumn('program')}
+                    />
+                    <Label htmlFor="col-program" className="text-sm cursor-pointer">Programa</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-status"
+                      checked={visibleColumns.status}
+                      onCheckedChange={() => toggleColumn('status')}
+                    />
+                    <Label htmlFor="col-status" className="text-sm cursor-pointer">Estado</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="col-admission"
+                      checked={visibleColumns.admissionDate}
+                      onCheckedChange={() => toggleColumn('admissionDate')}
+                    />
+                    <Label htmlFor="col-admission" className="text-sm cursor-pointer">Fecha Ingreso</Label>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white" onClick={handleAdd}>
+            <Plus className="w-4 h-4" />
+            Agregar Beneficiario
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -296,49 +423,55 @@ export default function BeneficiariesTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Edad / Género</TableHead>
-              <TableHead>Departamento</TableHead>
-              <TableHead>Municipio</TableHead>
-              <TableHead>Aldea</TableHead>
-              <TableHead>Programa</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha Ingreso</TableHead>
+              {visibleColumns.name && <TableHead>Nombre</TableHead>}
+              {visibleColumns.ageGender && <TableHead>Edad / Género</TableHead>}
+              {visibleColumns.department && <TableHead>Departamento</TableHead>}
+              {visibleColumns.municipality && <TableHead>Municipio</TableHead>}
+              {visibleColumns.village && <TableHead>Aldea</TableHead>}
+              {visibleColumns.program && <TableHead>Programa</TableHead>}
+              {visibleColumns.status && <TableHead>Estado</TableHead>}
+              {visibleColumns.admissionDate && <TableHead>Fecha Ingreso</TableHead>}
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 1} className="text-center py-8">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : beneficiaries.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 1} className="text-center py-8 text-muted-foreground">
                   No se encontraron beneficiarios
                 </TableCell>
               </TableRow>
             ) : (
               beneficiaries.map((beneficiary) => (
                 <TableRow key={beneficiary.id}>
-                  <TableCell className="font-medium">{beneficiary.name}</TableCell>
-                  <TableCell>
-                    {beneficiary.age} años / {beneficiary.gender}
-                  </TableCell>
-                  <TableCell>{beneficiary.department}</TableCell>
-                  <TableCell>{beneficiary.municipality}</TableCell>
-                  <TableCell>{beneficiary.village || '-'}</TableCell>
-                  <TableCell>{beneficiary.program}</TableCell>
-                  <TableCell>
-                    <Badge variant={beneficiary.is_active ? 'default' : 'secondary'}>
-                      {beneficiary.is_active ? 'Activo' : 'Inactivo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(beneficiary.admission_date).toLocaleDateString('es-GT')}
-                  </TableCell>
+                  {visibleColumns.name && <TableCell className="font-medium">{beneficiary.name}</TableCell>}
+                  {visibleColumns.ageGender && (
+                    <TableCell>
+                      {beneficiary.age} años / {beneficiary.gender}
+                    </TableCell>
+                  )}
+                  {visibleColumns.department && <TableCell>{beneficiary.department}</TableCell>}
+                  {visibleColumns.municipality && <TableCell>{beneficiary.municipality}</TableCell>}
+                  {visibleColumns.village && <TableCell>{beneficiary.village || '-'}</TableCell>}
+                  {visibleColumns.program && <TableCell>{beneficiary.program}</TableCell>}
+                  {visibleColumns.status && (
+                    <TableCell>
+                      <Badge variant={beneficiary.is_active ? 'default' : 'secondary'}>
+                        {beneficiary.is_active ? 'Activo' : 'Inactivo'}
+                      </Badge>
+                    </TableCell>
+                  )}
+                  {visibleColumns.admissionDate && (
+                    <TableCell>
+                      {new Date(beneficiary.admission_date).toLocaleDateString('es-GT')}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="ghost" size="icon" title="Ver detalles">
