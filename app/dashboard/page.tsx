@@ -7,7 +7,7 @@ import { DashboardContent } from "@/components/shared/dashboard-content"
 import { AuthWrapper } from "@/components/shared/auth-wrapper"
 
 export default function Dashboard() {
-  const [activeSection, setActiveSection] = useState("organizaciones")
+  const [activeSection, setActiveSection] = useState("pimco-comunidades")
 
   return (
     <AuthWrapper>

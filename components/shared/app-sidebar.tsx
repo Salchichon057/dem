@@ -46,11 +46,6 @@ const menuItems = [
         requiresData: true, // Solo si hay formularios
       },
       {
-        id: 'pimco-entrevistas',
-        title: 'Entrevistas',
-        icon: FileText,
-      },
-      {
         id: 'pimco-diagnostico-comunitario',
         title: 'Diagnóstico Comunitario',
         icon: Activity,

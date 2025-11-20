@@ -1,15 +1,11 @@
 "use client"
 
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { FormSectionType } from "@/lib/types"
-import { EstadisticasSection } from "@/components/statistics/estadisticas-section"
-import { PlantillasSection } from "@/components/forms/plantillas-section"
 import { FormulariosSection } from "@/components/forms/formularios-section"
 import { PerfilSection } from "@/components/settings/perfil-section"
 import { ConfiguracionSection } from "@/components/settings/configuracion-section"
-import { PerfilComunitarioSection } from "@/components/communities/perfil-comunitario-section"
-import { EstadisticasComunidadesSection } from "@/components/communities/estadisticas-comunidades-section"
 import { PlantillasComunidadesSection } from "@/components/communities/plantillas-comunidades-section"
+import { PimcoFormulariosSection } from "@/components/communities/pimco-formularios-section"
 import { FormulariosAuditoriaSection } from "@/components/audits/formularios-auditoria-section"
 import AbrazandoLeyendasSection from "@/components/forms/abrazando-leyendas-section"
 import { FormularioVoluntariadoSection } from "@/components/forms/formulario-voluntariado-section"
@@ -18,7 +14,6 @@ import { ComunidadesEstadisticaSection } from "@/components/statistics/comunidad
 import { AuditoriasEstadisticaSection } from "@/components/statistics/auditorias-estadistica-section"
 import { VoluntariadoEstadisticaSection } from "@/components/statistics/voluntariado-estadistica-section"
 import { PimcoEstadisticaSection } from "@/components/statistics/pimco-estadistica-section"
-import FormsList from "@/components/form/FormsList"
 import Image from "next/image"
 import { Construction, FileText } from "lucide-react"
 
@@ -64,13 +59,23 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
 
   const renderSection = () => {
     switch (activeSection) {
-      // Secciones principales - Organizaciones
+      // PIMCO - Perfil Comunitario
+      case "pimco-comunidades":
+        return <UnderConstruction title="PIMCO - Comunidades" />
+      case "pimco-estadistica":
+        return <PimcoEstadisticaSection />
+      case "pimco-formularios":
+        return <PimcoFormulariosSection />
+      case "pimco-diagnostico-comunitario":
+        return <UnderConstruction title="PIMCO - Diagnóstico Comunitario" />
+      
+      // Organizaciones
       case "organizaciones-estadistica":
         return <OrganizacionesEstadisticaSection />
       case "organizaciones-formularios":
         return <FormulariosSection />
       
-      // Secciones de Comunidades
+      // Comunidades
       case "comunidades-estadistica":
         return <ComunidadesEstadisticaSection />
       case "comunidades-formularios":
@@ -78,7 +83,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "comunidades-plantillas":
         return <UnderConstruction title="Plantillas de Comunidades" />
       
-      // Secciones de Auditorías
+      // Auditorías
       case "auditorias-estadistica":
         return <AuditoriasEstadisticaSection />
       case "auditorias-formularios":
@@ -88,92 +93,46 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "auditorias-semaforo":
         return <UnderConstruction title="Semáforo" />
       
-      // Secciones de Abrazando Leyendas
+      // Abrazando Leyendas
       case "abrazando-leyendas":
         return <AbrazandoLeyendasSection />
       
-      // Secciones de Voluntariado
+      // Voluntariado
       case "voluntariado-estadistica":
         return <VoluntariadoEstadisticaSection />
       case "voluntariado-formularios":
         return <FormularioVoluntariadoSection />
       
-      // Secciones de PIMCO
-      case "pimco-comunidades":
-        return <UnderConstruction title="PIMCO - Comunidades" />
-      case "pimco-estadistica":
-        return <PimcoEstadisticaSection />
-      case "pimco-formularios":
-        return <FormsList sectionLocation={FormSectionType.PERFIL_COMUNITARIO} locationName="Perfil Comunitario" />
-      case "pimco-entrevistas":
-        return <UnderConstruction title="PIMCO - Entrevistas" />
-      case "pimco-diagnostico-comunitario":
-        return <UnderConstruction title="PIMCO - Diagnóstico Comunitario" />
-      
-      // Legacy/Old routes - mantener por compatibilidad
-      case "organizaciones":
-        return <UnderConstruction title="Organizaciones" />
-      case "estadisticas":
-        return <EstadisticasSection />
-      case "plantillas":
-        return <PlantillasSection />
-      case "formularios":
-        return <FormulariosSection />
+      // Configuración y Perfil (no están en sidebar pero se acceden desde footer dropdown)
       case "perfil":
         return <PerfilSection />
       case "configuracion":
         return <ConfiguracionSection />
-      case "lista-comunidades":
-        return <UnderConstruction title="Lista de Comunidades" />
-      case "perfil-comunitario":
-        return <PerfilComunitarioSection />
-      case "estadisticas-comunidades":
-        return <EstadisticasComunidadesSection />
-      case "plantillas-comunidades":
-        return <PlantillasComunidadesSection />
-      case "formularios-auditoria":
-        return <FormulariosAuditoriaSection />
-      case "bases-datos-auditoria":
-        return <UnderConstruction title="Bases de Datos" />
-      case "tablero-consolidado":
-        return <UnderConstruction title="Tablero Consolidado" />
-      case "estadistica-auditoria":
-        return <UnderConstruction title="Estadísticas de Auditoría" />
-      case "semaforo":
-        return <UnderConstruction title="Semáforo" />
-      case "abrazando-leyendas":
-      case "lista-beneficiarios":
-      case "estadistica-leyendas":
-        return <AbrazandoLeyendasSection />
-      case "pimco-graficas-estadisticas-dashboard":
-        return <UnderConstruction title="PIMCO - Gráficas y Estadísticas" />
-      case "pimco-bd-estadisticas":
-        return <UnderConstruction title="PIMCO - Base de Datos Estadísticas" />
       
       default:
-        return <FormulariosSection />
+        return <UnderConstruction title="PIMCO - Comunidades" />
     }
   }
 
   const getSectionTitle = () => {
     switch (activeSection) {
+      // PIMCO - Perfil Comunitario
+      case "pimco-comunidades":
+        return "Perfil Comunitario - Comunidades"
+      case "pimco-estadistica":
+        return "Perfil Comunitario - Estadística"
+      case "pimco-formularios":
+        return "Perfil Comunitario - Formularios"
+      case "pimco-diagnostico-comunitario":
+        return "Perfil Comunitario - Diagnóstico Comunitario"
+      
       // Organizaciones
-      case "organizaciones":
-        return "Lista de Organizaciones"
       case "organizaciones-estadistica":
         return "Organizaciones - Estadística"
       case "organizaciones-formularios":
         return "Organizaciones - Formularios"
       
       // Comunidades
-      case "lista-comunidades":
-        return "Lista de Comunidades"
-      case "perfil-comunitario":
-        return "Perfil Comunitario"
-      case "estadisticas-comunidades":
-        return "Estadísticas de Comunidades"
-      case "plantillas-comunidades":
-        return "Plantillas de Comunidades"
       case "comunidades-estadistica":
         return "Comunidades - Estadística"
       case "comunidades-formularios":
@@ -182,16 +141,6 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return "Comunidades - Plantillas"
       
       // Auditorías
-      case "formularios-auditoria":
-        return "Formularios de Auditoría"
-      case "bases-datos-auditoria":
-        return "Bases de Datos"
-      case "tablero-consolidado":
-        return "Tablero Consolidado"
-      case "estadistica-auditoria":
-        return "Estadísticas de Auditoría"
-      case "semaforo":
-        return "Semáforo"
       case "auditorias-estadistica":
         return "Auditorías - Estadística"
       case "auditorias-formularios":
@@ -204,47 +153,21 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       // Abrazando Leyendas
       case "abrazando-leyendas":
         return "Abrazando Leyendas"
-      case "lista-beneficiarios":
-        return "Lista de Beneficiarios"
-      case "estadistica-leyendas":
-        return "Estadísticas de Leyendas"
       
       // Voluntariado
       case "voluntariado-estadistica":
-        return "Estadísticas de Voluntariado"
+        return "Voluntariado - Estadística"
       case "voluntariado-formularios":
-        return "Formularios de Voluntariado"
+        return "Voluntariado - Formularios"
       
-      // PIMCO
-      case "pimco-comunidades":
-        return "PIMCO - Comunidades"
-      case "pimco-graficas-estadisticas-dashboard":
-        return "PIMCO - Gráficas y Estadísticas"
-      case "pimco-bd-estadisticas":
-        return "PIMCO - Base de Datos Estadísticas"
-      case "pimco-formularios":
-        return "PIMCO - Formularios"
-      case "pimco-entrevistas":
-        return "PIMCO - Entrevistas"
-      case "pimco-diagnostico-comunitario":
-        return "PIMCO - Diagnóstico Comunitario"
-      case "pimco-estadistica":
-        return "PIMCO - Estadística"
-      
-      // Generales
-      case "estadisticas":
-        return "Estadísticas"
-      case "plantillas":
-        return "Plantillas"
-      case "formularios":
-        return "Formularios"
+      // Configuración y Perfil
       case "perfil":
         return "Perfil de Usuario"
       case "configuracion":
         return "Configuración"
       
       default:
-        return "Lista de Organizaciones"
+        return "Perfil Comunitario - Comunidades"
     }
   }
 
