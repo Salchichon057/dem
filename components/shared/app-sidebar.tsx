@@ -19,7 +19,6 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const menuItems = [
   // Perfil Comunitario - Subniveles en sidebar
@@ -198,11 +197,6 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
     setActiveSection('configuracion')
   }
 
-  const getUserInitials = (name: string | undefined | null) => {
-    if (!name) return 'U'
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-  }
-
   return (
     <Sidebar className="border-r border-purple-200/50 bg-gradient-to-b from-white via-purple-50/30 to-blue-50/30 shadow-xl">
       <SidebarHeader className="border-b border-purple-200/50 px-6 py-4 bg-gradient-to-r from-white to-purple-50/50">
@@ -300,41 +294,46 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 rounded-lg transition-all duration-300">
-                  <Avatar className="h-6 w-6 ring-2 ring-purple-200">
-                    <AvatarImage src={user?.user_metadata?.avatar_url || '/placeholder.svg?height=24&width=24'} />
-                    <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold">
-                      {getUserInitials(user?.user_metadata?.name || user?.email || 'U')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-medium text-gray-900">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario'}</span>
-                    <span className="text-xs text-gray-500">{user?.email}</span>
+                <SidebarMenuButton className="w-full h-auto py-3 text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 rounded-lg transition-all duration-300">
+                  <div className="h-8 w-8 rounded-full ring-2 ring-purple-400 flex items-center justify-center bg-purple-50 overflow-hidden flex-shrink-0">
+                    {user?.user_metadata?.avatar_url ? (
+                      <img 
+                        src={user.user_metadata.avatar_url} 
+                        alt="Avatar"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-purple-600" />
+                    )}
                   </div>
-                  <ChevronDown className="ml-auto h-4 w-4 text-gray-500" />
+                  <div className="flex flex-col items-start text-left flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-purple-700 truncate w-full">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario'}</span>
+                    <span className="text-xs text-gray-500 truncate w-full">{user?.email}</span>
+                  </div>
+                  <ChevronDown className="ml-2 h-4 w-4 text-purple-600 flex-shrink-0" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width] backdrop-blur-sm bg-white/95 border-purple-200">
+              <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width] backdrop-blur-sm bg-white/95 border-2 border-purple-200 shadow-lg">
                 <DropdownMenuItem 
                   onClick={handleProfile}
-                  className="hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 cursor-pointer"
+                  className="hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
                 >
                   <User className="mr-2 h-4 w-4 text-purple-600" />
-                  <span className="text-gray-700">Perfil</span>
+                  <span className="text-gray-700 font-medium">Perfil</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleSettings}
-                  className="hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100 cursor-pointer"
+                  className="hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
                 >
-                  <Settings className="mr-2 h-4 w-4 text-blue-600" />
-                  <span className="text-gray-700">Configuración</span>
+                  <Settings className="mr-2 h-4 w-4 text-purple-600" />
+                  <span className="text-gray-700 font-medium">Configuración</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleLogout}
-                  className="hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 cursor-pointer"
+                  className="hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 cursor-pointer transition-all py-2.5"
                 >
                   <LogOut className="mr-2 h-4 w-4 text-red-600" />
-                  <span className="text-gray-700">Cerrar Sesión</span>
+                  <span className="text-gray-700 font-medium">Cerrar Sesión</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
