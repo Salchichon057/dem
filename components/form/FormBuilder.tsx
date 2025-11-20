@@ -554,7 +554,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="Ej: Auditoría de Comunidades 2025"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600"
               />
             </div>
 
@@ -567,7 +567,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder="Descripción breve del formulario..."
                 rows={3}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600"
               />
             </div>
 
@@ -580,7 +580,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 value={formSlug}
                 onChange={(e) => setFormSlug(e.target.value)}
                 placeholder="auditoria-comunidades-2025"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-600 focus:border-transparent font-mono text-sm"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600 font-mono text-sm"
               />
               <p className="text-sm text-gray-500 mt-1">
                 URL: <span className="font-mono">/forms/{formSlug || 'slug-del-formulario'}</span>
@@ -722,7 +722,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 {/* Botón agregar pregunta */}
                 <button
                   onClick={() => handleAddQuestion(section.tempId)}
-                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:border-purple-600 hover:text-purple-600 hover:bg-pink-50 transition-colors flex items-center justify-center"
+                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center"
                 >
                   <PlusCircle className="w-5 h-5 mr-2" />
                   Agregar Pregunta
