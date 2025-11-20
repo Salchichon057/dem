@@ -8,9 +8,10 @@ interface SuccessModalProps {
   onClose: () => void
   message: string
   onRedirect?: () => void  // Callback opcional antes de redirigir
+  redirectPath?: string    // Ruta personalizada de redirección
 }
 
-export default function SuccessModal({ isOpen, onClose, message, onRedirect }: SuccessModalProps) {
+export default function SuccessModal({ isOpen, onClose, message, onRedirect, redirectPath }: SuccessModalProps) {
   const router = useRouter()
 
   const handleClose = () => {
@@ -18,7 +19,10 @@ export default function SuccessModal({ isOpen, onClose, message, onRedirect }: S
     if (onRedirect) {
       onRedirect()  // Ejecutar callback (limpiar formulario)
     }
-    router.push('/admin')
+    // Si hay redirectPath, usarlo; si no, cerrar el modal sin redirigir
+    if (redirectPath) {
+      router.push(redirectPath)
+    }
   }
 
   return (

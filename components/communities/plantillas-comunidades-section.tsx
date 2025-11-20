@@ -41,7 +41,7 @@ export function PlantillasComunidadesSection() {
             Volver a la lista
           </button>
         </div>
-        <FormRenderer form={viewingForm} />
+        <FormRenderer form={viewingForm} onSuccess={handleBackToList} />
       </div>
     );
   }

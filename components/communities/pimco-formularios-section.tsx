@@ -29,7 +29,7 @@ export function PimcoFormulariosSection() {
           </button>
         </div>
 
-        <FormRenderer form={viewingForm} />
+        <FormRenderer form={viewingForm} onSuccess={handleBackToList} />
       </div>
     );
   }

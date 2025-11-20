@@ -11,6 +11,7 @@ import { useUser } from '@/hooks/use-user'
 
 interface FormRendererProps {
   form: FormTemplateWithQuestions
+  onSuccess?: () => void
 }
 
 // Mapeo de FormSectionType a las keys de STORAGE_BUCKETS
@@ -23,7 +24,7 @@ const SECTION_TO_BUCKET_KEY: Record<FormSectionType, keyof typeof STORAGE_BUCKET
   'voluntariado': 'FORM_VOLUNTARIADO',
 }
 
-export default function FormRenderer({ form }: FormRendererProps) {
+export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
   const { user } = useUser()
   const [answers, setAnswers] = useState<Record<string, unknown>>({})
   const [isPending, startTransition] = useTransition()
@@ -630,7 +631,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                   setErrors({ ...errors, [question.id]: '' })
                 }
               }}
-              className="w-full border border-gray-300 rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-purple-600 file:to-blue-600 file:text-white hover:file:from-purple-700 hover:file:to-blue-700 file:cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full border border-gray-300 rounded-lg p-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-linear-to-r file:from-purple-600 file:to-blue-600 file:text-white hover:file:from-purple-700 hover:file:to-blue-700 file:cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             />
             {isUploading && (
               <p className="text-sm text-purple-600 mt-2 flex items-center gap-2">
@@ -717,7 +718,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
       case 'SECTION_HEADER':
         // SECTION_HEADER es solo visual, no requiere respuesta
         return (
-          <div className="bg-gradient-to-r from-purple-600/10 to-transparent border-l-4 border-purple-600 p-4 rounded-lg -mt-4">
+          <div className="bg-linear-to-r from-purple-600/10 to-transparent border-l-4 border-purple-600 p-4 rounded-lg -mt-4">
             <h3 className="text-lg font-bold text-gray-800">{question.title}</h3>
             {question.help_text && (
               <p className="text-sm text-gray-600 mt-1">{question.help_text}</p>
@@ -895,7 +896,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div 
-            className="bg-gradient-to-r from-purple-600 to-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"
+            className="bg-linear-to-r from-purple-600 to-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -903,7 +904,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
       {/* Section title */}
       {currentSectionData && (
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow-md p-6 text-white">
+        <div className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg shadow-md p-6 text-white">
           <h3 className="text-xl font-bold mb-2">{currentSectionData.title}</h3>
           {currentSectionData.description && (
             <p className="text-white/90">{currentSectionData.description}</p>
@@ -916,10 +917,10 @@ export default function FormRenderer({ form }: FormRendererProps) {
         {currentQuestions.map((question, index) => (
           <div key={question.id} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
             <div className="flex items-start mb-3">
-              <span className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+              <span className="shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
                 {index + 1}
               </span>
-              <div className="flex-grow">
+              <div className="grow">
                 <div className={`font-medium text-lg ${errors[question.id] ? 'text-red-600' : 'text-gray-900'}`}>
                   {question.title}
                   {question.is_required && (
@@ -966,7 +967,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
           <button
             type="button"
             onClick={handleNext}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all font-medium ml-auto"
+            className="flex items-center space-x-2 px-6 py-3 bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all font-medium ml-auto"
           >
             <span>Siguiente</span>
             <i className="fas fa-arrow-right"></i>
@@ -975,7 +976,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium ml-auto shadow-lg"
+            className="flex items-center space-x-2 px-8 py-3 bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium ml-auto shadow-lg"
           >
             {isPending ? (
               <>
@@ -995,9 +996,15 @@ export default function FormRenderer({ form }: FormRendererProps) {
       {/* Modales */}
       <SuccessModal
         isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
+        onClose={() => {
+          setShowSuccessModal(false)
+          if (onSuccess) {
+            onSuccess()
+          } else {
+            resetForm()
+          }
+        }}
         message="Tu formulario ha sido enviado exitosamente. Gracias por tu tiempo."
-        onRedirect={resetForm}
       />
       
       <ErrorModal
