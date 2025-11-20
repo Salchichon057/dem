@@ -280,20 +280,11 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
             {searchTerm ? 'No se encontraron formularios' : 'No hay formularios'}
           </h3>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500">
             {searchTerm 
               ? 'Intenta con otros términos de búsqueda' 
-              : 'Crea tu primer formulario para comenzar'}
+              : 'Usa el botón "Nuevo Formulario" para crear tu primer formulario'}
           </p>
-          {!searchTerm && (
-            <Link
-              href={`/dashboard/formularios/new?section=${sectionLocation}`}
-              className="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg"
-            >
-              <Plus className="w-5 h-5" />
-              Crear Formulario
-            </Link>
-          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
