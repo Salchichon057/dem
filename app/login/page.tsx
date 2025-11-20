@@ -66,11 +66,13 @@ export default function AuthPage() {
     const password = formData.get("password") as string;
 
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${baseUrl}/auth/callback`,
           data: { name },
         },
       });
