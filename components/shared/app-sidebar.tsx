@@ -3,9 +3,10 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Building2, BarChart3, FileText, Settings, User, ChevronDown, LogOut, MapPin, Shield, Activity, Heart, UserCheck, TrendingUp } from 'lucide-react'
+import { Building2, BarChart3, FileText, Settings, User, ChevronDown, LogOut, MapPin, Shield, Activity, Heart, UserCheck, TrendingUp, Lock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { useUserRole } from '@/hooks/use-user-role'
 
 import {
   Sidebar,
@@ -162,6 +163,7 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
   const supabase = createClient()
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [expandedItems, setExpandedItems] = useState<string[]>([])
+  const { isAdmin } = useUserRole()
 
   useEffect(() => {
     const getUser = async () => {
@@ -288,6 +290,38 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin() && (
+          <SidebarGroup className="mt-4">
+            <SidebarGroupLabel className="text-red-700 font-semibold mb-3 flex items-center space-x-2">
+              <div className="w-2 h-2 bg-linear-to-r from-red-500 to-orange-500 rounded-full"></div>
+              <span>Administración</span>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={activeSection === 'admin-panel'}
+                    onClick={() => setActiveSection('admin-panel')}
+                    className={`
+                      w-full justify-start text-gray-700 hover:bg-linear-to-r hover:from-red-100 hover:to-orange-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1
+                      ${activeSection === 'admin-panel' 
+                        ? 'bg-linear-to-r from-red-500 to-orange-500 text-white shadow-lg hover:from-red-600 hover:to-orange-600' 
+                        : ''
+                      }
+                    `}
+                  >
+                    <Lock className={`h-4 w-4 ${activeSection === 'admin-panel' ? 'text-white' : 'text-gray-600'}`} />
+                    <span className="font-medium">Panel de Admin</span>
+                    {activeSection === 'admin-panel' && (
+                      <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="shrink-0 border-t border-purple-200/50 p-4 bg-linear-to-r from-white to-purple-50/50">

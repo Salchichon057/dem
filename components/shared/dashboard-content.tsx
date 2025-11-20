@@ -17,6 +17,7 @@ import { ComunidadesEstadisticaSection } from "@/components/statistics/comunidad
 import { AuditoriasEstadisticaSection } from "@/components/statistics/auditorias-estadistica-section"
 import { VoluntariadoEstadisticaSection } from "@/components/statistics/voluntariado-estadistica-section"
 import { PimcoEstadisticaSection } from "@/components/statistics/pimco-estadistica-section"
+import { AdminPanelSection } from "@/components/admin/admin-panel-section"
 import Image from "next/image"
 import { Construction, FileText } from "lucide-react"
 
@@ -126,6 +127,10 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "configuracion":
         return <ConfiguracionSection />
       
+      // Admin Panel (solo visible para admins)
+      case "admin-panel":
+        return <AdminPanelSection />
+      
       default:
         return <UnderConstruction title="PIMCO - Comunidades" />
     }
@@ -182,6 +187,10 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return "Perfil de Usuario"
       case "configuracion":
         return "Configuración"
+      
+      // Admin Panel
+      case "admin-panel":
+        return "Panel de Administración"
       
       default:
         return "Perfil Comunitario - Comunidades"
