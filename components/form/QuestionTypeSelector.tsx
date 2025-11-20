@@ -116,7 +116,7 @@ export default function QuestionTypeSelector({ questionTypes, onSelect, onClose 
             return (
               <div key={category.name}>
                 <h3 className="text-lg font-bold text-gray-700 mb-4 flex items-center">
-                  <span className="bg-[#e6235a] text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">
+                  <span className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">
                     {typesInCategory.length}
                   </span>
                   {category.name}
@@ -130,14 +130,14 @@ export default function QuestionTypeSelector({ questionTypes, onSelect, onClose 
                       <button
                         key={type.id}
                         onClick={() => onSelect(type.id, type.code)}
-                        className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-[#e6235a] hover:bg-pink-50 transition-all group"
+                        className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-600 hover:bg-pink-50 transition-all group"
                       >
                         <div className="flex items-start">
-                          <div className="bg-gray-100 group-hover:bg-[#e6235a] group-hover:text-white rounded-lg w-12 h-12 flex items-center justify-center mr-3 transition-colors flex-shrink-0">
+                          <div className="bg-gray-100 group-hover:bg-purple-600 group-hover:text-white rounded-lg w-12 h-12 flex items-center justify-center mr-3 transition-colors flex-shrink-0">
                             <IconComponent className="w-6 h-6" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-gray-800 group-hover:text-[#e6235a] transition-colors">
+                            <h4 className="font-bold text-gray-800 group-hover:text-purple-600 transition-colors">
                               {type.name}
                             </h4>
                             {type.description && (

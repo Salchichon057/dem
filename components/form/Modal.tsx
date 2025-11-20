@@ -89,9 +89,9 @@ export default function Modal({
     },
     confirm: {
       icon: 'fa-question-circle',
-      iconBg: 'bg-[#e6235a]/10',
-      iconColor: 'text-[#e6235a]',
-      buttonBg: 'bg-[#e6235a] hover:bg-[#c41e4d]'
+      iconBg: 'bg-purple-600/10',
+      iconColor: 'text-purple-600',
+      buttonBg: 'bg-purple-600 hover:bg-purple-50'
     }
   }[type]
 

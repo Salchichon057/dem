@@ -52,7 +52,7 @@ export default function ValidationModal({ isOpen, onClose, missingFields }: Vali
         {/* Button */}
         <button
           onClick={onClose}
-          className="w-full px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors shadow-sm font-medium"
+          className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-50 transition-colors shadow-sm font-medium"
         >
           Entendido
         </button>

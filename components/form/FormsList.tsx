@@ -209,7 +209,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 text-[#e6235a] mb-4 mx-auto animate-spin" />
+          <Loader2 className="w-10 h-10 text-purple-600 mb-4 mx-auto animate-spin" />
           <p className="text-gray-600">Cargando formularios...</p>
         </div>
       </div>
@@ -327,7 +327,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                 {/* Estadísticas */}
                 <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-[#e6235a]" />
+                    <FileText className="w-4 h-4 text-purple-600" />
                     <span>{submissionCount} respuestas</span>
                   </div>
                 </div>

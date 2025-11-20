@@ -323,7 +323,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
     const inputClassName = `w-full border rounded-lg px-4 py-2.5 transition-all focus:outline-none focus:ring-2 ${
       hasError 
         ? 'border-red-500 focus:ring-red-200' 
-        : 'border-gray-300 focus:ring-[#e6235a] focus:border-[#e6235a]'
+        : 'border-gray-300 focus:ring-purple-600 focus:border-purple-600'
     }`
 
     switch (questionType) {
@@ -428,7 +428,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                     value={optionValue}
                     checked={value === optionValue}
                     onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    className="mr-3 h-5 w-5 text-[#e6235a] focus:ring-[#e6235a] border-gray-300"
+                    className="mr-3 h-5 w-5 text-purple-600 focus:ring-purple-600 border-gray-300"
                   />
                   <span className="text-gray-700 group-hover:text-gray-900">
                     {optionText}
@@ -463,7 +463,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                         : checkedValues.filter(v => v !== optionValue)
                       handleAnswerChange(question.id, newValues)
                     }}
-                    className="mr-3 h-5 w-5 text-[#e6235a] focus:ring-[#e6235a] border-gray-300 rounded"
+                    className="mr-3 h-5 w-5 text-purple-600 focus:ring-purple-600 border-gray-300 rounded"
                   />
                   <span className="text-gray-700 group-hover:text-gray-900">
                     {optionText}
@@ -535,7 +535,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                   value={option}
                   checked={value === option}
                   onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                  className="mr-3 h-5 w-5 text-[#e6235a] focus:ring-[#e6235a] border-gray-300"
+                  className="mr-3 h-5 w-5 text-purple-600 focus:ring-purple-600 border-gray-300"
                 />
                 <span className="text-gray-700 group-hover:text-gray-900">
                   {option}
@@ -564,8 +564,8 @@ export default function FormRenderer({ form }: FormRendererProps) {
                   onClick={() => handleAnswerChange(question.id, scaleVal)}
                   className={`w-12 h-12 rounded-lg border-2 transition-all font-medium ${
                     value === scaleVal
-                      ? 'bg-[#e6235a] text-white border-[#e6235a] shadow-md scale-110'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#e6235a] hover:text-[#e6235a]'
+                      ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-110'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-purple-600 hover:text-purple-600'
                   }`}
                 >
                   {scaleVal}
@@ -589,8 +589,8 @@ export default function FormRenderer({ form }: FormRendererProps) {
                 onClick={() => handleAnswerChange(question.id, rating)}
                 className={`px-4 py-2 rounded-lg border-2 transition-all font-medium ${
                   value === rating
-                    ? 'bg-[#e6235a] text-white border-[#e6235a] shadow-md scale-105'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#e6235a] hover:text-[#e6235a]'
+                    ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-105'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-purple-600 hover:text-purple-600'
                 }`}
               >
                 {rating}
@@ -698,7 +698,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                                 [row.text]: col.text
                               })
                             }}
-                            className="h-4 w-4 text-[#e6235a] focus:ring-[#e6235a] border-gray-300"
+                            className="h-4 w-4 text-purple-600 focus:ring-purple-600 border-gray-300"
                           />
                         </td>
                       )
@@ -717,7 +717,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
       case 'SECTION_HEADER':
         // SECTION_HEADER es solo visual, no requiere respuesta
         return (
-          <div className="bg-gradient-to-r from-[#e6235a]/10 to-transparent border-l-4 border-[#e6235a] p-4 rounded-lg -mt-4">
+          <div className="bg-gradient-to-r from-purple-600/10 to-transparent border-l-4 border-purple-600 p-4 rounded-lg -mt-4">
             <h3 className="text-lg font-bold text-gray-800">{question.title}</h3>
             {question.help_text && (
               <p className="text-sm text-gray-600 mt-1">{question.help_text}</p>
@@ -794,7 +794,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                           : selectedValues.filter(v => v !== optionValue)
                         handleAnswerChange(question.id, newValues)
                       }}
-                      className="mr-3 h-4 w-4 text-[#e6235a] focus:ring-[#e6235a] border-gray-300 rounded"
+                      className="mr-3 h-4 w-4 text-purple-600 focus:ring-purple-600 border-gray-300 rounded"
                     />
                     <span className="text-sm text-gray-700">{optionText}</span>
                   </label>
@@ -821,10 +821,10 @@ export default function FormRenderer({ form }: FormRendererProps) {
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header del formulario */}
-      <div className="bg-white rounded-lg shadow-sm border-t-4 border-[#e6235a] p-6 sm:p-8">
+      <div className="bg-white rounded-lg shadow-sm border-t-4 border-purple-600 p-6 sm:p-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{form.name}</h1>
         <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
-          <i className="far fa-question-circle text-[#e6235a]"></i>
+          <i className="far fa-question-circle text-purple-600"></i>
           <span>{form.questions?.filter(q => q.question_types?.code !== 'PAGE_BREAK' && q.question_types?.code !== 'SECTION_HEADER').length || 0} preguntas</span>
         </div>
         {form.description && (
@@ -849,7 +849,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                     <div className="flex flex-col items-center relative z-10">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
                         isActive 
-                          ? 'bg-[#e6235a] text-white ring-4 ring-[#e6235a]/20 scale-110' 
+                          ? 'bg-purple-600 text-white ring-4 ring-purple-600/20 scale-110' 
                           : isCompleted
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-200 text-gray-500'
@@ -862,7 +862,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
                       </div>
                       {sectionInfo?.title && (
                         <span className={`text-xs mt-2 text-center font-medium max-w-[100px] truncate ${
-                          isActive ? 'text-[#e6235a]' : 'text-gray-500'
+                          isActive ? 'text-purple-600' : 'text-gray-500'
                         }`}>
                           {sectionInfo.title}
                         </span>
@@ -889,13 +889,13 @@ export default function FormRenderer({ form }: FormRendererProps) {
               ? `Paso ${currentSection + 1} de ${totalSections}` 
               : 'Progreso del formulario'}
           </span>
-          <span className="text-sm font-semibold text-[#e6235a]">
+          <span className="text-sm font-semibold text-purple-600">
             {progress}% completado
           </span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div 
-            className="bg-[#e6235a] h-2.5 rounded-full transition-all duration-300 ease-in-out"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -903,7 +903,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
       {/* Section title */}
       {currentSectionData && (
-        <div className="bg-gradient-to-r from-[#e6235a] to-[#c41e4d] rounded-lg shadow-md p-6 text-white">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow-md p-6 text-white">
           <h3 className="text-xl font-bold mb-2">{currentSectionData.title}</h3>
           {currentSectionData.description && (
             <p className="text-white/90">{currentSectionData.description}</p>
@@ -916,14 +916,14 @@ export default function FormRenderer({ form }: FormRendererProps) {
         {currentQuestions.map((question, index) => (
           <div key={question.id} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
             <div className="flex items-start mb-3">
-              <span className="flex-shrink-0 w-8 h-8 bg-[#e6235a] text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+              <span className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
                 {index + 1}
               </span>
               <div className="flex-grow">
                 <div className={`font-medium text-lg ${errors[question.id] ? 'text-red-600' : 'text-gray-900'}`}>
                   {question.title}
                   {question.is_required && (
-                    <span className="text-[#e6235a] ml-1">*</span>
+                    <span className="text-purple-600 ml-1">*</span>
                   )}
                 </div>
                 {question.help_text && (
@@ -966,7 +966,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
           <button
             type="button"
             onClick={handleNext}
-            className="flex items-center space-x-2 px-6 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] transition-colors font-medium ml-auto"
+            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all font-medium ml-auto"
           >
             <span>Siguiente</span>
             <i className="fas fa-arrow-right"></i>
@@ -975,7 +975,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="flex items-center space-x-2 px-8 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium ml-auto shadow-lg"
+            className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium ml-auto shadow-lg"
           >
             {isPending ? (
               <>

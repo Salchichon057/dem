@@ -536,9 +536,9 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
             {mode === 'edit' ? (
-              <Edit className="w-8 h-8 text-[#e6235a] mr-3" />
+              <Edit className="w-8 h-8 text-purple-600 mr-3" />
             ) : (
-              <FileText className="w-8 h-8 text-[#e6235a] mr-3" />
+              <FileText className="w-8 h-8 text-purple-600 mr-3" />
             )}
             {mode === 'edit' ? 'Editar Formulario' : 'Crear Nuevo Formulario'}
           </h1>
@@ -554,7 +554,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="Ej: Auditoría de Comunidades 2025"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               />
             </div>
 
@@ -567,7 +567,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder="Descripción breve del formulario..."
                 rows={3}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               />
             </div>
 
@@ -580,7 +580,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 value={formSlug}
                 onChange={(e) => setFormSlug(e.target.value)}
                 placeholder="auditoria-comunidades-2025"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#e6235a] focus:border-transparent font-mono text-sm"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-600 focus:border-transparent font-mono text-sm"
               />
               <p className="text-sm text-gray-500 mt-1">
                 URL: <span className="font-mono">/forms/{formSlug || 'slug-del-formulario'}</span>
@@ -593,7 +593,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 id="isPublic"
                 checked={isPublic}
                 onChange={(e) => setIsPublic(e.target.checked)}
-                className="h-5 w-5 text-[#e6235a] focus:ring-[#e6235a] border-gray-300 rounded"
+                className="h-5 w-5 text-purple-600 focus:ring-purple-600 border-gray-300 rounded"
               />
               <label htmlFor="isPublic" className="ml-3 text-sm font-medium text-gray-700">
                 Formulario público (visible sin autenticación)
@@ -610,7 +610,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center mb-2">
-                    <span className="bg-[#e6235a] text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                    <span className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                       {sectionIndex + 1}
                     </span>
                     <input
@@ -618,7 +618,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                       value={section.title}
                       onChange={(e) => handleUpdateSection(section.tempId, 'title', e.target.value)}
                       placeholder="Título de la sección *"
-                      className="flex-1 text-xl font-bold border-b-2 border-gray-300 focus:border-[#e6235a] outline-none pb-1"
+                      className="flex-1 text-xl font-bold border-b-2 border-gray-300 focus:border-purple-600 outline-none pb-1"
                     />
                   </div>
                   <input
@@ -626,7 +626,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                     value={section.description || ''}
                     onChange={(e) => handleUpdateSection(section.tempId, 'description', e.target.value)}
                     placeholder="Descripción de la sección (opcional)"
-                    className="w-full text-sm text-gray-600 border-b border-gray-200 focus:border-[#e6235a] outline-none pb-1"
+                    className="w-full text-sm text-gray-600 border-b border-gray-200 focus:border-purple-600 outline-none pb-1"
                   />
                 </div>
                 
@@ -722,7 +722,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
                 {/* Botón agregar pregunta */}
                 <button
                   onClick={() => handleAddQuestion(section.tempId)}
-                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-pink-50 transition-colors flex items-center justify-center"
+                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:border-purple-600 hover:text-purple-600 hover:bg-pink-50 transition-colors flex items-center justify-center"
                 >
                   <PlusCircle className="w-5 h-5 mr-2" />
                   Agregar Pregunta
@@ -734,7 +734,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
           {/* Botón agregar sección */}
           <button
             onClick={handleAddSection}
-            className="w-full border-2 border-dashed border-gray-400 rounded-lg p-6 text-gray-600 hover:border-[#e6235a] hover:text-[#e6235a] hover:bg-pink-50 transition-colors font-medium text-lg flex items-center justify-center"
+            className="w-full border-2 border-dashed border-gray-400 rounded-lg p-6 text-gray-600 hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-colors font-medium text-lg flex items-center justify-center"
           >
             <Layers className="w-6 h-6 mr-2" />
             Agregar Sección
@@ -760,7 +760,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
           <button
             onClick={handleSaveForm}
             disabled={isSaving}
-            className="px-8 py-3 bg-[#e6235a] text-white rounded-lg hover:bg-[#c41e4d] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center"
+            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium flex items-center"
           >
             {isSaving ? (
               <>
