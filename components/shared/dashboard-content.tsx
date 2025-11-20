@@ -1,5 +1,8 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
+import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { FormulariosSection } from "@/components/forms/formularios-section"
 import { PerfilSection } from "@/components/settings/perfil-section"
@@ -54,8 +57,22 @@ const UnderConstruction = ({ title, variant = 'coming-soon' }: { title: string; 
 }
 
 export function DashboardContent({ activeSection }: DashboardContentProps) {
-  // Obtener usuario de Supabase Auth en el futuro
-  const user = { name: 'Usuario', email: 'usuario@example.com' }
+  const supabase = createClient()
+  const [user, setUser] = useState<SupabaseUser | null>(null)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
 
   const renderSection = () => {
     switch (activeSection) {
@@ -191,11 +208,11 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
             {getSectionTitle()}
           </h1>
         </div>
-        <div className="hidden md:flex items-center space-x-4 text-white/90">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-sm">
-              Bienvenido, {user?.name || user?.email || 'Usuario'}
+        <div className="hidden md:flex items-center space-x-2">
+          <div className="flex items-center space-x-2 bg-black/5 backdrop-blur-xl px-4 py-2 rounded-full shadow-lg border border-white/20">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-sm shadow-green-400/50"></div>
+            <span className="text-sm font-medium text-white drop-shadow-md">
+              Bienvenido, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario'}
             </span>
           </div>
         </div>

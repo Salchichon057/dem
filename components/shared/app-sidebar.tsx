@@ -217,11 +217,6 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
             />
           </div>
         </div>
-        <div className="mt-2 text-xs text-gray-600">
-          <span className="font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Bienvenido, {user?.email?.split('@')[0] || 'Usuario'}
-          </span>
-        </div>
       </SidebarHeader>
 
       <SidebarContent className="px-4 py-4 bg-gradient-to-b from-white/95 to-purple-50/95">
