@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -198,8 +199,8 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
   }
 
   return (
-    <Sidebar className="border-r border-purple-200/50 bg-gradient-to-b from-white via-purple-50/30 to-blue-50/30 shadow-xl">
-      <SidebarHeader className="border-b border-purple-200/50 px-6 py-4 bg-gradient-to-r from-white to-purple-50/50">
+    <Sidebar className="border-r border-purple-200/50 bg-linear-to-b from-white via-purple-50/30 to-blue-50/30 shadow-xl">
+      <SidebarHeader className="shrink-0 border-b border-purple-200/50 px-6 py-4 bg-linear-to-r from-white to-purple-50/50">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Image
@@ -213,10 +214,10 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-4 py-4 bg-gradient-to-b from-white/95 to-purple-50/95">
+      <SidebarContent className="flex-1 overflow-y-auto px-4 py-4 bg-white">
         <SidebarGroup>
           <SidebarGroupLabel className="text-gray-700 font-semibold mb-3 flex items-center space-x-2">
-            <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-linear-to-r from-purple-500 to-pink-500 rounded-full"></div>
             <span>Navegación Principal</span>
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -227,7 +228,7 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                     <div>
                       <SidebarMenuButton
                         onClick={() => toggleExpanded(item.id)}
-                        className="w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1"
+                        className="w-full justify-start text-gray-700 hover:bg-linear-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1"
                       >
                         <item.icon className="h-4 w-4 text-gray-600" />
                         <span className="font-medium">{item.title}</span>
@@ -243,9 +244,9 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                               isActive={activeSection === subItem.id}
                               onClick={() => setActiveSection(subItem.id)}
                               className={`
-                                w-full justify-start text-gray-600 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
+                                w-full justify-start text-gray-600 hover:bg-linear-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
                                 ${activeSection === subItem.id 
-                                  ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
+                                  ? 'bg-linear-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
                                   : ''
                                 }
                               `}
@@ -265,9 +266,9 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                       isActive={activeSection === item.id}
                       onClick={() => setActiveSection(item.id)}
                       className={`
-                        w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1
+                        w-full justify-start text-gray-700 hover:bg-linear-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1
                         ${activeSection === item.id 
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:from-purple-600 hover:to-pink-600' 
+                          ? 'bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:from-purple-600 hover:to-pink-600' 
                           : ''
                         }
                       `}
@@ -289,13 +290,13 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-purple-200/50 p-4 bg-gradient-to-r from-white to-purple-50/50">
+      <SidebarFooter className="shrink-0 border-t border-purple-200/50 p-4 bg-linear-to-r from-white to-purple-50/50">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full h-auto py-3 text-gray-700 hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 rounded-lg transition-all duration-300">
-                  <div className="h-8 w-8 rounded-full ring-2 ring-purple-400 flex items-center justify-center bg-purple-50 overflow-hidden flex-shrink-0">
+                <SidebarMenuButton className="w-full h-auto py-3 text-gray-700 hover:bg-linear-to-r hover:from-purple-100 hover:to-blue-100 rounded-lg transition-all duration-300">
+                  <div className="h-8 w-8 rounded-full ring-2 ring-purple-400 flex items-center justify-center bg-purple-50 overflow-hidden shrink-0">
                     {user?.user_metadata?.avatar_url ? (
                       <img 
                         src={user.user_metadata.avatar_url} 
@@ -310,27 +311,27 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                     <span className="text-sm font-semibold text-purple-700 truncate w-full">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario'}</span>
                     <span className="text-xs text-gray-500 truncate w-full">{user?.email}</span>
                   </div>
-                  <ChevronDown className="ml-2 h-4 w-4 text-purple-600 flex-shrink-0" />
+                  <ChevronDown className="ml-2 h-4 w-4 text-purple-600 shrink-0" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width] backdrop-blur-sm bg-white/95 border-2 border-purple-200 shadow-lg">
                 <DropdownMenuItem 
                   onClick={handleProfile}
-                  className="hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
+                  className="hover:bg-linear-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
                 >
                   <User className="mr-2 h-4 w-4 text-purple-600" />
                   <span className="text-gray-700 font-medium">Perfil</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleSettings}
-                  className="hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
+                  className="hover:bg-linear-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
                 >
                   <Settings className="mr-2 h-4 w-4 text-purple-600" />
                   <span className="text-gray-700 font-medium">Configuración</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleLogout}
-                  className="hover:bg-gradient-to-r hover:from-red-100 hover:to-pink-100 cursor-pointer transition-all py-2.5"
+                  className="hover:bg-linear-to-r hover:from-red-100 hover:to-pink-100 cursor-pointer transition-all py-2.5"
                 >
                   <LogOut className="mr-2 h-4 w-4 text-red-600" />
                   <span className="text-gray-700 font-medium">Cerrar Sesión</span>

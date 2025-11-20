@@ -29,6 +29,14 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
     })
   }
 
+  // Si es FILE_UPLOAD y no tiene allowedTypes, establecer valores por defecto
+  if (questionType?.code === 'FILE_UPLOAD' && (!question.config.allowedTypes || (question.config.allowedTypes as string[]).length === 0)) {
+    handleConfigUpdate('allowedTypes', ['image/*', '.pdf', '.doc', '.docx', '.xls', '.xlsx'])
+    if (!question.config.maxSize) {
+      handleConfigUpdate('maxSize', 10)
+    }
+  }
+
   const handleAddOption = () => {
     const currentOptions = (question.config.options as string[]) || []
     handleConfigUpdate('options', [...currentOptions, ''])
@@ -289,9 +297,19 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
                   ))}
                 </div>
               </div>
-              {selectedTypes.length > 0 && (
-                <p className="text-xs text-gray-600 mt-2">
-                  Seleccionados: {selectedTypes.join(', ')}
+              {selectedTypes.length > 0 ? (
+                <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {selectedTypes.length} formato(s) seleccionado(s): {selectedTypes.join(', ')}
+                </p>
+              ) : (
+                <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  Selecciona al menos un tipo de archivo
                 </p>
               )}
             </div>
@@ -418,8 +436,18 @@ export default function QuestionEditor({ question, questionType, onUpdate }: Que
           value={question.title}
           onChange={(e) => onUpdate({ title: e.target.value })}
           placeholder="Escribe tu pregunta aquí..."
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[purple-600] focus:border-transparent"
+          className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none ${
+            !question.title.trim() ? 'border-red-300 bg-red-50' : 'border-gray-300'
+          }`}
         />
+        {!question.title.trim() && (
+          <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            El título es obligatorio
+          </p>
+        )}
       </div>
 
       {/* Texto de ayuda */}

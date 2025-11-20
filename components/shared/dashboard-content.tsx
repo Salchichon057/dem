@@ -29,7 +29,7 @@ const UnderConstruction = ({ title, variant = 'coming-soon' }: { title: string; 
   if (variant === 'no-data') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-6">
+        <div className="w-24 h-24 bg-linear-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-6">
           <FileText className="w-12 h-12 text-purple-600" />
         </div>
         <h2 className="text-3xl font-bold text-gray-800 mb-3">No hay {title.toLowerCase()}</h2>
@@ -41,7 +41,7 @@ const UnderConstruction = ({ title, variant = 'coming-soon' }: { title: string; 
   
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-6">
+      <div className="w-24 h-24 bg-linear-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-6">
         <Construction className="w-12 h-12 text-purple-600" />
       </div>
       <h2 className="text-3xl font-bold text-gray-800 mb-3">{title}</h2>
@@ -189,9 +189,9 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden">
+    <div className="flex flex-col h-screen relative overflow-hidden">
       {/* Fondo decorativo */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 opacity-60"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-purple-50 via-blue-50 to-pink-50 opacity-60"></div>
       <div className="absolute inset-0" style={{
         backgroundImage: `
           radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
@@ -201,7 +201,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         backgroundSize: '100% 100%'
       }}></div>
       
-      <header className="relative z-10 flex h-16 items-center gap-4 border-b border-purple-200/50 bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 px-6 shadow-lg">
+      <header className="relative z-10 flex h-16 shrink-0 items-center gap-4 border-b border-purple-200/50 bg-linear-to-r from-purple-600 via-blue-600 to-pink-600 px-6 shadow-lg">
         <SidebarTrigger className="text-white hover:bg-white/20 rounded-lg transition-colors duration-200" />
         <div className="flex-1">
           <h1 className="text-lg font-semibold text-white drop-shadow-sm">
@@ -218,7 +218,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         </div>
       </header>
       
-      <div className="relative z-10 flex-1 p-6" style={{
+      <div className="relative z-10 flex-1 overflow-y-auto p-6" style={{
         background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)'
       }}>
         <div className="max-w-7xl mx-auto">
@@ -226,11 +226,11 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         </div>
       </div>
       
-      <footer className="relative z-10 border-t border-purple-200/50 bg-gradient-to-r from-gray-800 via-gray-900 to-black px-6 py-4 shadow-lg">
+      <footer className="relative z-10 shrink-0 border-t border-purple-200/50 bg-linear-to-r from-gray-800 via-gray-900 to-black px-6 py-3 shadow-lg">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-linear-to-r rounded-full flex items-center justify-center">
                 <Image
                   src="/logos/logo.png"
                   alt="Logo"
