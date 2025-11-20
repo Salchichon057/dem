@@ -480,7 +480,7 @@ export default function BeneficiaryForm({
                     checked={isActive}
                     onCheckedChange={setIsActive}
                   />
-                  <span className={`text-sm font-medium ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
+                  <span className={`text-sm font-medium ${isActive ? 'text-purple-600' : 'text-gray-500'}`}>
                     {isActive ? 'Activo' : 'Inactivo'}
                   </span>
                 </div>
