@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import { useState } from "react"
@@ -34,7 +35,7 @@ export function PerfilSection() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white shadow-lg">
+      <div className="bg-linear-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white shadow-lg">
         <h1 className="text-3xl font-bold flex items-center gap-3">
           <User className="h-8 w-8" />
           Mi Perfil
@@ -50,7 +51,7 @@ export function PerfilSection() {
           <CardContent className="p-6">
             <div className="text-center space-y-4">
               <div className="relative mx-auto w-fit">
-                <div className="h-32 w-32 rounded-full ring-4 ring-purple-400 flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100 overflow-hidden">
+                <div className="h-32 w-32 rounded-full ring-4 ring-purple-400 flex items-center justify-center bg-linear-to-br from-purple-100 to-blue-100 overflow-hidden">
                   {profile?.avatar ? (
                     <img 
                       src={profile.avatar} 
@@ -63,7 +64,7 @@ export function PerfilSection() {
                 </div>
                 <Button 
                   size="sm" 
-                  className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
+                  className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
                 >
                   <Camera className="h-5 w-5" />
                 </Button>
@@ -78,7 +79,7 @@ export function PerfilSection() {
 
         {/* Information Card */}
         <Card className="border-purple-200 shadow-xl">
-          <CardHeader className="border-b border-purple-100 bg-gradient-to-r from-purple-50 to-blue-50">
+          <CardHeader className="border-b border-purple-100 bg-linear-to-r from-purple-50 to-blue-50">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-2xl flex items-center gap-2 text-gray-900">
@@ -93,7 +94,7 @@ export function PerfilSection() {
                 onClick={() => setIsEditing(!isEditing)}
                 className={isEditing 
                   ? "bg-gray-100 hover:bg-gray-200 text-gray-700" 
-                  : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  : "bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
                 }
               >
                 {isEditing ? (
@@ -125,7 +126,7 @@ export function PerfilSection() {
                     className="border-purple-200 focus:border-purple-600 focus:ring-purple-600"
                   />
                 ) : (
-                  <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+                  <div className="flex items-center space-x-3 p-4 bg-linear-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
                     <span className="text-gray-900 font-medium">{profile?.name || 'No especificado'}</span>
                   </div>
                 )}
@@ -145,7 +146,7 @@ export function PerfilSection() {
                     className="border-purple-200 focus:border-purple-600 focus:ring-purple-600"
                   />
                 ) : (
-                  <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+                  <div className="flex items-center space-x-3 p-4 bg-linear-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
                     <span className="text-gray-900 font-medium">{profile?.email || 'No especificado'}</span>
                   </div>
                 )}
@@ -156,7 +157,7 @@ export function PerfilSection() {
                   <Calendar className="h-4 w-4" />
                   Fecha de registro
                 </Label>
-                <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+                <div className="flex items-center space-x-3 p-4 bg-linear-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
                   <span className="text-gray-900 font-medium">
                     {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('es-ES') : 'No disponible'}
                   </span>
@@ -168,7 +169,7 @@ export function PerfilSection() {
                   <Shield className="h-4 w-4" />
                   Rol
                 </Label>
-                <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+                <div className="flex items-center space-x-3 p-4 bg-linear-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
                   <span className="text-gray-900 font-medium">{profile?.role || 'viewer'}</span>
                 </div>
               </div>
@@ -186,7 +187,7 @@ export function PerfilSection() {
                 </Button>
                 <Button
                   onClick={handleSave}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  className="bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Guardar Cambios

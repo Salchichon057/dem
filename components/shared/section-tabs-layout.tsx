@@ -59,7 +59,7 @@ export default function SectionTabsLayout({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold tracking-tight bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             {title}
           </h1>
           <p className="text-muted-foreground mt-1">{description}</p>
@@ -76,7 +76,7 @@ export default function SectionTabsLayout({
             disabled={tab.disabled}
             className={`gap-2 ${
               activeTab === tab.id 
-                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700' 
+                ? 'bg-linear-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700' 
                 : 'hover:bg-purple-50'
             }`}
           >
@@ -90,13 +90,13 @@ export default function SectionTabsLayout({
       {/* Tab Content */}
       <div className="mt-6">
         {currentTab?.locked ? (
-          <Card className="p-12 text-center border-purple-200 bg-gradient-to-br from-purple-50/50 to-blue-50/50">
+          <Card className="p-12 text-center border-purple-200 bg-linear-to-br from-purple-50/50 to-blue-50/50">
             <div className="flex flex-col items-center justify-center gap-4">
-              <div className="bg-gradient-to-br from-purple-100 to-blue-100 p-6 rounded-full">
+              <div className="bg-linear-to-br from-purple-100 to-blue-100 p-6 rounded-full">
                 <Lock className="w-12 h-12 text-purple-600" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold mb-2 bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Sección Bloqueada
                 </h3>
                 <p className="text-muted-foreground max-w-md">

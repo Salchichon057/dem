@@ -133,7 +133,7 @@ export default function QuestionTypeSelector({ questionTypes, onSelect, onClose 
                         className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-600 hover:bg-pink-50 transition-all group"
                       >
                         <div className="flex items-start">
-                          <div className="bg-gray-100 group-hover:bg-purple-600 group-hover:text-white rounded-lg w-12 h-12 flex items-center justify-center mr-3 transition-colors flex-shrink-0">
+                          <div className="bg-gray-100 group-hover:bg-purple-600 group-hover:text-white rounded-lg w-12 h-12 flex items-center justify-center mr-3 transition-colors shrink-0">
                             <IconComponent className="w-6 h-6" />
                           </div>
                           <div className="flex-1 min-w-0">

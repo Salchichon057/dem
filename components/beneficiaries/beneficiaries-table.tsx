@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Search, Eye, Pencil, Trash2, Settings2, Image as ImageIcon, MapPin, ExternalLink } from 'lucide-react'
+import { Plus, Search, Eye, Pencil, Trash2, Settings2, Image as ImageIcon, MapPin, ExternalLink, Download } from 'lucide-react'
 import { Beneficiary, } from '@/lib/types'
 import { toast } from 'sonner'
 import BeneficiaryForm from './beneficiary-form'
@@ -94,6 +94,42 @@ export default function BeneficiariesTable() {
 
   const allColumnsChecked = Object.values(visibleColumns).every(v => v)
   const someColumnsChecked = Object.values(visibleColumns).some(v => v) && !allColumnsChecked
+
+  // Download Excel function
+  const handleDownloadExcel = () => {
+    // Preparar headers
+    const headers = ['Nombre', 'Edad', 'Género', 'Departamento', 'Municipio', 'Aldea', 'Programa', 'Estado', 'Fecha de Ingreso']
+    
+    // Preparar filas
+    const rows = beneficiaries.map(b => [
+      b.name,
+      b.age,
+      b.gender,
+      b.department,
+      b.municipality,
+      b.village || '',
+      b.program,
+      b.is_active ? 'Activo' : 'Inactivo',
+      new Date(b.admission_date).toLocaleDateString('es-GT')
+    ])
+
+    // Construir CSV
+    let csvContent = headers.join(',') + '\n'
+    rows.forEach(row => {
+      csvContent += row.map(cell => `"${cell}"`).join(',') + '\n'
+    })
+
+    // Descargar
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `beneficiarios-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   // Load all beneficiaries once to generate filter options
   useEffect(() => {
@@ -266,6 +302,10 @@ export default function BeneficiariesTable() {
           <p className="text-muted-foreground">Total: {total} beneficiarios</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleDownloadExcel} className="gap-2">
+            <Download className="w-4 h-4" />
+            Descargar Excel
+          </Button>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="icon" title="Configurar columnas">
@@ -372,7 +412,7 @@ export default function BeneficiariesTable() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white" onClick={handleAdd}>
+          <Button className="gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white" onClick={handleAdd}>
             <Plus className="w-4 h-4" />
             Agregar Beneficiario
           </Button>
@@ -400,7 +440,7 @@ export default function BeneficiariesTable() {
             <SelectValue placeholder="Departamento" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los departamentos</SelectItem>
+            <SelectItem value="all">Departamentos</SelectItem>
             {departments.map((dept) => (
               <SelectItem key={dept} value={dept}>
                 {dept}
@@ -419,7 +459,7 @@ export default function BeneficiariesTable() {
             <SelectValue placeholder="Municipio" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los municipios</SelectItem>
+            <SelectItem value="all">Municipios</SelectItem>
             {municipalities.map((muni) => (
               <SelectItem key={muni} value={muni}>
                 {muni}
@@ -464,21 +504,21 @@ export default function BeneficiariesTable() {
       )}
 
       {/* Table */}
-      <div className="border rounded-lg">
-        <Table>
+      <div className="border rounded-lg overflow-x-auto">
+        <Table className="min-w-full">
           <TableHeader>
             <TableRow>
-              {visibleColumns.photo && <TableHead>Foto</TableHead>}
-              {visibleColumns.name && <TableHead>Nombre</TableHead>}
-              {visibleColumns.ageGender && <TableHead>Edad / Género</TableHead>}
-              {visibleColumns.department && <TableHead>Departamento</TableHead>}
-              {visibleColumns.municipality && <TableHead>Municipio</TableHead>}
-              {visibleColumns.village && <TableHead>Aldea</TableHead>}
-              {visibleColumns.program && <TableHead>Programa</TableHead>}
-              {visibleColumns.googleMaps && <TableHead>Google Maps</TableHead>}
-              {visibleColumns.status && <TableHead>Estado</TableHead>}
-              {visibleColumns.admissionDate && <TableHead>Fecha Ingreso</TableHead>}
-              <TableHead className="text-right">Acciones</TableHead>
+              {visibleColumns.photo && <TableHead className="whitespace-nowrap">Foto</TableHead>}
+              {visibleColumns.name && <TableHead className="whitespace-nowrap">Nombre</TableHead>}
+              {visibleColumns.ageGender && <TableHead className="whitespace-nowrap">Edad / Género</TableHead>}
+              {visibleColumns.department && <TableHead className="whitespace-nowrap">Departamento</TableHead>}
+              {visibleColumns.municipality && <TableHead className="whitespace-nowrap">Municipio</TableHead>}
+              {visibleColumns.village && <TableHead className="whitespace-nowrap">Aldea</TableHead>}
+              {visibleColumns.program && <TableHead className="whitespace-nowrap">Programa</TableHead>}
+              {visibleColumns.googleMaps && <TableHead className="whitespace-nowrap">Google Maps</TableHead>}
+              {visibleColumns.status && <TableHead className="whitespace-nowrap">Estado</TableHead>}
+              {visibleColumns.admissionDate && <TableHead className="whitespace-nowrap">Fecha Ingreso</TableHead>}
+              <TableHead className="text-right whitespace-nowrap">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -523,16 +563,16 @@ export default function BeneficiariesTable() {
                       )}
                     </TableCell>
                   )}
-                  {visibleColumns.name && <TableCell className="font-medium">{beneficiary.name}</TableCell>}
+                  {visibleColumns.name && <TableCell className="font-medium whitespace-nowrap">{beneficiary.name}</TableCell>}
                   {visibleColumns.ageGender && (
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">
                       {beneficiary.age} años / {beneficiary.gender}
                     </TableCell>
                   )}
-                  {visibleColumns.department && <TableCell>{beneficiary.department}</TableCell>}
-                  {visibleColumns.municipality && <TableCell>{beneficiary.municipality}</TableCell>}
-                  {visibleColumns.village && <TableCell>{beneficiary.village || '-'}</TableCell>}
-                  {visibleColumns.program && <TableCell>{beneficiary.program}</TableCell>}
+                  {visibleColumns.department && <TableCell className="whitespace-nowrap">{beneficiary.department}</TableCell>}
+                  {visibleColumns.municipality && <TableCell className="whitespace-nowrap">{beneficiary.municipality}</TableCell>}
+                  {visibleColumns.village && <TableCell className="whitespace-nowrap">{beneficiary.village || '-'}</TableCell>}
+                  {visibleColumns.program && <TableCell className="whitespace-nowrap">{beneficiary.program}</TableCell>}
                   {visibleColumns.googleMaps && (
                     <TableCell>
                       {beneficiary.google_maps_url ? (
@@ -559,11 +599,11 @@ export default function BeneficiariesTable() {
                     </TableCell>
                   )}
                   {visibleColumns.admissionDate && (
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">
                       {new Date(beneficiary.admission_date).toLocaleDateString('es-GT')}
                     </TableCell>
                   )}
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="ghost" size="icon" title="Ver detalles">
                         <Eye className="w-4 h-4" />

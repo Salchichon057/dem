@@ -15,7 +15,7 @@ interface ConfirmDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
-  description: string
+  description: string | React.ReactNode
   confirmText?: string
   cancelText?: string
   onConfirm: () => void
@@ -32,14 +32,23 @@ export function ConfirmDialog({
   onConfirm,
   variant = "default"
 }: ConfirmDialogProps) {
+  const descriptionId = "confirm-dialog-description"
+  const isStringDescription = typeof description === 'string'
+  
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent aria-describedby={isStringDescription ? undefined : descriptionId}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-base">
-            {description}
-          </AlertDialogDescription>
+          {isStringDescription ? (
+            <AlertDialogDescription className="text-base">
+              {description}
+            </AlertDialogDescription>
+          ) : (
+            <div id={descriptionId} className="text-sm text-muted-foreground">
+              {description}
+            </div>
+          )}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelText}</AlertDialogCancel>

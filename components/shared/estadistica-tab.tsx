@@ -32,7 +32,7 @@ export default function EstadisticaTab({
           onClick={() => setViewMode('tabla')}
           className={`gap-2 ${
             viewMode === 'tabla'
-              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+              ? 'bg-linear-to-r from-purple-500 to-blue-500 text-white'
               : 'hover:bg-purple-50'
           }`}
         >
@@ -46,7 +46,7 @@ export default function EstadisticaTab({
           disabled={graficosDisabled}
           className={`gap-2 ${
             viewMode === 'graficos'
-              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+              ? 'bg-linear-to-r from-purple-500 to-blue-500 text-white'
               : 'hover:bg-purple-50'
           }`}
         >
@@ -63,13 +63,13 @@ export default function EstadisticaTab({
         ) : graficosContent ? (
           graficosContent
         ) : (
-          <Card className="p-12 text-center border-purple-200 bg-gradient-to-br from-purple-50/50 to-blue-50/50">
+          <Card className="p-12 text-center border-purple-200 bg-linear-to-br from-purple-50/50 to-blue-50/50">
             <div className="flex flex-col items-center justify-center gap-4">
-              <div className="bg-gradient-to-br from-purple-100 to-blue-100 p-6 rounded-full">
+              <div className="bg-linear-to-br from-purple-100 to-blue-100 p-6 rounded-full">
                 <Lock className="w-12 h-12 text-purple-600" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold mb-2 bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Gráficos y Estadísticas
                 </h3>
                 <p className="text-muted-foreground max-w-md">

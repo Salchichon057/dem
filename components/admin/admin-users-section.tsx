@@ -7,7 +7,7 @@ import { useUserRole } from "@/hooks/use-user-role"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Shield, Loader2, Check, X, Edit } from "lucide-react"
+import { Shield, Loader2, Check, X, Edit, AlertTriangle } from "lucide-react"
 import { ConfirmDialog } from "./confirm-dialog"
 
 interface UserWithRole {
@@ -288,11 +288,19 @@ export function AdminUsersSection() {
         open={roleDialog.open}
         onOpenChange={(open) => !open && setRoleDialog({ open: false, user: null, newRoleId: null })}
         title="Cambiar Rol de Usuario"
-        description={`¿Estás seguro de cambiar el rol de ${roleDialog.user?.name || roleDialog.user?.email}? ${
-          roleDialog.user?.id === userData?.id 
-            ? '\n\n⚠️ ATENCIÓN: Estás cambiando tu propio rol. Si te degradas de Admin, NO podrás revertirlo por ti mismo.' 
-            : ''
-        }`}
+        description={
+          <>
+            <p>¿Estás seguro de cambiar el rol de {roleDialog.user?.name || roleDialog.user?.email}?</p>
+            {roleDialog.user?.id === userData?.id && (
+              <div className="mt-3 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                <div className="text-sm text-red-800">
+                  <strong>ATENCIÓN:</strong> Estás cambiando tu propio rol. Si te degradas de Admin, NO podrás revertirlo por ti mismo.
+                </div>
+              </div>
+            )}
+          </>
+        }
         confirmText="Cambiar Rol"
         onConfirm={confirmRoleChange}
         variant={roleDialog.user?.id === userData?.id ? "destructive" : "default"}

@@ -760,7 +760,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
           <button
             onClick={handleSaveForm}
             disabled={isSaving}
-            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium flex items-center"
+            className="px-8 py-3 bg-linear-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium flex items-center"
           >
             {isSaving ? (
               <>

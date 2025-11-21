@@ -109,43 +109,43 @@ export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) 
         </Button>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table>
+      <div className="overflow-x-auto w-full">
+        <Table className="min-w-full">
           <TableHeader>
             <TableRow>
-              <TableHead>Departamento</TableHead>
-              <TableHead className="text-right">Población</TableHead>
-              <TableHead className="text-right">Femenino</TableHead>
-              <TableHead className="text-right">Masculino</TableHead>
+              <TableHead className="whitespace-nowrap">Departamento</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Población</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Femenino</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Masculino</TableHead>
               {/* Headers dinámicos para cada programa */}
               {allPrograms.map(program => (
-                <TableHead key={program} className="text-right">{program}</TableHead>
+                <TableHead key={program} className="text-right whitespace-nowrap">{program}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {departmentData.map((row) => (
               <TableRow key={row.department}>
-                <TableCell className="font-medium">{row.department}</TableCell>
-                <TableCell className="text-right">{row.total}</TableCell>
-                <TableCell className="text-right">{row.feminine}</TableCell>
-                <TableCell className="text-right">{row.masculine}</TableCell>
+                <TableCell className="font-medium whitespace-nowrap">{row.department}</TableCell>
+                <TableCell className="text-right whitespace-nowrap">{row.total}</TableCell>
+                <TableCell className="text-right whitespace-nowrap">{row.feminine}</TableCell>
+                <TableCell className="text-right whitespace-nowrap">{row.masculine}</TableCell>
                 {/* Celdas dinámicas para cada programa */}
                 {allPrograms.map(program => (
-                  <TableCell key={program} className="text-right">
+                  <TableCell key={program} className="text-right whitespace-nowrap">
                     {row.programs[program] || 0}
                   </TableCell>
                 ))}
               </TableRow>
             ))}
             <TableRow className="bg-gray-50 font-bold">
-              <TableCell>TOTAL</TableCell>
-              <TableCell className="text-right">{stats.total}</TableCell>
-              <TableCell className="text-right">{stats.by_gender?.femenino || 0}</TableCell>
-              <TableCell className="text-right">{stats.by_gender?.masculino || 0}</TableCell>
+              <TableCell className="whitespace-nowrap">TOTAL</TableCell>
+              <TableCell className="text-right whitespace-nowrap">{stats.total}</TableCell>
+              <TableCell className="text-right whitespace-nowrap">{stats.by_gender?.femenino || 0}</TableCell>
+              <TableCell className="text-right whitespace-nowrap">{stats.by_gender?.masculino || 0}</TableCell>
               {/* Totales dinámicos para cada programa */}
               {allPrograms.map(program => (
-                <TableCell key={program} className="text-right">
+                <TableCell key={program} className="text-right whitespace-nowrap">
                   {stats.by_program[program] || 0}
                 </TableCell>
               ))}

@@ -147,10 +147,11 @@ export function AdminPanelSection() {
                 <span className="text-gray-700 font-medium">Total de Respuestas</span>
                 <span className="text-3xl font-bold text-blue-600">{generalStats?.total_submissions || 0}</span>
               </div>
-              <div className="flex justify-between items-center p-4 bg-orange-50 rounded-lg">
+              {/* Voluntarios - Deshabilitado temporalmente (no en v1) */}
+              {/* <div className="flex justify-between items-center p-4 bg-orange-50 rounded-lg">
                 <span className="text-gray-700 font-medium">Voluntarios Activos</span>
                 <span className="text-3xl font-bold text-orange-600">{generalStats?.total_volunteers || 0}</span>
-              </div>
+              </div> */}
               <div className="flex justify-between items-center p-4 bg-teal-50 rounded-lg">
                 <span className="text-gray-700 font-medium">Promedio por Formulario</span>
                 <span className="text-3xl font-bold text-teal-600">
