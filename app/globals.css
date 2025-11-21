@@ -313,12 +313,12 @@
 @layer components {
   /* Botón primario - Purple to Blue gradient */
   .btn-primary {
-    @apply bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+    @apply bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
   }
   
   /* Botón secundario - Cyan to Purple gradient */
   .btn-secondary {
-    @apply bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+    @apply bg-linear-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
   }
   
   /* Botón outline - Purple border */
@@ -328,17 +328,17 @@
   
   /* Botón success - Green gradient */
   .btn-success {
-    @apply bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+    @apply bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
   }
   
   /* Botón warning - Orange gradient */
   .btn-warning {
-    @apply bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+    @apply bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
   }
   
   /* Botón danger - Red gradient */
   .btn-danger {
-    @apply bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
+    @apply bg-linear-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
   }
   
   /* Botón ghost - Sin fondo */
@@ -358,7 +358,7 @@
   
   /* Badge con gradiente */
   .badge-gradient {
-    @apply bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 font-medium px-3 py-1 rounded-full text-sm;
+    @apply bg-linear-to-r from-purple-100 to-blue-100 text-purple-700 font-medium px-3 py-1 rounded-full text-sm;
   }
 }
 
