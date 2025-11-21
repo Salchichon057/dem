@@ -70,11 +70,9 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone();
     if (data) {
-      // Si está autenticado, redirigir a dashboard
       url.pathname = '/dashboard';
       return NextResponse.redirect(url);
     } else {
-      // Si no está autenticado, redirigir a login
       url.pathname = '/login';
       return NextResponse.redirect(url);
     }
@@ -92,6 +90,28 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
+  }
+
+  // Validación de roles para rutas protegidas
+  if (data && request.nextUrl.pathname.startsWith('/admin')) {
+    const userId = data.claims.sub as string;
+    
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role:roles!users_role_id_fkey(name)')
+      .eq('id', userId)
+      .single();
+
+    const role = Array.isArray(userData?.role) 
+      ? userData.role[0] 
+      : userData?.role;
+    const roleName = role?.name;
+
+    if (roleName !== 'admin') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/dashboard';
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;
