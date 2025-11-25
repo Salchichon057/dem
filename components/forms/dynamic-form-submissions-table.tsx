@@ -567,7 +567,7 @@ export default function DynamicFormSubmissionsTable({
                 className="gap-2"
               >
                 <Download className="w-4 h-4" />
-                Descargar Excel
+                Exportar CSV
               </Button>
               <Popover>
                 <PopoverTrigger asChild>
@@ -744,16 +744,16 @@ export default function DynamicFormSubmissionsTable({
 
       {/* Table */}
       {selectedFormId !== 'none' && (
-        <div className="border rounded-lg overflow-x-auto">
-          <Table className="min-w-full">
+        <div className="border rounded-lg">
+          <Table>
             <TableHeader>
               <TableRow>
-                {visibleColumns.user_name && <TableHead className="whitespace-nowrap">Nombre Usuario</TableHead>}
-                {visibleColumns.user_email && <TableHead className="whitespace-nowrap">Email Usuario</TableHead>}
-                {visibleColumns.submitted_at && <TableHead className="whitespace-nowrap">Fecha Envío</TableHead>}
+                {visibleColumns.user_name && <TableHead>Nombre Usuario</TableHead>}
+                {visibleColumns.user_email && <TableHead>Email Usuario</TableHead>}
+                {visibleColumns.submitted_at && <TableHead>Fecha Envío</TableHead>}
                 {columns.map((col) => (
                   visibleColumns[col.id] && (
-                    <TableHead key={col.id} className="whitespace-nowrap">
+                    <TableHead key={col.id}>
                       {col.title}
                       <span className="text-xs text-muted-foreground ml-1">
                         ({col.type})
@@ -761,7 +761,7 @@ export default function DynamicFormSubmissionsTable({
                     </TableHead>
                   )
                 ))}
-                <TableHead className="text-right whitespace-nowrap">Acciones</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -813,24 +813,24 @@ export default function DynamicFormSubmissionsTable({
                 paginatedData.map((row) => (
                   <TableRow key={row.submission_id}>
                     {visibleColumns.user_name && (
-                      <TableCell className="font-medium whitespace-nowrap">{row.user_name}</TableCell>
+                      <TableCell className="font-medium">{row.user_name}</TableCell>
                     )}
                     {visibleColumns.user_email && (
-                      <TableCell className="whitespace-nowrap">{row.user_email}</TableCell>
+                      <TableCell>{row.user_email}</TableCell>
                     )}
                     {visibleColumns.submitted_at && (
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell>
                         {new Date(row.submitted_at).toLocaleString('es-GT')}
                       </TableCell>
                     )}
                     {columns.map((col) => (
                       visibleColumns[col.id] && (
-                        <TableCell key={col.id} className="whitespace-nowrap">
+                        <TableCell key={col.id}>
                           {renderValue(row[col.id], col.type, col.title)}
                         </TableCell>
                       )
                     ))}
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell>
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="icon" title="Ver detalles">
                           <Eye className="w-4 h-4" />

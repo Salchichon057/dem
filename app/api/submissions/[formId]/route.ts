@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth-server'
 
@@ -56,23 +57,37 @@ export async function GET(
       )
     }
 
-    // 3. Query directo a la vista
-    const { data: viewData, error: viewError } = await supabase
-      .from(viewName)
-      .select('*')
+    // 3. Determinar tablas según section_location
+    const submissionsTable = formTemplate.section_location === 'organizaciones' ? 'organizations_submissions' :
+                            formTemplate.section_location === 'auditorias' ? 'audits_submissions' :
+                            formTemplate.section_location === 'comunidades' ? 'communities_submissions' :
+                            formTemplate.section_location === 'voluntariado' ? 'volunteer_submissions' :
+                            formTemplate.section_location === 'perfil-comunitario' ? 'community_profile_submissions' :
+                            'embracing_legends_submissions'
+
+    const answersTable = formTemplate.section_location === 'organizaciones' ? 'organizations_answers' :
+                        formTemplate.section_location === 'auditorias' ? 'audits_answers' :
+                        formTemplate.section_location === 'comunidades' ? 'communities_answers' :
+                        formTemplate.section_location === 'voluntariado' ? 'volunteer_answers' :
+                        formTemplate.section_location === 'perfil-comunitario' ? 'community_profile_answers' :
+                        'embracing_legends_answers'
+
+    // 4. Obtener TODAS las submissions del formulario
+    const { data: submissions, error: submissionsError } = await supabase
+      .from(submissionsTable)
+      .select('id, submitted_at, user_id')
       .eq('form_template_id', formId)
       .order('submitted_at', { ascending: false })
-      .order('order_index', { ascending: true })
 
-    if (viewError) {
-      console.error('❌ Error al consultar vista:', viewError)
+    if (submissionsError) {
+      console.error('❌ Error al obtener submissions:', submissionsError)
       return NextResponse.json(
-        { error: 'Error al obtener submissions', details: viewError },
+        { error: 'Error al obtener submissions', details: submissionsError },
         { status: 500 }
       )
     }
 
-    if (!viewData || viewData.length === 0) {
+    if (!submissions || submissions.length === 0) {
       // Obtener preguntas aunque no haya submissions
       const { data: questions } = await supabase
         .from('questions')
@@ -85,56 +100,154 @@ export async function GET(
         columns: questions?.map(q => ({
           id: q.id,
           title: q.title,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           type: (q.question_types as any)?.code || 'TEXT'
         })) || [],
         data: []
       })
     }
 
-    // 4. Transformar datos de la vista a formato tabla
-    // Agrupar por submission_id
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const submissionsMap = new Map<string, any>()
-    const questionsSet = new Set<string>()
+    // 5. Obtener usuarios
+    const userIds = [...new Set(submissions.map(s => s.user_id))]
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .in('id', userIds)
+    
+    const usersMap = new Map(users?.map(u => [u.id, u]) || [])
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    viewData.forEach((row: any) => {
-      if (!submissionsMap.has(row.submission_id)) {
-        submissionsMap.set(row.submission_id, {
-          submission_id: row.submission_id,
-          submitted_at: row.submitted_at,
-          user_name: row.user_name || row.user_email?.split('@')[0] || 'N/A',
-          user_email: row.user_email || 'N/A'
-        })
+    // 6. Obtener preguntas del formulario
+    const { data: questions } = await supabase
+      .from('questions')
+      .select('id, title, order_index, question_types(code)')
+      .eq('form_template_id', formId)
+      .order('order_index')
+
+    if (!questions) {
+      return NextResponse.json({
+        formName: formTemplate.name,
+        columns: [],
+        data: []
+      })
+    }
+
+    // 7. Obtener TODAS las respuestas en lote (SIN LÍMITE)
+    const submissionIds = submissions.map(s => s.id)
+    // console.log(`📊 Buscando respuestas para ${submissionIds.length} submissions en tabla: ${answersTable}`)
+    
+    // CRÍTICO: Hacer múltiples queries si hay más de 1000 respuestas esperadas
+    // Supabase tiene límite de 1000 por defecto
+    const batchSize = 20 // Procesar 20 submissions a la vez para evitar límite
+    let allAnswers: any[] = []
+    
+    for (let i = 0; i < submissionIds.length; i += batchSize) {
+      const batch = submissionIds.slice(i, i + batchSize)
+      const { data: batchAnswers, error: batchError } = await supabase
+        .from(answersTable)
+        .select('submission_id, question_id, answer_value')
+        .in('submission_id', batch)
+      
+      if (batchError) {
+        console.error(`❌ Error en batch ${i}-${i+batchSize}:`, batchError)
+      } else {
+        allAnswers = allAnswers.concat(batchAnswers || [])
       }
+    }
+    
+    const answers = allAnswers
+    // console.log(`✅ Respuestas obtenidas: ${answers.length} total (esperado: ~${submissionIds.length * 44})`)
 
-      // Agregar respuesta si existe question_id
-      if (row.question_id) {
-        questionsSet.add(JSON.stringify({
-          id: row.question_id,
-          title: row.question_title,
-          type: row.question_type || 'TEXT',
-          order: row.order_index
-        }))
-
-        const submission = submissionsMap.get(row.submission_id)
-        submission[row.question_id] = row.answer_value?.value || null
+    // 8. Organizar respuestas por submission
+     
+    const answersBySubmission = new Map<string, Map<string, any>>()
+    answers?.forEach(answer => {
+      if (!answersBySubmission.has(answer.submission_id)) {
+        answersBySubmission.set(answer.submission_id, new Map())
       }
+      answersBySubmission.get(answer.submission_id)!.set(
+        answer.question_id,
+        answer.answer_value?.value || null
+      )
     })
 
-    // 5. Ordenar preguntas y crear columnas
-    const questions = Array.from(questionsSet)
-      .map(q => JSON.parse(q))
-      .sort((a, b) => a.order - b.order)
+    // 9. Construir datos de la tabla
+     
+    const data = submissions.map((submission: any) => {
+      const user = usersMap.get(submission.user_id)
+      const submissionAnswers = answersBySubmission.get(submission.id) || new Map()
 
+       
+      const row: any = {
+        submission_id: submission.id,
+        submitted_at: submission.submitted_at,
+        user_name: user?.name || user?.email?.split('@')[0] || 'N/A',
+        user_email: user?.email || 'N/A'
+      }
+
+      // Agregar respuestas por question_id
+      questions.forEach(q => {
+        row[q.id] = submissionAnswers.get(q.id) || null
+      })
+
+      return row
+    })
+
+    // 10. Preparar columnas
     const columns = questions.map(q => ({
       id: q.id,
       title: q.title,
-      type: q.type
+       
+      type: (q.question_types as any)?.code || 'TEXT'
     }))
 
-    const data = Array.from(submissionsMap.values())
+    // Log detallado para debugging
+    // console.log(`\n${'='.repeat(80)}`)
+    // console.log(`📋 RESUMEN FINAL - DATOS A ENVIAR`)
+    // console.log(`${'='.repeat(80)}`)
+    // console.log(`Total submissions construidas: ${data.length}`)
+    // console.log(`Total columnas (preguntas): ${columns.length}`)
+    // console.log(`Total respuestas obtenidas de BD: ${answers?.length || 0}`)
+    // console.log(`Promedio respuestas/submission: ${answers?.length ? (answers.length / submissions.length).toFixed(1) : 0}`)
+    
+    // Verificar primeras 5 filas con detalle
+    // console.log(`\n--- MUESTRA DE PRIMERAS 5 FILAS ---`)
+    data.slice(0, 5).forEach((row, idx) => {
+      const answeredCount = Object.keys(row).filter(k => 
+        !['submission_id', 'submitted_at', 'user_name', 'user_email'].includes(k) && row[k] !== null
+      ).length
+      
+      const firstQuestionAnswer = columns[0] ? row[columns[0].id] : 'N/A'
+      
+      // console.log(`\n[${idx + 1}] Submission: ${row.submission_id.substring(0, 8)}...`)
+      // console.log(`    User: ${row.user_name}`)
+      // console.log(`    Fecha: ${row.submitted_at}`)
+      // console.log(`    Respuestas llenas: ${answeredCount}/${columns.length}`)
+      // console.log(`    Primera pregunta ("${columns[0]?.title.substring(0, 50)}..."): ${firstQuestionAnswer || '(vacío)'}`)
+    })
+    
+    // Verificar si hay filas completamente vacías
+    const emptyRows = data.filter(row => {
+      const answeredCount = Object.keys(row).filter(k => 
+        !['submission_id', 'submitted_at', 'user_name', 'user_email'].includes(k) && row[k] !== null
+      ).length
+      return answeredCount === 0
+    })
+    
+    // console.log(`\n⚠️  Filas SIN respuestas: ${emptyRows.length}/${data.length}`)
+    if (emptyRows.length > 0) {
+      // console.log(`IDs de submissions vacías:`, emptyRows.slice(0, 3).map(r => r.submission_id))
+    }
+    
+    // Verificar estructura de answersBySubmission
+    // console.log(`\n--- MAPA DE RESPUESTAS POR SUBMISSION ---`)
+    // console.log(`Total submissions en mapa: ${answersBySubmission.size}`)
+    const firstSubmissionId = submissions[0]?.id
+    if (firstSubmissionId && answersBySubmission.has(firstSubmissionId)) {
+      const firstSubmAnswers = answersBySubmission.get(firstSubmissionId)!
+      // console.log(`Ejemplo - Primera submission (${firstSubmissionId.substring(0, 8)}...) tiene ${firstSubmAnswers.size} respuestas en mapa`)
+    }
+    
+    // console.log(`${'='.repeat(80)}\n`)
 
     return NextResponse.json({
       formName: formTemplate.name,
