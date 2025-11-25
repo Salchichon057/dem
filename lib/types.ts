@@ -1,4 +1,5 @@
 export * from './supabase/types'
+export * from './types/community'
 
 // Enum para los tipos de sección de formularios
 export enum FormSectionType {

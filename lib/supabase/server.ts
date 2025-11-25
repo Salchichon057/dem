@@ -33,3 +33,34 @@ export async function createClient() {
     },
   );
 }
+
+/**
+ * Cliente de Supabase con SERVICE ROLE KEY (bypasses RLS)
+ * ⚠️ USAR SOLO EN API ROUTES DEL SERVIDOR
+ * Esta función crea un cliente con permisos de administrador que ignora las políticas RLS.
+ * NUNCA exponer este cliente al navegador.
+ */
+export async function createServiceClient() {
+  const cookieStore = await cookies();
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role key - bypasses RLS
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options),
+            );
+          } catch {
+            // Ignorar errores de cookies en Server Components
+          }
+        },
+      },
+    },
+  );
+}
