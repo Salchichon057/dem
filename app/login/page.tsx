@@ -104,8 +104,8 @@ export default function AuthPage() {
       {/* Panel Izquierdo - Fondo animado con cards modernas */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Fondo animado con patrones */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500">
-          <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 via-purple-500 to-blue-500 opacity-70"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-purple-600 via-blue-600 to-cyan-500">
+          <div className="absolute inset-0 bg-linear-to-tr from-pink-500 via-purple-500 to-blue-500 opacity-70"></div>
 
           {/* Patrones geométricos CSS */}
           <div
@@ -202,12 +202,12 @@ export default function AuthPage() {
       {/* Panel Derecho */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50 relative">
         {/* Fondo sutil para móviles */}
-        <div className="lg:hidden absolute inset-0 bg-gradient-to-br from-purple-100 via-blue-50 to-cyan-50 opacity-50"></div>
+        <div className="lg:hidden absolute inset-0 bg-linear-to-br from-purple-100 via-blue-50 to-cyan-50 opacity-50"></div>
 
         <div className="relative z-10 w-full max-w-md">
           {/* Header móvil */}
           <div className="lg:hidden text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl">
+            <div className="w-16 h-16 mx-auto mb-4 bg-linear-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl">
               🤝
             </div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -288,7 +288,7 @@ export default function AuthPage() {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 transition-all duration-300 hover:scale-105"
+                      className="w-full bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 transition-all duration-300 hover:scale-105"
                     >
                       {isLoading ? (
                         <>
@@ -374,7 +374,7 @@ export default function AuthPage() {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-semibold py-3 transition-all duration-300 hover:scale-105"
+                      className="w-full bg-linear-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-semibold py-3 transition-all duration-300 hover:scale-105"
                     >
                       {isLoading ? (
                         <>
