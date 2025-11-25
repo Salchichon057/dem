@@ -73,7 +73,7 @@ const menuItems = [
       },
     ]
   },
-  // Comunidades - Subniveles en sidebar (Estadística + Formularios + Plantillas)
+  // Comunidades - Subniveles en sidebar (Estadística + Plantillas) - SIN FORMULARIOS DINÁMICOS
   {
     id: 'comunidades',
     title: 'Comunidades',
@@ -85,12 +85,12 @@ const menuItems = [
         icon: BarChart3,
         requiresData: true, // Bloqueado si no hay datos
       },
-      {
-        id: 'comunidades-formularios',
-        title: 'Formularios',
-        icon: FileText,
-        requiresData: true, // Solo si hay formularios
-      },
+      // {
+      //   id: 'comunidades-formularios',
+      //   title: 'Formularios',
+      //   icon: FileText,
+      //   requiresData: true, // Solo si hay formularios
+      // },
       {
         id: 'comunidades-plantillas',
         title: 'Plantillas',

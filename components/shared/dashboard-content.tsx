@@ -8,6 +8,8 @@ import { FormulariosSection } from "@/components/forms/formularios-section"
 import { PerfilSection } from "@/components/settings/perfil-section"
 import { ConfiguracionSection } from "@/components/settings/configuracion-section"
 import { PlantillasComunidadesSection } from "@/components/communities/plantillas-comunidades-section"
+import CommunitiesSection from "@/components/communities/communities-section"
+import { PlantillasTemplateSection } from "@/components/communities/plantillas-template-section"
 import { PimcoFormulariosSection } from "@/components/communities/pimco-formularios-section"
 import { FormulariosAuditoriaSection } from "@/components/audits/formularios-auditoria-section"
 import AbrazandoLeyendasSection from "@/components/forms/abrazando-leyendas-section"
@@ -79,7 +81,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
     switch (activeSection) {
       // PIMCO - Perfil Comunitario
       case "pimco-comunidades":
-        return <UnderConstruction title="PIMCO - Comunidades" />
+        return <CommunitiesSection />
       case "pimco-estadistica":
         return <PimcoEstadisticaSection />
       case "pimco-formularios":
@@ -99,7 +101,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "comunidades-formularios":
         return <PlantillasComunidadesSection />
       case "comunidades-plantillas":
-        return <UnderConstruction title="Plantillas de Comunidades" />
+        return <PlantillasTemplateSection />
       
       // Auditorías
       case "auditorias-estadistica":
