@@ -157,11 +157,11 @@ export default function DynamicFormSubmissionsTable({
         setVisibleColumns(initialVisibility)
         
       } else {
-        toast.error('Error al cargar submissions')
+        toast.error('Error al cargar envíos')
       }
     } catch (error) {
       console.error('Error fetching submissions:', error)
-      toast.error('Error al cargar submissions')
+      toast.error('Error al cargar envíos')
     } finally {
       setLoading(false)
     }
@@ -554,7 +554,7 @@ export default function DynamicFormSubmissionsTable({
           <h2 className="text-2xl font-bold">Tabla de Datos - {sectionTitle}</h2>
           <p className="text-muted-foreground">
             {selectedFormId !== 'none' 
-              ? `${filteredData.length} submissions encontradas` 
+              ? `${filteredData.length} envíos encontrados` 
               : 'Selecciona un formulario para ver los datos'}
           </p>
         </div>

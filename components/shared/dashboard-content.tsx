@@ -12,6 +12,7 @@ import CommunitiesSection from "@/components/communities/communities-section"
 import { PlantillasTemplateSection } from "@/components/communities/plantillas-template-section"
 import { PimcoFormulariosSection } from "@/components/communities/pimco-formularios-section"
 import { FormulariosAuditoriaSection } from "@/components/audits/formularios-auditoria-section"
+import { TableroConsolidadoSection } from "@/components/audits/tablero-consolidado-section"
 import AbrazandoLeyendasSection from "@/components/forms/abrazando-leyendas-section"
 import { FormularioVoluntariadoSection } from "@/components/forms/formulario-voluntariado-section"
 import { OrganizacionesEstadisticaSection } from "@/components/statistics/organizaciones-estadistica-section"
@@ -109,7 +110,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "auditorias-formularios":
         return <FormulariosAuditoriaSection />
       case "auditorias-tablero-consolidado":
-        return <UnderConstruction title="Tablero Consolidado" />
+        return <TableroConsolidadoSection />
       case "auditorias-semaforo":
         return <UnderConstruction title="Semáforo" />
       

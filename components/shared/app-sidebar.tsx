@@ -1,12 +1,26 @@
 /* eslint-disable @next/next/no-img-element */
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { Building2, BarChart3, FileText, Settings, User, ChevronDown, LogOut, MapPin, Shield, Activity, Heart, UserCheck, TrendingUp, Lock } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { useUserRole } from '@/hooks/use-user-role'
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import {
+  Building2,
+  BarChart3,
+  FileText,
+  Settings,
+  User,
+  ChevronDown,
+  LogOut,
+  MapPin,
+  Shield,
+  Activity,
+  Heart,
+  UserCheck,
+  Lock,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useUserRole } from "@/hooks/use-user-role";
 
 import {
   Sidebar,
@@ -19,69 +33,74 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+} from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const menuItems = [
   // Perfil Comunitario - Subniveles en sidebar
   {
-    id: 'pimco',
-    title: 'Perfil Comunitario',
+    id: "pimco",
+    title: "Perfil Comunitario",
     icon: Building2,
     children: [
       {
-        id: 'pimco-comunidades',
-        title: 'Comunidades',
+        id: "pimco-comunidades",
+        title: "Comunidades",
         icon: MapPin,
       },
       {
-        id: 'pimco-estadistica',
-        title: 'Estadística',
+        id: "pimco-estadistica",
+        title: "Estadística",
         icon: BarChart3,
         requiresData: true, // Bloqueado si no hay datos
       },
       {
-        id: 'pimco-formularios',
-        title: 'Formularios',
+        id: "pimco-formularios",
+        title: "Formularios",
         icon: FileText,
         requiresData: true, // Solo si hay formularios
       },
       {
-        id: 'pimco-diagnostico-comunitario',
-        title: 'Diagnóstico Comunitario',
+        id: "pimco-diagnostico-comunitario",
+        title: "Diagnóstico Comunitario",
         icon: Activity,
       },
-    ]
+    ],
   },
   // Organizaciones - Subniveles en sidebar (Estadística + Formularios)
   {
-    id: 'organizaciones',
-    title: 'Organizaciones',
+    id: "organizaciones",
+    title: "Organizaciones",
     icon: Building2,
     children: [
       {
-        id: 'organizaciones-estadistica',
-        title: 'Estadística',
+        id: "organizaciones-estadistica",
+        title: "Estadística",
         icon: BarChart3,
         requiresData: true, // Bloqueado si no hay datos
       },
       {
-        id: 'organizaciones-formularios',
-        title: 'Formularios',
+        id: "organizaciones-formularios",
+        title: "Formularios",
         icon: FileText,
         requiresData: true, // Solo si hay formularios
       },
-    ]
+    ],
   },
   // Comunidades - Subniveles en sidebar (Estadística + Plantillas) - SIN FORMULARIOS DINÁMICOS
   {
-    id: 'comunidades',
-    title: 'Comunidades',
+    id: "comunidades",
+    title: "Comunidades",
     icon: MapPin,
     children: [
       {
-        id: 'comunidades-estadistica',
-        title: 'Estadística',
+        id: "comunidades-estadistica",
+        title: "Estadística",
         icon: BarChart3,
         requiresData: true, // Bloqueado si no hay datos
       },
@@ -92,113 +111,115 @@ const menuItems = [
       //   requiresData: true, // Solo si hay formularios
       // },
       {
-        id: 'comunidades-plantillas',
-        title: 'Plantillas',
+        id: "comunidades-plantillas",
+        title: "Plantillas",
         icon: FileText,
       },
-    ]
+    ],
   },
   // Auditorías - Subniveles en sidebar
   {
-    id: 'auditorias',
-    title: 'Auditorías',
+    id: "auditorias",
+    title: "Auditorías",
     icon: Shield,
     children: [
       {
-        id: 'auditorias-estadistica',
-        title: 'Estadística',
+        id: "auditorias-estadistica",
+        title: "Estadística",
         icon: BarChart3,
         requiresData: true, // Bloqueado si no hay datos
       },
       {
-        id: 'auditorias-formularios',
-        title: 'Formularios',
+        id: "auditorias-formularios",
+        title: "Formularios",
         icon: FileText,
         requiresData: true, // Solo si hay formularios
       },
       {
-        id: 'auditorias-tablero-consolidado',
-        title: 'Tablero Consolidado',
+        id: "auditorias-tablero-consolidado",
+        title: "Tablero Consolidado",
         icon: Activity,
       },
-      {
-        id: 'auditorias-semaforo',
-        title: 'Semáforo',
-        icon: TrendingUp,
-      },
-    ]
+    ],
   },
   // Abrazando Leyendas - Clic directo (sin subniveles)
   {
-    id: 'abrazando-leyendas',
-    title: 'Abrazando Leyendas',
+    id: "abrazando-leyendas",
+    title: "Abrazando Leyendas",
     icon: Heart,
   },
   // Voluntariado - Subniveles en sidebar (Estadística + Formularios) - ESTRUCTURA ORIGINAL CORRECTA
   {
-    id: 'voluntariado',
-    title: 'Voluntariado',
+    id: "voluntariado",
+    title: "Voluntariado",
     icon: UserCheck,
     children: [
       {
-        id: 'voluntariado-estadistica',
-        title: 'Estadística',
+        id: "voluntariado-estadistica",
+        title: "Estadística",
         icon: BarChart3,
       },
       {
-        id: 'voluntariado-formularios',
-        title: 'Formularios',
+        id: "voluntariado-formularios",
+        title: "Formularios",
         icon: FileText,
       },
-    ]
+    ],
   },
-]
+];
 
 interface AppSidebarProps {
-  activeSection: string
-  setActiveSection: (section: string) => void
+  activeSection: string;
+  setActiveSection: (section: string) => void;
 }
 
-export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps) {
-  const supabase = createClient()
-  const [user, setUser] = useState<SupabaseUser | null>(null)
-  const [expandedItems, setExpandedItems] = useState<string[]>([])
-  const { isAdmin } = useUserRole()
+export function AppSidebar({
+  activeSection,
+  setActiveSection,
+}: AppSidebarProps) {
+  const supabase = createClient();
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const { isAdmin } = useUserRole();
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   const toggleExpanded = (itemId: string) => {
-    setExpandedItems(prev => 
-      prev.includes(itemId) 
-      ? prev.filter(id => id !== itemId)
-      : [...prev, itemId]
-    )
-  }
+    setExpandedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    window.location.href = '/login'
-  }
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
 
   const handleProfile = () => {
-    setActiveSection('perfil')
-  }
+    setActiveSection("perfil");
+  };
 
   const handleSettings = () => {
-    setActiveSection('configuracion')
-  }
+    setActiveSection("configuracion");
+  };
 
   return (
     <Sidebar className="border-r border-purple-200/50 bg-linear-to-b from-white via-purple-50/30 to-blue-50/30 shadow-xl">
@@ -234,9 +255,11 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                       >
                         <item.icon className="h-4 w-4 text-gray-600" />
                         <span className="font-medium">{item.title}</span>
-                        <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${
-                          expandedItems.includes(item.id) ? 'rotate-180' : ''
-                        }`} />
+                        <ChevronDown
+                          className={`ml-auto h-4 w-4 transition-transform ${
+                            expandedItems.includes(item.id) ? "rotate-180" : ""
+                          }`}
+                        />
                       </SidebarMenuButton>
                       {expandedItems.includes(item.id) && (
                         <div className="ml-6 mt-1 space-y-1">
@@ -247,14 +270,23 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                               onClick={() => setActiveSection(subItem.id)}
                               className={`
                                 w-full justify-start text-gray-600 hover:bg-linear-to-r hover:from-purple-50 hover:to-pink-50 hover:text-gray-800 rounded-lg transition-all duration-300
-                                ${activeSection === subItem.id 
-                                  ? 'bg-linear-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500' 
-                                  : ''
+                                ${
+                                  activeSection === subItem.id
+                                    ? "bg-linear-to-r from-purple-400 to-pink-400 text-white shadow-md hover:from-purple-500 hover:to-pink-500"
+                                    : ""
                                 }
                               `}
                             >
-                              <subItem.icon className={`h-3 w-3 ${activeSection === subItem.id ? 'text-white' : 'text-gray-500'}`} />
-                              <span className="text-sm font-medium">{subItem.title}</span>
+                              <subItem.icon
+                                className={`h-3 w-3 ${
+                                  activeSection === subItem.id
+                                    ? "text-white"
+                                    : "text-gray-500"
+                                }`}
+                              />
+                              <span className="text-sm font-medium">
+                                {subItem.title}
+                              </span>
                               {activeSection === subItem.id && (
                                 <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                               )}
@@ -269,16 +301,23 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                       onClick={() => setActiveSection(item.id)}
                       className={`
                         w-full justify-start text-gray-700 hover:bg-linear-to-r hover:from-purple-100 hover:to-pink-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1
-                        ${activeSection === item.id 
-                          ? 'bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:from-purple-600 hover:to-pink-600' 
-                          : ''
+                        ${
+                          activeSection === item.id
+                            ? "bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:from-purple-600 hover:to-pink-600"
+                            : ""
                         }
                       `}
                       style={{
-                        animationDelay: `${index * 0.1}s`
+                        animationDelay: `${index * 0.1}s`,
                       }}
                     >
-                      <item.icon className={`h-4 w-4 ${activeSection === item.id ? 'text-white' : 'text-gray-600'}`} />
+                      <item.icon
+                        className={`h-4 w-4 ${
+                          activeSection === item.id
+                            ? "text-white"
+                            : "text-gray-600"
+                        }`}
+                      />
                       <span className="font-medium">{item.title}</span>
                       {activeSection === item.id && (
                         <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -301,19 +340,26 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    isActive={activeSection === 'admin-panel'}
-                    onClick={() => setActiveSection('admin-panel')}
+                    isActive={activeSection === "admin-panel"}
+                    onClick={() => setActiveSection("admin-panel")}
                     className={`
                       w-full justify-start text-gray-700 hover:bg-linear-to-r hover:from-red-100 hover:to-orange-100 hover:text-gray-900 rounded-lg transition-all duration-300 mb-1
-                      ${activeSection === 'admin-panel' 
-                        ? 'bg-linear-to-r from-red-500 to-orange-500 text-white shadow-lg hover:from-red-600 hover:to-orange-600' 
-                        : ''
+                      ${
+                        activeSection === "admin-panel"
+                          ? "bg-linear-to-r from-red-500 to-orange-500 text-white shadow-lg hover:from-red-600 hover:to-orange-600"
+                          : ""
                       }
                     `}
                   >
-                    <Lock className={`h-4 w-4 ${activeSection === 'admin-panel' ? 'text-white' : 'text-gray-600'}`} />
+                    <Lock
+                      className={`h-4 w-4 ${
+                        activeSection === "admin-panel"
+                          ? "text-white"
+                          : "text-gray-600"
+                      }`}
+                    />
                     <span className="font-medium">Panel de Admin</span>
-                    {activeSection === 'admin-panel' && (
+                    {activeSection === "admin-panel" && (
                       <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     )}
                   </SidebarMenuButton>
@@ -332,8 +378,8 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                 <SidebarMenuButton className="w-full h-auto py-3 text-gray-700 hover:bg-linear-to-r hover:from-purple-100 hover:to-blue-100 rounded-lg transition-all duration-300">
                   <div className="h-8 w-8 rounded-full ring-2 ring-purple-400 flex items-center justify-center bg-purple-50 overflow-hidden shrink-0">
                     {user?.user_metadata?.avatar_url ? (
-                      <img 
-                        src={user.user_metadata.avatar_url} 
+                      <img
+                        src={user.user_metadata.avatar_url}
                         alt="Avatar"
                         className="h-full w-full object-cover"
                       />
@@ -342,33 +388,46 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
                     )}
                   </div>
                   <div className="flex flex-col items-start text-left flex-1 min-w-0">
-                    <span className="text-sm font-semibold text-purple-700 truncate w-full">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario'}</span>
-                    <span className="text-xs text-gray-500 truncate w-full">{user?.email}</span>
+                    <span className="text-sm font-semibold text-purple-700 truncate w-full">
+                      {user?.user_metadata?.name ||
+                        user?.email?.split("@")[0] ||
+                        "Usuario"}
+                    </span>
+                    <span className="text-xs text-gray-500 truncate w-full">
+                      {user?.email}
+                    </span>
                   </div>
                   <ChevronDown className="ml-2 h-4 w-4 text-purple-600 shrink-0" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width] backdrop-blur-sm bg-white/95 border-2 border-purple-200 shadow-lg">
-                <DropdownMenuItem 
+              <DropdownMenuContent
+                side="top"
+                className="w-[--radix-popper-anchor-width] backdrop-blur-sm bg-white/95 border-2 border-purple-200 shadow-lg"
+              >
+                <DropdownMenuItem
                   onClick={handleProfile}
                   className="hover:bg-linear-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
                 >
                   <User className="mr-2 h-4 w-4 text-purple-600" />
                   <span className="text-gray-700 font-medium">Perfil</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={handleSettings}
                   className="hover:bg-linear-to-r hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-all py-2.5"
                 >
                   <Settings className="mr-2 h-4 w-4 text-purple-600" />
-                  <span className="text-gray-700 font-medium">Configuración</span>
+                  <span className="text-gray-700 font-medium">
+                    Configuración
+                  </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={handleLogout}
                   className="hover:bg-linear-to-r hover:from-red-100 hover:to-pink-100 cursor-pointer transition-all py-2.5"
                 >
                   <LogOut className="mr-2 h-4 w-4 text-red-600" />
-                  <span className="text-gray-700 font-medium">Cerrar Sesión</span>
+                  <span className="text-gray-700 font-medium">
+                    Cerrar Sesión
+                  </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -376,5 +435,5 @@ export function AppSidebar({ activeSection, setActiveSection }: AppSidebarProps)
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
