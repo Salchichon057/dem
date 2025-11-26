@@ -24,24 +24,24 @@ import {
 
 interface TrafficLightStats {
   total: number;
-  rojo: number;
-  amarillo: number;
-  verde: number;
-  sin_definir: number;
-  por_mes: Array<{
-    mes: string;
-    rojo: number;
-    amarillo: number;
-    verde: number;
+  red: number;
+  yellow: number;
+  green: number;
+  undefined: number;
+  by_month: Array<{
+    month: string;
+    red: number;
+    yellow: number;
+    green: number;
   }>;
-  seguimiento: {
-    con_seguimiento: number;
-    sin_seguimiento: number;
+  follow_up: {
+    with_follow_up: number;
+    without_follow_up: number;
   };
-  concluidos: {
-    si: number;
+  concluded: {
+    yes: number;
     no: number;
-    sin_definir: number;
+    undefined: number;
   };
 }
 
@@ -96,12 +96,12 @@ export function SemaforoEstadisticas() {
 
   // Datos para gráfico de pie
   const pieData = [
-    { name: "Rojo", value: stats.rojo, color: COLORS.rojo },
-    { name: "Amarillo", value: stats.amarillo, color: COLORS.amarillo },
-    { name: "Verde", value: stats.verde, color: COLORS.verde },
+    { name: "Rojo", value: stats.red, color: COLORS.rojo },
+    { name: "Amarillo", value: stats.yellow, color: COLORS.amarillo },
+    { name: "Verde", value: stats.green, color: COLORS.verde },
     {
       name: "Sin definir",
-      value: stats.sin_definir,
+      value: stats.undefined,
       color: COLORS.sin_definir,
     },
   ].filter((item) => item.value > 0);
@@ -110,22 +110,22 @@ export function SemaforoEstadisticas() {
   const seguimientoData = [
     {
       name: "Con Seguimiento",
-      value: stats.seguimiento.con_seguimiento,
+      value: stats.follow_up.with_follow_up,
       fill: "#22c55e",
     },
     {
       name: "Sin Seguimiento",
-      value: stats.seguimiento.sin_seguimiento,
+      value: stats.follow_up.without_follow_up,
       fill: "#ef4444",
     },
   ];
 
   const porcentajeRojo =
-    stats.total > 0 ? ((stats.rojo / stats.total) * 100).toFixed(1) : "0";
+    stats.total > 0 ? ((stats.red / stats.total) * 100).toFixed(1) : "0";
   const porcentajeAmarillo =
-    stats.total > 0 ? ((stats.amarillo / stats.total) * 100).toFixed(1) : "0";
+    stats.total > 0 ? ((stats.yellow / stats.total) * 100).toFixed(1) : "0";
   const porcentajeVerde =
-    stats.total > 0 ? ((stats.verde / stats.total) * 100).toFixed(1) : "0";
+    stats.total > 0 ? ((stats.green / stats.total) * 100).toFixed(1) : "0";
 
   return (
     <div className="space-y-6">
@@ -164,7 +164,7 @@ export function SemaforoEstadisticas() {
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.rojo}</div>
+            <div className="text-2xl font-bold text-red-600">{stats.red}</div>
             <p className="text-xs text-red-600">{porcentajeRojo}% del total</p>
           </CardContent>
         </Card>
@@ -178,7 +178,7 @@ export function SemaforoEstadisticas() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {stats.amarillo}
+              {stats.yellow}
             </div>
             <p className="text-xs text-yellow-600">
               {porcentajeAmarillo}% del total
@@ -195,7 +195,7 @@ export function SemaforoEstadisticas() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {stats.verde}
+              {stats.green}
             </div>
             <p className="text-xs text-green-600">
               {porcentajeVerde}% del total

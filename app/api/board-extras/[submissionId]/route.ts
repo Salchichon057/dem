@@ -3,11 +3,11 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { submissionId: string } }
+  { params }: { params: Promise<{ submissionId: string }> }
 ) {
   try {
     const supabase = await createClient()
-    const { submissionId } = params
+    const { submissionId } = await params
 
     const { data, error } = await supabase
       .from("consolidated_board_extras")

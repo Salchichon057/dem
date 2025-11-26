@@ -350,3 +350,53 @@ export interface VolunteerStats {
   }>
 }
 
+// ============================================
+// BOARD EXTRAS (AUDIT TRACKING) TYPES
+// ============================================
+
+export type TrafficLightStatus = 'Rojo' | 'Amarillo' | 'Verde'
+export type ConcludedStatus = 'Sí' | 'No'
+
+export interface BoardExtra {
+  id: string
+  submission_id: string
+  traffic_light: TrafficLightStatus | null
+  recommendations: string | null
+  follow_up_given: boolean
+  follow_up_date: string | null
+  concluded_result_red_or_no: ConcludedStatus | null
+  solutions: string | null
+  preliminary_report: string | null
+  full_report: string | null
+  created_at: string
+  updated_at: string
+  audits_submissions?: {
+    submitted_at: string
+  }
+}
+
+export interface MonthlyTrafficLightData {
+  month: string
+  red: number
+  yellow: number
+  green: number
+}
+
+export interface BoardExtraStats {
+  total: number
+  red: number
+  yellow: number
+  green: number
+  undefined: number
+  by_month: MonthlyTrafficLightData[]
+  follow_up: {
+    with_follow_up: number
+    without_follow_up: number
+  }
+  concluded: {
+    yes: number
+    no: number
+    undefined: number
+  }
+}
+

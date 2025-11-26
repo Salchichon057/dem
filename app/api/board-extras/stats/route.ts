@@ -1,11 +1,83 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import type { BoardExtra, MonthlyTrafficLightData, BoardExtraStats } from "@/lib/types"
 
+const LAST_MONTHS_TO_SHOW = 6
+
+/**
+ * Count board extras by traffic light status
+ */
+function countByTrafficLight(extras: BoardExtra[]) {
+  return {
+    red: extras.filter(e => e.traffic_light === 'Rojo').length,
+    yellow: extras.filter(e => e.traffic_light === 'Amarillo').length,
+    green: extras.filter(e => e.traffic_light === 'Verde').length,
+    undefined: extras.filter(e => !e.traffic_light).length,
+  }
+}
+
+/**
+ * Count board extras by follow-up status
+ */
+function countByFollowUp(extras: BoardExtra[]) {
+  return {
+    with_follow_up: extras.filter(e => e.follow_up_given === true).length,
+    without_follow_up: extras.filter(e => e.follow_up_given === false).length,
+  }
+}
+
+/**
+ * Count board extras by concluded status
+ */
+function countByConcluded(extras: BoardExtra[]) {
+  return {
+    yes: extras.filter(e => e.concluded_result_red_or_no === 'Sí').length,
+    no: extras.filter(e => e.concluded_result_red_or_no === 'No').length,
+    undefined: extras.filter(e => !e.concluded_result_red_or_no).length,
+  }
+}
+
+/**
+ * Group board extras by month and count traffic light statuses
+ */
+function groupByMonth(extras: BoardExtra[]): MonthlyTrafficLightData[] {
+  const monthlyData = extras.reduce((acc: MonthlyTrafficLightData[], item: BoardExtra) => {
+    if (!item.audits_submissions?.submitted_at) return acc
+    
+    const date = new Date(item.audits_submissions.submitted_at)
+    const month = date.toLocaleDateString('es-GT', { year: 'numeric', month: 'short' })
+    
+    let monthData = acc.find(m => m.month === month)
+    if (!monthData) {
+      monthData = { month, red: 0, yellow: 0, green: 0 }
+      acc.push(monthData)
+    }
+    
+    if (item.traffic_light === 'Rojo') monthData.red++
+    else if (item.traffic_light === 'Amarillo') monthData.yellow++
+    else if (item.traffic_light === 'Verde') monthData.green++
+    
+    return acc
+  }, [])
+
+  // Sort by date and take last N months
+  monthlyData.sort((a, b) => {
+    const dateA = new Date(a.month)
+    const dateB = new Date(b.month)
+    return dateA.getTime() - dateB.getTime()
+  })
+  
+  return monthlyData.slice(-LAST_MONTHS_TO_SHOW)
+}
+
+/**
+ * GET /api/board-extras/stats
+ * Returns statistics about board extras (audit tracking)
+ */
 export async function GET() {
   try {
     const supabase = await createClient()
 
-    // Obtener todos los extras con sus submissions
     const { data: extras, error } = await supabase
       .from("consolidated_board_extras")
       .select(`
@@ -20,66 +92,27 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const total = extras?.length || 0
-    
-    // Contar por tipo de semáforo
-    const rojo = extras?.filter(e => e.traffic_light === 'Rojo').length || 0
-    const amarillo = extras?.filter(e => e.traffic_light === 'Amarillo').length || 0
-    const verde = extras?.filter(e => e.traffic_light === 'Verde').length || 0
-    const sin_definir = extras?.filter(e => !e.traffic_light).length || 0
+    const boardExtras = (extras || []) as BoardExtra[]
+    const trafficLightCounts = countByTrafficLight(boardExtras)
+    const followUpCounts = countByFollowUp(boardExtras)
+    const concludedCounts = countByConcluded(boardExtras)
+    const monthlyData = groupByMonth(boardExtras)
 
-    // Seguimiento
-    const con_seguimiento = extras?.filter(e => e.follow_up_given === true).length || 0
-    const sin_seguimiento = extras?.filter(e => e.follow_up_given === false).length || 0
-
-    // Concluidos
-    const concluidos_si = extras?.filter(e => e.concluded_result_red_or_no === 'Sí').length || 0
-    const concluidos_no = extras?.filter(e => e.concluded_result_red_or_no === 'No').length || 0
-    const concluidos_sin_definir = extras?.filter(e => !e.concluded_result_red_or_no).length || 0
-
-    // Agrupar por mes (últimos 6 meses)
-    const porMes = extras?.reduce((acc: any[], item: any) => {
-      if (!item.audits_submissions?.submitted_at) return acc
-      
-      const date = new Date(item.audits_submissions.submitted_at)
-      const mes = date.toLocaleDateString('es-GT', { year: 'numeric', month: 'short' })
-      
-      let mesData = acc.find(m => m.mes === mes)
-      if (!mesData) {
-        mesData = { mes, rojo: 0, amarillo: 0, verde: 0 }
-        acc.push(mesData)
-      }
-      
-      if (item.traffic_light === 'Rojo') mesData.rojo++
-      else if (item.traffic_light === 'Amarillo') mesData.amarillo++
-      else if (item.traffic_light === 'Verde') mesData.verde++
-      
-      return acc
-    }, []) || []
-
-    // Ordenar por fecha y tomar últimos 6 meses
-    porMes.sort((a, b) => {
-      const dateA = new Date(a.mes)
-      const dateB = new Date(b.mes)
-      return dateA.getTime() - dateB.getTime()
-    })
-    const ultimosSeisMeses = porMes.slice(-6)
-
-    const stats = {
-      total,
-      rojo,
-      amarillo,
-      verde,
-      sin_definir,
-      por_mes: ultimosSeisMeses,
-      seguimiento: {
-        con_seguimiento,
-        sin_seguimiento,
+    const stats: BoardExtraStats = {
+      total: boardExtras.length,
+      red: trafficLightCounts.red,
+      yellow: trafficLightCounts.yellow,
+      green: trafficLightCounts.green,
+      undefined: trafficLightCounts.undefined,
+      by_month: monthlyData,
+      follow_up: {
+        with_follow_up: followUpCounts.with_follow_up,
+        without_follow_up: followUpCounts.without_follow_up,
       },
-      concluidos: {
-        si: concluidos_si,
-        no: concluidos_no,
-        sin_definir: concluidos_sin_definir,
+      concluded: {
+        yes: concludedCounts.yes,
+        no: concludedCounts.no,
+        undefined: concludedCounts.undefined,
       },
     }
 
