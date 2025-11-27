@@ -74,6 +74,28 @@ export const createBeneficiarySchema = z.object({
   photo_url: z.string()
     .url('Debe ser una URL válida')
     .optional()
+    .or(z.literal('')),
+
+  // Información de Contacto Personal
+  personal_contact: z.string()
+    .max(100, 'El nombre de contacto no puede exceder 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  personal_number: z.string()
+    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
+    .optional()
+    .or(z.literal('')),
+
+  // Información de Contacto Comunidad
+  community_contact: z.string()
+    .max(100, 'El nombre de contacto no puede exceder 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  community_number: z.string()
+    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
+    .optional()
     .or(z.literal(''))
 })
 
@@ -151,6 +173,28 @@ export const updateBeneficiarySchema = z.object({
 
   photo_url: z.string()
     .url('Debe ser una URL válida')
+    .optional()
+    .or(z.literal('')),
+
+  // Información de Contacto Personal
+  personal_contact: z.string()
+    .max(100, 'El nombre de contacto no puede exceder 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  personal_number: z.string()
+    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
+    .optional()
+    .or(z.literal('')),
+
+  // Información de Contacto Comunidad
+  community_contact: z.string()
+    .max(100, 'El nombre de contacto no puede exceder 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  community_number: z.string()
+    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
     .optional()
     .or(z.literal(''))
 }).partial()

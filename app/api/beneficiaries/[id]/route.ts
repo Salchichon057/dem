@@ -106,6 +106,10 @@ export async function PUT(
     if (body.village !== undefined) updateData.village = body.village
     if (body.address !== undefined) updateData.address = body.address
     if (body.google_maps_url !== undefined) updateData.google_maps_url = body.google_maps_url
+    if (body.personal_contact !== undefined) updateData.personal_contact = body.personal_contact
+    if (body.personal_number !== undefined) updateData.personal_number = body.personal_number
+    if (body.community_contact !== undefined) updateData.community_contact = body.community_contact
+    if (body.community_number !== undefined) updateData.community_number = body.community_number
 
     // Actualizar (updated_at se actualiza automáticamente por trigger)
     const { data: beneficiary, error: updateError } = await supabase

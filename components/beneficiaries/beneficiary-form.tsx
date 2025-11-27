@@ -66,9 +66,39 @@ export default function BeneficiaryForm({
   const [address, setAddress] = useState('')
   const [googleMapsUrl, setGoogleMapsUrl] = useState('')
 
+  // Contact fields
+  const [personalContact, setPersonalContact] = useState('')
+  const [personalNumber, setPersonalNumber] = useState('')
+  const [communityContact, setCommunityContact] = useState('')
+  const [communityNumber, setCommunityNumber] = useState('')
+
   // Location data
   const [departments, setDepartments] = useState<string[]>([])
   const [municipalities, setMunicipalities] = useState<string[]>([])
+
+  // Helper function to format phone numbers (Guatemala format: XXXX-XXXX)
+  const formatPhoneNumber = (value: string): string => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '')
+    
+    // Limit to 8 digits
+    const limitedDigits = digits.slice(0, 8)
+    
+    // Add hyphen after 4th digit if there are more than 4 digits
+    if (limitedDigits.length > 4) {
+      return `${limitedDigits.slice(0, 4)}-${limitedDigits.slice(4)}`
+    }
+    
+    return limitedDigits
+  }
+
+  // Validate phone number format (Guatemala)
+  const validatePhoneNumber = (value: string): boolean => {
+    if (!value) return true // Empty is valid (optional field)
+    const digitsOnly = value.replace(/\D/g, '')
+    // Must be 8 digits and start with 2-7
+    return /^[2-7]\d{7}$/.test(digitsOnly)
+  }
 
   // Load departments on mount
   useEffect(() => {
@@ -101,6 +131,10 @@ export default function BeneficiaryForm({
       setVillage(beneficiary.village || '')
       setAddress(beneficiary.address || '')
       setGoogleMapsUrl(beneficiary.google_maps_url || '')
+      setPersonalContact(beneficiary.personal_contact || '')
+      setPersonalNumber(beneficiary.personal_number || '')
+      setCommunityContact(beneficiary.community_contact || '')
+      setCommunityNumber(beneficiary.community_number || '')
     } else {
       resetForm()
     }
@@ -131,6 +165,10 @@ export default function BeneficiaryForm({
     setVillage('')
     setAddress('')
     setGoogleMapsUrl('')
+    setPersonalContact('')
+    setPersonalNumber('')
+    setCommunityContact('')
+    setCommunityNumber('')
   }
 
   // Manejar selección de archivo de foto (solo preview, no subir aún)
@@ -209,6 +247,10 @@ export default function BeneficiaryForm({
         village: village || '',
         address: address || '',
         google_maps_url: googleMapsUrl || '',
+        personal_contact: personalContact || '',
+        personal_number: personalNumber || '',
+        community_contact: communityContact || '',
+        community_number: communityNumber || '',
       }
 
       // Validar con Zod
@@ -460,11 +502,8 @@ export default function BeneficiaryForm({
                     <SelectValue placeholder="Seleccione" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Alimentación">Alimentación</SelectItem>
-                    <SelectItem value="Salud">Salud</SelectItem>
-                    <SelectItem value="Vivienda">Vivienda</SelectItem>
-                    <SelectItem value="Educación">Educación</SelectItem>
-                    <SelectItem value="Recreación">Recreación</SelectItem>
+                    <SelectItem value="Demos">Demos</SelectItem>
+                    <SelectItem value="Abrazando Leyendas">Abrazando Leyendas</SelectItem>
                   </SelectContent>
                 </Select>
                 {validationErrors.program && (
@@ -610,6 +649,126 @@ export default function BeneficiaryForm({
                 {validationErrors.google_maps_url && (
                   <p className="text-xs text-red-500">{validationErrors.google_maps_url}</p>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* Información de Contacto Personal */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">Información de Contacto Personal</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="personalContact" className="text-sm font-medium">
+                  Nombre de Contacto
+                </Label>
+                <Input
+                  id="personalContact"
+                  value={personalContact}
+                  onChange={(e) => setPersonalContact(e.target.value)}
+                  placeholder="Ej: Juan Pérez"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label 
+                  htmlFor="personalNumber" 
+                  className={`text-sm font-medium ${validationErrors.personal_number ? 'text-red-500' : ''}`}
+                >
+                  Número de Teléfono
+                </Label>
+                <Input
+                  id="personalNumber"
+                  value={personalNumber}
+                  onChange={(e) => {
+                    const formatted = formatPhoneNumber(e.target.value)
+                    setPersonalNumber(formatted)
+                  }}
+                  onBlur={() => {
+                    if (personalNumber && !validatePhoneNumber(personalNumber)) {
+                      setValidationErrors(prev => ({
+                        ...prev,
+                        personal_number: 'Formato inválido. Debe ser 8 dígitos: XXXX-XXXX'
+                      }))
+                    } else {
+                      setValidationErrors(prev => {
+                        const newErrors = { ...prev }
+                        delete newErrors.personal_number
+                        return newErrors
+                      })
+                    }
+                  }}
+                  placeholder="Ej: 5555-1234"
+                  className={`w-full ${validationErrors.personal_number ? 'border-red-500' : ''}`}
+                  maxLength={9}
+                />
+                {validationErrors.personal_number && (
+                  <p className="text-xs text-red-500">{validationErrors.personal_number}</p>
+                )}
+                <p className="text-xs text-gray-500">
+                  Formato: XXXX-XXXX (8 dígitos, primer dígito 2-7)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Información de Contacto Comunidad */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">Información de Contacto Comunidad</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="communityContact" className="text-sm font-medium">
+                  Nombre de Contacto
+                </Label>
+                <Input
+                  id="communityContact"
+                  value={communityContact}
+                  onChange={(e) => setCommunityContact(e.target.value)}
+                  placeholder="Ej: María López"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label 
+                  htmlFor="communityNumber" 
+                  className={`text-sm font-medium ${validationErrors.community_number ? 'text-red-500' : ''}`}
+                >
+                  Número de Teléfono
+                </Label>
+                <Input
+                  id="communityNumber"
+                  value={communityNumber}
+                  onChange={(e) => {
+                    const formatted = formatPhoneNumber(e.target.value)
+                    setCommunityNumber(formatted)
+                  }}
+                  onBlur={() => {
+                    if (communityNumber && !validatePhoneNumber(communityNumber)) {
+                      setValidationErrors(prev => ({
+                        ...prev,
+                        community_number: 'Formato inválido. Debe ser 8 dígitos: XXXX-XXXX'
+                      }))
+                    } else {
+                      setValidationErrors(prev => {
+                        const newErrors = { ...prev }
+                        delete newErrors.community_number
+                        return newErrors
+                      })
+                    }
+                  }}
+                  placeholder="Ej: 5555-5678"
+                  className={`w-full ${validationErrors.community_number ? 'border-red-500' : ''}`}
+                  maxLength={9}
+                />
+                {validationErrors.community_number && (
+                  <p className="text-xs text-red-500">{validationErrors.community_number}</p>
+                )}
+                <p className="text-xs text-gray-500">
+                  Formato: XXXX-XXXX (8 dígitos, primer dígito 2-7)
+                </p>
               </div>
             </div>
           </div>

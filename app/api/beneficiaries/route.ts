@@ -149,6 +149,10 @@ export async function POST(request: NextRequest) {
         village: body.village || null,
         address: body.address || null,
         google_maps_url: body.google_maps_url || null,
+        personal_contact: body.personal_contact || null,
+        personal_number: body.personal_number || null,
+        community_contact: body.community_contact || null,
+        community_number: body.community_number || null,
         created_by: user.id  // ID del usuario autenticado
       })
       .select()

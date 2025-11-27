@@ -236,6 +236,10 @@ export interface Beneficiary {
   village: string | null
   address: string | null
   google_maps_url: string | null
+  personal_contact: string | null
+  personal_number: string | null
+  community_contact: string | null
+  community_number: string | null
   created_at: string
   updated_at: string
   created_by: string | null
@@ -256,6 +260,10 @@ export interface CreateBeneficiaryInput {
   village?: string
   address?: string
   google_maps_url?: string
+  personal_contact?: string
+  personal_number?: string
+  community_contact?: string
+  community_number?: string
 }
 
 export interface UpdateBeneficiaryInput extends Partial<CreateBeneficiaryInput> {
