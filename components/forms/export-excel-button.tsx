@@ -128,7 +128,7 @@ export function ExportExcelButton({
       })
 
       toast.success(`Archivo Excel exportado (${filteredData.length} filas, ${excelColumns.length} columnas)`)
-    } catch (error) {
+    } catch {
       toast.error('Error al exportar el archivo')
     }
   }
@@ -145,3 +145,4 @@ export function ExportExcelButton({
     </Button>
   )
 }
+

@@ -62,7 +62,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
       // Mapear section_location a bucket key
       const bucketKey = SECTION_TO_BUCKET_KEY[sectionLocation]
       if (!bucketKey) {
-)
         setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
         return null
       }
@@ -80,7 +79,7 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
       const relativePath = await uploadFormFile(file, bucketKey, userId, tempSubmissionId)
       setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
       return relativePath // Guardamos el path relativo, no la URL
-    } catch (error) {
+    } catch {
       setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
       return null
     }
@@ -246,7 +245,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
     startTransition(async () => {
       try {
         // PASO 1: Subir todos los archivos pendientes
-)
         const uploadedPaths: Record<string, string> = {}
         
         for (const [questionId, file] of Object.entries(pendingFiles)) {
@@ -261,7 +259,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
 
         // PASO 2: Combinar answers con los paths de archivos subidos
         const finalAnswers = { ...answers, ...uploadedPaths }
-:', finalAnswers)
 
         // PASO 3: Preparar el payload
         const payload = {
@@ -290,8 +287,8 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
           setErrorMessage(result.error || 'Ha ocurrido un error al enviar el formulario')
           setShowErrorModal(true)
         }
-      } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : 'Error de conexión. Por favor, intenta de nuevo.')
+      } catch {
+        setErrorMessage('Error de conexión. Por favor, intenta de nuevo.')
         setShowErrorModal(true)
       }
     })
@@ -1004,4 +1001,5 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
     </form>
   )
 }
+
 

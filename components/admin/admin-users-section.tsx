@@ -75,7 +75,7 @@ export function AdminUsersSection() {
         setUsers(usersWithRole)
       }
       if (rolesResult.data) setRoles(rolesResult.data)
-    } catch (error) {
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -112,7 +112,7 @@ export function AdminUsersSection() {
         setRoleDialog({ open: false, user: null, newRoleId: null })
         toast.success('Rol actualizado correctamente')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al cambiar rol')
     } finally {
       setUpdating(null)
@@ -135,7 +135,7 @@ export function AdminUsersSection() {
 
       await fetchData()
       setDeactivateDialog({ open: false, user: null })
-    } catch (error) {
+    } catch {
       toast.error('Error al cambiar estado')
     } finally {
       setUpdating(null)
@@ -164,7 +164,7 @@ export function AdminUsersSection() {
         description: `Nueva contraseña: ${data.defaultPassword}`,
         duration: 10000
       })
-    } catch (error) {
+    } catch {
       toast.error('Error al resetear contraseña')
     } finally {
       setUpdating(null)
@@ -420,3 +420,4 @@ export function AdminUsersSection() {
     </div>
   )
 }
+

@@ -55,7 +55,7 @@ export default function GridPreviewModal({
       })
 
       toast.success('Tabla exportada a Excel')
-    } catch (error) {
+    } catch {
       toast.error('Error al exportar el archivo')
     }
   }
@@ -122,3 +122,4 @@ export default function GridPreviewModal({
     </Dialog>
   )
 }
+

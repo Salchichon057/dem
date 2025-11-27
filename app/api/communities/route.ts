@@ -126,9 +126,9 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: 'Error al obtener comunidades', details: error.message },
+      { error: 'Error al obtener comunidades' },
       { status: 500 }
     )
   }
@@ -170,10 +170,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ community }, { status: 201 })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: 'Error al crear comunidad', details: error.message },
+      { error: 'Error al crear comunidad' },
       { status: 500 }
     )
   }
 }
+
+

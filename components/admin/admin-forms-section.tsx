@@ -71,7 +71,7 @@ export function AdminFormsSection() {
         })) as FormTemplate[]
         setForms(formsWithCreator)
       }
-    } catch (error) {
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -89,7 +89,7 @@ export function AdminFormsSection() {
 
       if (error) throw error
       await fetchForms()
-    } catch (error) {
+    } catch {
       alert('Error al cambiar visibilidad')
     } finally {
       setUpdating(null)
@@ -111,7 +111,7 @@ export function AdminFormsSection() {
       if (error) throw error
       await fetchForms()
       setDeleteDialog({ open: false, form: null })
-    } catch (error) {
+    } catch {
       alert('Error al eliminar formulario')
     } finally {
       setUpdating(null)
@@ -133,7 +133,7 @@ export function AdminFormsSection() {
       if (error) throw error
       await fetchForms()
       setRestoreDialog({ open: false, form: null })
-    } catch (error) {
+    } catch {
       alert('Error al restaurar formulario')
     } finally {
       setUpdating(null)
@@ -338,3 +338,4 @@ export function AdminFormsSection() {
     </div>
   )
 }
+

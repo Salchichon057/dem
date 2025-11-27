@@ -118,7 +118,7 @@ export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) 
       })
 
       toast.success('Resumen exportado a Excel')
-    } catch (error) {
+    } catch {
       toast.error('Error al exportar el archivo')
     }
   }
@@ -187,3 +187,4 @@ export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) 
     </Card>
   )
 }
+

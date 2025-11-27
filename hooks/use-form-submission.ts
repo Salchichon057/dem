@@ -100,8 +100,8 @@ export function useFormSubmission(form: FormTemplateWithQuestions) {
       setCurrentSection(0)
       setErrors({})
       
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Error desconocido')
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Error desconocido')
       setShowErrorModal(true)
     } finally {
       setIsSubmitting(false)
@@ -144,3 +144,4 @@ export function useFormSubmission(form: FormTemplateWithQuestions) {
     setShowValidationModal
   }
 }
+

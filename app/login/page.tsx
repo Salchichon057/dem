@@ -48,7 +48,7 @@ export default function AuthPage() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.error("Error al iniciar sesión. Verifica tus credenciales.");
     } finally {
       setIsLoading(false);
@@ -83,7 +83,7 @@ export default function AuthPage() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.error("Error al crear la cuenta. Intenta con otro email.");
     } finally {
       setIsLoading(false);
@@ -393,3 +393,4 @@ export default function AuthPage() {
     </div>
   );
 }
+

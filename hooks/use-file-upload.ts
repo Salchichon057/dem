@@ -179,21 +179,21 @@ export function useFileUpload(options: UseFileUploadOptions) {
           )
 
           return { ...uploadedFile, relativePath, publicUrl, status: 'success' as const }
-        } catch (error: any) {
+        } catch (err) {
           // Actualizar estado a "error"
           setFiles(prev =>
             prev.map(f =>
               f.id === uploadedFile.id
                 ? {
                     ...f,
-                    error: error.message,
+                    error: err instanceof Error ? err.message : 'Error al subir archivo',
                     status: 'error' as const,
                   }
                 : f
             )
           )
 
-          throw error
+          throw err
         }
       })
 
@@ -201,8 +201,8 @@ export function useFileUpload(options: UseFileUploadOptions) {
 
       const successFiles = files.filter(f => f.status === 'success')
       onSuccess?.(successFiles)
-    } catch (error: any) {
-      const errorMsg = `Error al subir archivos: ${error.message}`
+    } catch (err) {
+      const errorMsg = `Error al subir archivos: ${err instanceof Error ? err.message : 'Error desconocido'}`
       onError?.(errorMsg)
     } finally {
       setIsUploading(false)
@@ -221,7 +221,7 @@ export function useFileUpload(options: UseFileUploadOptions) {
       if (fileToRemove.relativePath) {
         try {
           await deleteFile(fileToRemove.relativePath)
-        } catch (error) {
+        } catch {
         }
       }
 
@@ -257,3 +257,4 @@ export function useFileUpload(options: UseFileUploadOptions) {
     getSuccessfulUploads,
   }
 }
+

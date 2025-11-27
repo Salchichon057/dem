@@ -32,12 +32,6 @@ import { ExportExcelButton } from './export-excel-button'
 import { SubmissionDetailModal } from './submission-detail-modal'
 import { useDynamicFormSubmissions } from '@/hooks/use-dynamic-form-submissions'
 
-interface ColumnDefinition {
-  id: string
-  title: string
-  type: string
-}
-
 interface SubmissionRow {
   submission_id: string
   submitted_at: string

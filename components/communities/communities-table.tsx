@@ -79,8 +79,8 @@ export default function CommunitiesTable() {
       setCommunities(data.communities || [])
       setTotal(data.pagination.total)
       setTotalPages(data.pagination.totalPages)
-    } catch (error: any) {
-      toast.error(error.message || 'Error al cargar comunidades')
+    } catch {
+      toast.error('Error al cargar comunidades')
     } finally {
       setLoading(false)
     }
@@ -372,3 +372,5 @@ export default function CommunitiesTable() {
     </div>
   )
 }
+
+

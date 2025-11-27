@@ -88,7 +88,7 @@ export function useVoluntarios(filters?: VoluntariosFilters) {
       setTotal(data.total || 0)
       setTotalPages(data.totalPages || 1)
       setCurrentPage(data.page || 1)
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar voluntarios')
     } finally {
       setLoading(false)
@@ -105,7 +105,7 @@ export function useVoluntarios(filters?: VoluntariosFilters) {
       
       const data = await response.json()
       setStats(data.stats)
-    } catch (error) {
+    } catch {
     }
   }, [])
 
@@ -130,9 +130,9 @@ export function useVoluntarios(filters?: VoluntariosFilters) {
       toast.success('Voluntario agregado correctamente')
       
       return { success: true, data: voluntario }
-    } catch (error) {
+    } catch {
       toast.error('Error al agregar voluntario')
-      return { success: false, error }
+      return { success: false }
     }
   }, [])
 
@@ -159,9 +159,9 @@ export function useVoluntarios(filters?: VoluntariosFilters) {
       
       toast.success('Voluntario actualizado correctamente')
       return { success: true, data: voluntario }
-    } catch (error) {
+    } catch {
       toast.error('Error al actualizar voluntario')
-      return { success: false, error }
+      return { success: false }
     }
   }, [])
 
@@ -179,9 +179,9 @@ export function useVoluntarios(filters?: VoluntariosFilters) {
       
       toast.success('Voluntario eliminado correctamente')
       return { success: true }
-    } catch (error) {
+    } catch {
       toast.error('Error al eliminar voluntario')
-      return { success: false, error }
+      return { success: false }
     }
   }, [])
 
@@ -204,3 +204,5 @@ export function useVoluntarios(filters?: VoluntariosFilters) {
     eliminarVoluntario
   }
 }
+
+

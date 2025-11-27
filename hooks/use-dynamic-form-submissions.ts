@@ -66,7 +66,7 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
       } else {
         toast.error('Error al cargar formularios')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar formularios')
     }
   }
@@ -112,7 +112,7 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
       } else {
         toast.error('Error al cargar envíos')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar envíos')
     } finally {
       setLoading(false)
@@ -215,3 +215,4 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
     toggleAllColumns,
   }
 }
+

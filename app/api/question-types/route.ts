@@ -30,13 +30,14 @@ export async function GET() {
       data
     })
 
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Error desconocido' 
+        error: 'Error desconocido' 
       },
       { status: 500 }
     )
   }
 }
+

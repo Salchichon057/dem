@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
       }
       
       return NextResponse.json(
-        { error: 'Error al obtener formularios', details: error.message },
+        { error: 'Error al obtener formularios' },
         { status: 500 }
       )
     }
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
         // Usar el helper que distribuye las queries según section_location
         const { getAllSubmissionsCounts } = await import('@/lib/supabase/submissions')
         submissionCounts = await getAllSubmissionsCounts(formIds)
-      } catch (err) {
+      } catch {
       }
     }
 
@@ -99,14 +99,13 @@ export async function GET(req: NextRequest) {
       ...form,
       submission_count: submissionCounts[form.id] || 0
     }))
-))
 
     return NextResponse.json({ 
       forms: formsWithCount,
       total: formsWithCount.length 
     })
 
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Error al obtener formularios' },
       { status: 500 }
@@ -123,8 +122,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { name, description, section_location, is_public = true, sections = [] } = body
 
-    // DEBUG: Imprimir datos recibidos
-)
     // Validar campos requeridos
     if (!name || !section_location) {
       return NextResponse.json(
@@ -200,8 +197,6 @@ export async function POST(req: NextRequest) {
         // Crear preguntas de la sección
         if (section.questions && section.questions.length > 0) {
           const questionsToInsert = section.questions.map((q: any) => {
-)
-            
             return {
               form_template_id: newForm.id,
               section_id: newSection.id,
@@ -213,7 +208,6 @@ export async function POST(req: NextRequest) {
               config: q.config || {}
             }
           })
-)
 
           const { error: questionsError } = await supabase
             .from('questions')
@@ -237,7 +231,7 @@ export async function POST(req: NextRequest) {
       message: 'Formulario creado exitosamente' 
     }, { status: 201 })
 
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Error al crear formulario' },
       { status: 500 }
@@ -298,7 +292,7 @@ export async function PUT(req: NextRequest) {
       message: 'Formulario actualizado exitosamente' 
     })
 
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Error al actualizar formulario' },
       { status: 500 }
@@ -340,11 +334,13 @@ export async function DELETE(req: NextRequest) {
       message: 'Formulario eliminado exitosamente' 
     })
 
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Error al eliminar formulario' },
       { status: 500 }
     )
   }
 }
+
+
 

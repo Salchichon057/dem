@@ -17,8 +17,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { form_template_id, answers } = body
 
-    // Debug: Ver qué llega al servidor
-)
     if (!form_template_id || !answers) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos: form_template_id, answers' },
@@ -64,7 +62,6 @@ export async function POST(request: NextRequest) {
       answer_value: answer.answer_value,
       created_at: new Date().toISOString()
     }))
-)
 
     // Crear las respuestas en la tabla correspondiente
     const createdAnswers = await createAnswers(sectionLocation, answersData)
@@ -74,9 +71,9 @@ export async function POST(request: NextRequest) {
       answers: createdAnswers
     })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al crear submission' },
+      { error: 'Error al crear submission' },
       { status: 500 }
     )
   }
@@ -133,11 +130,13 @@ export async function GET(request: NextRequest) {
       total: submissions.length
     })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al obtener submissions' },
+      { error: 'Error al obtener submissions' },
       { status: 500 }
     )
   }
 }
+
+
 

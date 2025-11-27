@@ -286,10 +286,10 @@ export default function BeneficiaryForm({
         onOpenChange(false)
         if (!isEdit) resetForm()
       } else {
-        const error = await response.json()
-        toast.error(error.message || 'Error al guardar beneficiario')
+        await response.json()
+        toast.error('Error al guardar beneficiario')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al guardar beneficiario')
     } finally {
       setLoading(false)
@@ -791,3 +791,5 @@ export default function BeneficiaryForm({
     </Dialog>
   )
 }
+
+

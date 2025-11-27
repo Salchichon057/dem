@@ -84,7 +84,7 @@ export function EditBoardExtrasDialog({
         }
       } else if (response.status !== 404) {
       }
-    } catch (error) {
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -124,7 +124,7 @@ export function EditBoardExtrasDialog({
         const error = await response.json()
         toast.error('Error al guardar: ' + (error.error || 'Error desconocido'))
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al guardar los datos')
     } finally {
       setSaving(false)
@@ -310,3 +310,4 @@ export function EditBoardExtrasDialog({
     </Dialog>
   )
 }
+

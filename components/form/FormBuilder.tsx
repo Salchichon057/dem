@@ -149,7 +149,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
               setSections(convertedSections)
             }
           }
-        } catch (error) {
+        } catch {
           setModal({
             isOpen: true,
             type: 'error',
@@ -194,7 +194,7 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
         if (result.success && result.data) {
           setQuestionTypes(result.data)
         }
-      } catch (error) {
+      } catch {
       }
     }
     loadQuestionTypes()
@@ -798,3 +798,4 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
     </div>
   )
 }
+

@@ -92,10 +92,12 @@ export async function GET(request: NextRequest) {
       total_families_in_ra
     })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: 'Error al obtener estadísticas', details: error.message },
+      { error: 'Error al obtener estadísticas' },
       { status: 500 }
     )
   }
 }
+
+

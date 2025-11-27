@@ -89,10 +89,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ stats })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al obtener estadísticas' },
+      { error: 'Error al obtener estadísticas' },
       { status: 500 }
     )
   }
 }
+
+

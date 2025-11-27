@@ -44,10 +44,10 @@ export function useApi<T>(
       const data = await response.json()
       setState({ data, loading: false, error: null })
       return data
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
       setState({ data: null, loading: false, error: errorMessage })
-      throw error
+      throw err
     }
   }, [endpoint])
 
@@ -77,10 +77,10 @@ export function useApi<T>(
       const data = await response.json()
       setState({ data, loading: false, error: null })
       return data
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
       setState({ data: null, loading: false, error: errorMessage })
-      throw error
+      throw err
     }
   }
 
@@ -96,3 +96,4 @@ export function useApi<T>(
     post: postData
   }
 }
+

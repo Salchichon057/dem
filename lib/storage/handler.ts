@@ -109,8 +109,8 @@ class StorageHandler {
       // Formato: "bucket-name/fileName"
       const relativePath = `${bucket}/${fileName}`
       return relativePath
-    } catch (error: any) {
-      throw new Error(`Error al subir archivo: ${error.message}`)
+    } catch {
+      throw new Error(`Error al subir archivo`)
     }
   }
 
@@ -169,8 +169,8 @@ class StorageHandler {
         .remove([filePath])
 
       if (error) throw error
-    } catch (error: any) {
-      throw new Error(`Error al eliminar archivo: ${error.message}`)
+    } catch {
+      throw new Error(`Error al eliminar archivo`)
     }
   }
 
@@ -203,8 +203,8 @@ class StorageHandler {
       }
       
       return newPath
-    } catch (error: any) {
-      throw new Error(`Error al reemplazar archivo: ${error.message}`)
+    } catch {
+      throw new Error(`Error al reemplazar archivo`)
     }
   }
 
@@ -225,7 +225,7 @@ class StorageHandler {
         
         if (error) throw error
       }
-    } catch (error: any) {
+    } catch {
       // No lanzar error, solo loggear
     }
   }
@@ -306,4 +306,5 @@ export const replaceBeneficiaryPhoto = (oldPath: string, newFile: File, userId: 
  */
 export const ensureAllBucketsExist = () => 
   storageHandler.ensureAllBucketsExist()
+
 

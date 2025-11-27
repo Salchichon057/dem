@@ -124,9 +124,9 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil((count || 0) / limit)
     })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al obtener beneficiarios' },
+      { error: 'Error al obtener beneficiarios' },
       { status: 500 }
     )
   }
@@ -198,10 +198,12 @@ export async function POST(request: NextRequest) {
       beneficiary
     }, { status: 201 })
 
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { error: error.message || 'Error al crear beneficiario' },
+      { error: 'Error al crear beneficiario' },
       { status: 500 }
     )
   }
 }
+
+

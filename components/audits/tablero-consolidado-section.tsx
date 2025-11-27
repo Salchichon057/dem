@@ -76,7 +76,7 @@ export function TableroConsolidadoSection() {
       } else {
         toast.error('Error al cargar envíos: ' + (result.error || 'Error desconocido'))
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar envíos')
     } finally {
       setLoading(false)
@@ -95,13 +95,13 @@ export function TableroConsolidadoSection() {
               const extras = await response.json()
               extrasMap[row.submission_id] = extras
             }
-          } catch (error) {
+          } catch {
           }
         })
       )
       
       setBoardExtras(extrasMap)
-    } catch (error) {
+    } catch {
     }
   }
 
@@ -252,7 +252,7 @@ export function TableroConsolidadoSection() {
       })
 
       toast.success('Archivo Excel descargado')
-    } catch (error) {
+    } catch {
       toast.error('Error al exportar el archivo')
     }
   }
@@ -495,3 +495,4 @@ export function TableroConsolidadoSection() {
     </div>
   )
 }
+

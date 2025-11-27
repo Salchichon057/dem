@@ -75,7 +75,7 @@ async function setupBuckets() {
   }
 
   const existingBucketNames = existingBuckets?.map(b => b.name) || []
-|| 'ninguno')
+  
   // Verificar y crear cada bucket necesario
   let bucketsToCreate = 0
   for (const bucket of REQUIRED_BUCKETS) {

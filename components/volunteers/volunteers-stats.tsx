@@ -69,7 +69,7 @@ export default function VolunteersStats() {
           { name: 'Carmen López', hours: 65, projects: 4, area: 'Deportes' }
         ]
       })
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar estadísticas de voluntarios')
     } finally {
       setLoading(false)
@@ -256,3 +256,4 @@ export default function VolunteersStats() {
     </div>
   )
 }
+

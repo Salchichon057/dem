@@ -63,7 +63,6 @@ export async function createAnswers(
 ) {
   const supabase = createClient()
   const { answers: answersTable } = getSubmissionTables(sectionLocation)
-)
   
   const { data, error } = await supabase
     .from(answersTable)
@@ -222,10 +221,11 @@ export async function getAllSubmissionsCounts(
       for (const [formId, count] of Object.entries(sectionCounts)) {
         counts[formId] = count
       }
-    } catch (error) {
+    } catch {
     }
   }
   
   return counts
 }
+
 

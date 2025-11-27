@@ -49,7 +49,7 @@ export default function BeneficiariesCharts() {
       } else {
         toast.error('Error al cargar estadísticas')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar estadísticas')
     } finally {
       setLoading(false)
@@ -324,3 +324,4 @@ export default function BeneficiariesCharts() {
     </div>
   )
 }
+

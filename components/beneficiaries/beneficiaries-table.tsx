@@ -140,7 +140,7 @@ export default function BeneficiariesTable() {
       })
 
       toast.success(`Exportados ${beneficiaries.length} beneficiarios a Excel`)
-    } catch (error) {
+    } catch {
       toast.error('Error al exportar el archivo')
     }
   }
@@ -167,7 +167,7 @@ export default function BeneficiariesTable() {
         const uniquePrograms = [...new Set(data.beneficiaries.map((b: Beneficiary) => b.program))] as string[]
         setPrograms(uniquePrograms.sort())
       }
-    } catch (error) {
+    } catch {
     }
   }
 
@@ -213,7 +213,7 @@ export default function BeneficiariesTable() {
       } else {
         toast.error('Error al cargar beneficiarios')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar beneficiarios')
     } finally {
       setLoading(false)
@@ -245,7 +245,7 @@ export default function BeneficiariesTable() {
       } else {
         toast.error('Error al eliminar beneficiario')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al eliminar beneficiario')
     }
   }
@@ -743,3 +743,4 @@ export default function BeneficiariesTable() {
     </div>
   )
 }
+

@@ -16,7 +16,7 @@ export async function getCurrentUser(): Promise<User | null> {
     }
 
     return user
-  } catch (error) {
+  } catch {
     return null
   }
 }
@@ -44,3 +44,4 @@ export async function withAuth() {
     error: null
   }
 }
+

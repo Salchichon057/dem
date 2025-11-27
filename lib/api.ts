@@ -281,8 +281,8 @@ export async function obtenerOrganizaciones(): Promise<Organizacion[]> {
   try {
     const data = await apiCall<{ organizaciones: Organizacion[] }>('/organizaciones')
     return data.organizaciones || []
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -296,8 +296,8 @@ export async function crearOrganizacion(organizacion: NuevaOrganizacion): Promis
       body: JSON.stringify(organizacion),
     })
     return data.organizacion
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -314,8 +314,8 @@ export async function actualizarOrganizacion(
       body: JSON.stringify(organizacion),
     })
     return data.organizacion
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -327,8 +327,8 @@ export async function eliminarOrganizacion(id: string): Promise<void> {
     await apiCall(`/organizaciones/${id}`, {
       method: 'DELETE',
     })
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -345,8 +345,8 @@ export async function cambiarEstadoOrganizacion(
       body: JSON.stringify({ estado }),
     })
     return data.organizacion
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -359,8 +359,8 @@ export async function obtenerEstadisticas(): Promise<Estadistica> {
   try {
     const data = await apiCall<Estadistica>('/estadisticas')
     return data
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -373,8 +373,8 @@ export async function obtenerPerfilUsuario(): Promise<Usuario> {
   try {
     const data = await apiCall<{ user: Usuario }>('/auth/verify')
     return data.user
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -390,8 +390,8 @@ export async function actualizarPerfilUsuario(
       body: JSON.stringify(datos),
     })
     return data.user
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -410,8 +410,8 @@ export async function cambiarContrasena(
         newPassword: contrasenaNueva,
       }),
     })
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -424,8 +424,8 @@ export async function obtenerPlantillas(): Promise<Plantilla[]> {
   try {
     const data = await apiCall<{ plantillas: Plantilla[] }>('/plantillas')
     return data.plantillas || []
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -439,8 +439,8 @@ export async function crearPlantilla(plantilla: NuevaPlantilla): Promise<Plantil
       body: JSON.stringify(plantilla),
     })
     return data.plantilla
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -453,8 +453,8 @@ export async function obtenerFormularios(): Promise<Formulario[]> {
   try {
     const data = await apiCall<{ formularios: Formulario[] }>('/formularios')
     return data.formularios || []
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -468,8 +468,8 @@ export async function crearFormulario(formulario: NuevoFormulario): Promise<Form
       body: JSON.stringify(formulario),
     })
     return data.formulario
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -484,8 +484,8 @@ export async function obtenerComunidades(): Promise<Comunidad[]> {
       method: 'GET',
     })
     return data.comunidades
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -498,8 +498,8 @@ export async function obtenerComunidadPorId(id: string): Promise<Comunidad> {
       method: 'GET',
     })
     return data.comunidad
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -513,8 +513,8 @@ export async function crearComunidad(comunidad: Omit<Comunidad, 'id' | 'createdA
       body: JSON.stringify(comunidad),
     })
     return data.comunidad
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -528,8 +528,8 @@ export async function actualizarComunidad(id: string, comunidad: Partial<Comunid
       body: JSON.stringify(comunidad),
     })
     return data.comunidad
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -541,8 +541,8 @@ export async function eliminarComunidad(id: string): Promise<void> {
     await apiCall(`/comunidades/${id}`, {
       method: 'DELETE',
     })
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -557,8 +557,8 @@ export async function obtenerPerfilesComunitarios(): Promise<PerfilComunitario[]
       method: 'GET',
     })
     return data.perfiles
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -572,8 +572,8 @@ export async function crearPerfilComunitario(perfil: Omit<PerfilComunitario, 'id
       body: JSON.stringify(perfil),
     })
     return data.perfil
-  } catch (error) {
-    throw error
+  } catch {
+    throw new Error('Error en la operación')
   }
 }
 
@@ -608,3 +608,5 @@ export function limpiarAutenticacion(): void {
   localStorage.removeItem('auth-token')
   document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
 }
+
+

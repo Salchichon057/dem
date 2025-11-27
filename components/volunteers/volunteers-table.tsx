@@ -78,7 +78,7 @@ export default function VolunteersTable() {
       } else {
         toast.error('Error al cargar voluntarios')
       }
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar voluntarios')
     } finally {
       setLoading(false)
@@ -369,3 +369,4 @@ export default function VolunteersTable() {
     </div>
   )
 }
+

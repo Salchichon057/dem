@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { 
@@ -20,7 +19,6 @@ import {
   Link as LinkIcon,
   CheckCircle2,
   XCircle,
-  Star,
   Table as TableIcon,
 } from 'lucide-react'
 
