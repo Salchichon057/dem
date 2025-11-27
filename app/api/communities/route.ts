@@ -22,6 +22,10 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || undefined
     }
 
+    // Parámetros de fecha
+    const year = searchParams.get('year') || undefined
+    const month = searchParams.get('month') || undefined
+
     // Parámetros de paginación
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -50,6 +54,21 @@ export async function GET(request: NextRequest) {
     if (filters.search) {
       countQuery = countQuery.or(`villages.ilike.%${filters.search}%,leader_name.ilike.%${filters.search}%`)
     }
+    
+    // Filtros de fecha por año y mes (created_at)
+    if (year && year !== 'all') {
+      const startDate = `${year}-01-01`
+      const endDate = `${year}-12-31`
+      countQuery = countQuery.gte('created_at', startDate).lte('created_at', endDate)
+      
+      if (month && month !== 'all') {
+        const monthPadded = month.padStart(2, '0')
+        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+        const startMonth = `${year}-${monthPadded}-01`
+        const endMonth = `${year}-${monthPadded}-${lastDay}`
+        countQuery = countQuery.gte('created_at', startMonth).lte('created_at', endMonth)
+      }
+    }
 
     const { count, error: countError } = await countQuery
     if (countError) throw countError
@@ -77,6 +96,21 @@ export async function GET(request: NextRequest) {
     }
     if (filters.search) {
       query = query.or(`villages.ilike.%${filters.search}%,leader_name.ilike.%${filters.search}%`)
+    }
+    
+    // Filtros de fecha por año y mes (created_at)
+    if (year && year !== 'all') {
+      const startDate = `${year}-01-01`
+      const endDate = `${year}-12-31`
+      query = query.gte('created_at', startDate).lte('created_at', endDate)
+      
+      if (month && month !== 'all') {
+        const monthPadded = month.padStart(2, '0')
+        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+        const startMonth = `${year}-${monthPadded}-01`
+        const endMonth = `${year}-${monthPadded}-${lastDay}`
+        query = query.gte('created_at', startMonth).lte('created_at', endMonth)
+      }
     }
 
     const { data: communities, error } = await query

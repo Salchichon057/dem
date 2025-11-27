@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
     const shift = searchParams.get('shift')
     const is_active = searchParams.get('is_active')
     const work_date = searchParams.get('work_date')
+    const year = searchParams.get('year')
+    const month = searchParams.get('month')
 
     // Construir query base
     let query = supabase
@@ -59,6 +61,21 @@ export async function GET(request: NextRequest) {
 
     if (work_date) {
       query = query.eq('work_date', work_date)
+    }
+
+    // Filtros de fecha por año y mes (created_at)
+    if (year && year !== 'all') {
+      const startDate = `${year}-01-01`
+      const endDate = `${year}-12-31`
+      query = query.gte('created_at', startDate).lte('created_at', endDate)
+      
+      if (month && month !== 'all') {
+        const monthPadded = month.padStart(2, '0')
+        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+        const startMonth = `${year}-${monthPadded}-01`
+        const endMonth = `${year}-${monthPadded}-${lastDay}`
+        query = query.gte('created_at', startMonth).lte('created_at', endMonth)
+      }
     }
 
     // Ejecutar query con paginación

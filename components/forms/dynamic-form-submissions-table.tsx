@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table'
 import { Search, Eye, Pencil, Trash2, Settings2, Download, FileText, Image as ImageIcon, Table as TableIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import DateFilter from '@/components/shared/date-filter'
 import {
   Popover,
   PopoverContent,
@@ -75,6 +76,8 @@ export default function DynamicFormSubmissionsTable({
   
   // Filters
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
   
   // Column visibility - dinámico basado en las columnas del formulario
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
@@ -167,14 +170,14 @@ export default function DynamicFormSubmissionsTable({
     }
   }
 
-  // Search filter
+  // Search and date filters
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredData(data)
-    } else {
-      const filtered = data.filter(row => {
-        // Buscar en nombre, email y todas las columnas de texto
-        const searchLower = searchTerm.toLowerCase()
+    let filtered = data
+    
+    // Aplicar filtro de búsqueda
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(row => {
         return (
           row.user_name?.toLowerCase().includes(searchLower) ||
           row.user_email?.toLowerCase().includes(searchLower) ||
@@ -184,10 +187,28 @@ export default function DynamicFormSubmissionsTable({
           })
         )
       })
-      setFilteredData(filtered)
     }
-    setCurrentPage(1) // Reset to page 1 on search
-  }, [searchTerm, data, columns])
+    
+    // Aplicar filtro de fecha (submitted_at)
+    if (selectedYear !== 'all') {
+      filtered = filtered.filter(row => {
+        const submittedDate = new Date(row.submitted_at)
+        const rowYear = submittedDate.getFullYear()
+        
+        if (rowYear !== parseInt(selectedYear)) return false
+        
+        if (selectedMonth !== 'all') {
+          const rowMonth = submittedDate.getMonth() + 1
+          return rowMonth === parseInt(selectedMonth)
+        }
+        
+        return true
+      })
+    }
+    
+    setFilteredData(filtered)
+    setCurrentPage(1) // Reset to page 1 on filter change
+  }, [searchTerm, selectedYear, selectedMonth, data, columns])
 
   // Pagination
   useEffect(() => {
@@ -741,6 +762,20 @@ export default function DynamicFormSubmissionsTable({
           </div>
         )}
       </div>
+      
+      {/* Date Filter */}
+      {selectedFormId !== 'none' && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Fecha de Envío:</span>
+          <DateFilter
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onYearChange={setSelectedYear}
+            onMonthChange={setSelectedMonth}
+            showIcons={false}
+          />
+        </div>
+      )}
 
       {/* Table */}
       {selectedFormId !== 'none' && (

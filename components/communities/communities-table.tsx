@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge'
 import { Plus, Search, Eye, Pencil, Trash2, MapPin, ExternalLink, Download, Users } from 'lucide-react'
 import { Community } from '@/lib/types/community'
 import { toast } from 'sonner'
+import DateFilter from '@/components/shared/date-filter'
 
 export default function CommunitiesTable() {
   const [communities, setCommunities] = useState<Community[]>([])
@@ -41,6 +42,8 @@ export default function CommunitiesTable() {
   const [municipalityFilter, setMunicipalityFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<'activa' | 'inactiva' | 'suspendida' | ''>('')
   const [classificationFilter, setClassificationFilter] = useState<string>('')
+  const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
 
   // Cargar comunidades
   const fetchCommunities = async () => {
@@ -56,6 +59,8 @@ export default function CommunitiesTable() {
       if (municipalityFilter) params.append('municipality', municipalityFilter)
       if (statusFilter) params.append('status', statusFilter)
       if (classificationFilter) params.append('classification', classificationFilter)
+      if (selectedYear !== 'all') params.append('year', selectedYear)
+      if (selectedMonth !== 'all') params.append('month', selectedMonth)
 
       const response = await fetch(`/api/communities?${params}`)
       if (!response.ok) {
@@ -86,7 +91,7 @@ export default function CommunitiesTable() {
 
   useEffect(() => {
     fetchCommunities()
-  }, [currentPage, searchTerm, departmentFilter, municipalityFilter, statusFilter, classificationFilter])
+  }, [currentPage, searchTerm, departmentFilter, municipalityFilter, statusFilter, classificationFilter, selectedYear, selectedMonth])
 
   // Exportar a Excel
   const handleExport = async () => {
@@ -193,6 +198,18 @@ export default function CommunitiesTable() {
             <SelectItem value="Grande">Grande (&gt;150)</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      
+      {/* Date Filter */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Fecha de Registro:</span>
+        <DateFilter
+          selectedYear={selectedYear}
+          selectedMonth={selectedMonth}
+          onYearChange={setSelectedYear}
+          onMonthChange={setSelectedMonth}
+          showIcons={false}
+        />
       </div>
 
       {/* Tabla */}

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { EditBoardExtrasDialog } from "./edit-board-extras-dialog"
 import { SemaforoEstadisticas } from "./semaforo-estadisticas"
+import DateFilter from "@/components/shared/date-filter"
 
 type ViewMode = 'table' | 'stats'
 
@@ -45,6 +46,8 @@ export function TableroConsolidadoSection() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredData, setFilteredData] = useState<SubmissionRow[]>([])
+  const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [formTemplateId] = useState("5bd783b6-e52c-48de-ab3b-9e7ae8538bd2") // Consolidado de Auditorías 2025
   const [boardExtras, setBoardExtras] = useState<Record<string, BoardExtras>>({})
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -120,13 +123,14 @@ export function TableroConsolidadoSection() {
     fetchAllBoardExtras()
   }
 
-  // Search filter
+  // Search and date filters
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredData(data)
-    } else {
-      const filtered = data.filter(row => {
-        const searchLower = searchTerm.toLowerCase()
+    let filtered = data
+    
+    // Aplicar filtro de búsqueda
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(row => {
         return (
           row.user_name?.toLowerCase().includes(searchLower) ||
           row.user_email?.toLowerCase().includes(searchLower) ||
@@ -136,9 +140,27 @@ export function TableroConsolidadoSection() {
           })
         )
       })
-      setFilteredData(filtered)
     }
-  }, [searchTerm, data, columns])
+    
+    // Aplicar filtro de fecha (submitted_at)
+    if (selectedYear !== 'all') {
+      filtered = filtered.filter(row => {
+        const submittedDate = new Date(row.submitted_at)
+        const rowYear = submittedDate.getFullYear()
+        
+        if (rowYear !== parseInt(selectedYear)) return false
+        
+        if (selectedMonth !== 'all') {
+          const rowMonth = submittedDate.getMonth() + 1
+          return rowMonth === parseInt(selectedMonth)
+        }
+        
+        return true
+      })
+    }
+    
+    setFilteredData(filtered)
+  }, [searchTerm, selectedYear, selectedMonth, data, columns])
 
   const formatCellValue = (value: any, type: string): string => {
     if (value === null || value === undefined || value === '') return '-'
@@ -314,6 +336,18 @@ export function TableroConsolidadoSection() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
+        />
+      </div>
+      
+      {/* Date Filter */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Fecha de Envío:</span>
+        <DateFilter
+          selectedYear={selectedYear}
+          selectedMonth={selectedMonth}
+          onYearChange={setSelectedYear}
+          onMonthChange={setSelectedMonth}
+          showIcons={false}
         />
       </div>
 

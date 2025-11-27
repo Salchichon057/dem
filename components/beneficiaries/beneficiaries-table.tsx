@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import DateFilter from '@/components/shared/date-filter'
 
 export default function BeneficiariesTable() {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([])
@@ -59,6 +60,8 @@ export default function BeneficiariesTable() {
   const [selectedMunicipality, setSelectedMunicipality] = useState<string>('all')
   const [selectedProgram, setSelectedProgram] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
 
   // Dynamic filter options (extracted from actual data)
   const [departments, setDepartments] = useState<string[]>([])
@@ -187,6 +190,8 @@ export default function BeneficiariesTable() {
       if (selectedMunicipality && selectedMunicipality !== 'all') params.append('municipality', selectedMunicipality)
       if (selectedProgram && selectedProgram !== 'all') params.append('program', selectedProgram)
       if (selectedStatus && selectedStatus !== 'all') params.append('is_active', selectedStatus)
+      if (selectedYear && selectedYear !== 'all') params.append('year', selectedYear)
+      if (selectedMonth && selectedMonth !== 'all') params.append('month', selectedMonth)
 
       const response = await fetch(`/api/beneficiaries?${params.toString()}`)
       const data = await response.json()
@@ -209,12 +214,12 @@ export default function BeneficiariesTable() {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchBeneficiaries()
-  }, [searchTerm, selectedDepartment, selectedMunicipality, selectedProgram, selectedStatus, currentPage])
+  }, [searchTerm, selectedDepartment, selectedMunicipality, selectedProgram, selectedStatus, selectedYear, selectedMonth, currentPage])
 
   // Reset a página 1 cuando cambian los filtros (excepto cuando cambia currentPage)
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, selectedDepartment, selectedMunicipality, selectedProgram, selectedStatus])
+  }, [searchTerm, selectedDepartment, selectedMunicipality, selectedProgram, selectedStatus, selectedYear, selectedMonth])
 
   // Delete beneficiary
   const handleDelete = async (id: string, name: string) => {
@@ -244,6 +249,8 @@ export default function BeneficiariesTable() {
     setSelectedMunicipality('all')
     setSelectedProgram('all')
     setSelectedStatus('all')
+    setSelectedYear('all')
+    setSelectedMonth('all')
     setCurrentPage(1) // Reset a la primera página
   }
 
@@ -420,19 +427,20 @@ export default function BeneficiariesTable() {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        {/* Search */}
-        <div className="lg:col-span-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nombre..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* Search */}
+          <div className="lg:col-span-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
           </div>
-        </div>
 
         {/* Department */}
         <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
@@ -494,10 +502,23 @@ export default function BeneficiariesTable() {
             <SelectItem value="false">Inactivos</SelectItem>
           </SelectContent>
         </Select>
+        </div>
+        
+        {/* Date Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Fecha de Ingreso:</span>
+          <DateFilter
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onYearChange={setSelectedYear}
+            onMonthChange={setSelectedMonth}
+            showIcons={false}
+          />
+        </div>
       </div>
 
       {/* Clear filters button */}
-      {(searchTerm || selectedDepartment !== 'all' || selectedMunicipality !== 'all' || selectedProgram !== 'all' || selectedStatus !== 'all') && (
+      {(searchTerm || selectedDepartment !== 'all' || selectedMunicipality !== 'all' || selectedProgram !== 'all' || selectedStatus !== 'all' || selectedYear !== 'all' || selectedMonth !== 'all') && (
         <Button variant="outline" onClick={clearFilters}>
           Limpiar filtros
         </Button>

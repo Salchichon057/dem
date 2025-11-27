@@ -22,6 +22,10 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || undefined
     }
 
+    // Parámetros de fecha
+    const year = searchParams.get('year') || undefined
+    const month = searchParams.get('month') || undefined
+
     // Parámetros de paginación
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -50,6 +54,21 @@ export async function GET(request: NextRequest) {
     if (filters.search) {
       countQuery = countQuery.ilike('name', `%${filters.search}%`)
     }
+    
+    // Filtros de fecha por año y mes (admission_date)
+    if (year && year !== 'all') {
+      const startDate = `${year}-01-01`
+      const endDate = `${year}-12-31`
+      countQuery = countQuery.gte('admission_date', startDate).lte('admission_date', endDate)
+      
+      if (month && month !== 'all') {
+        const monthPadded = month.padStart(2, '0')
+        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+        const startMonth = `${year}-${monthPadded}-01`
+        const endMonth = `${year}-${monthPadded}-${lastDay}`
+        countQuery = countQuery.gte('admission_date', startMonth).lte('admission_date', endMonth)
+      }
+    }
 
     const { count, error: countError } = await countQuery
     if (countError) throw countError
@@ -77,6 +96,21 @@ export async function GET(request: NextRequest) {
     }
     if (filters.search) {
       query = query.ilike('name', `%${filters.search}%`)
+    }
+    
+    // Filtros de fecha por año y mes (admission_date)
+    if (year && year !== 'all') {
+      const startDate = `${year}-01-01`
+      const endDate = `${year}-12-31`
+      query = query.gte('admission_date', startDate).lte('admission_date', endDate)
+      
+      if (month && month !== 'all') {
+        const monthPadded = month.padStart(2, '0')
+        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+        const startMonth = `${year}-${monthPadded}-01`
+        const endMonth = `${year}-${monthPadded}-${lastDay}`
+        query = query.gte('admission_date', startMonth).lte('admission_date', endMonth)
+      }
     }
 
     const { data: beneficiaries, error } = await query

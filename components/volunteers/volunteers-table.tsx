@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge'
 import { Plus, Search, Eye, Pencil, Calendar, Clock, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Volunteer } from '@/lib/types'
+import DateFilter from '@/components/shared/date-filter'
 
 interface VolunteersResponse {
   volunteers: Volunteer[]
@@ -40,6 +41,8 @@ export default function VolunteersTable() {
   const [volunteerTypeFilter, setVolunteerTypeFilter] = useState<string>('all')
   const [shiftFilter, setShiftFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [selectedYear, setSelectedYear] = useState<string>('all')
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
@@ -47,7 +50,7 @@ export default function VolunteersTable() {
 
   useEffect(() => {
     fetchVolunteers()
-  }, [searchTerm, volunteerTypeFilter, shiftFilter, statusFilter, currentPage])
+  }, [searchTerm, volunteerTypeFilter, shiftFilter, statusFilter, selectedYear, selectedMonth, currentPage])
 
   const fetchVolunteers = async () => {
     try {
@@ -62,6 +65,8 @@ export default function VolunteersTable() {
       if (volunteerTypeFilter !== 'all') params.set('volunteer_type', volunteerTypeFilter)
       if (shiftFilter !== 'all') params.set('shift', shiftFilter)
       if (statusFilter !== 'all') params.set('is_active', statusFilter)
+      if (selectedYear !== 'all') params.set('year', selectedYear)
+      if (selectedMonth !== 'all') params.set('month', selectedMonth)
 
       const response = await fetch(`/api/volunteers?${params}`)
       const data: VolunteersResponse = await response.json()
@@ -205,6 +210,18 @@ export default function VolunteersTable() {
             <Plus className="h-4 w-4" />
             Agregar Voluntario
           </Button>
+        </div>
+        
+        {/* Date Filter */}
+        <div className="flex items-center gap-2 px-4 pb-4">
+          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Fecha de Registro:</span>
+          <DateFilter
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onYearChange={setSelectedYear}
+            onMonthChange={setSelectedMonth}
+            showIcons={false}
+          />
         </div>
       </Card>
 
