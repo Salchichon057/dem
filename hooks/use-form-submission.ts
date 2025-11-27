@@ -101,7 +101,6 @@ export function useFormSubmission(form: FormTemplateWithQuestions) {
       setErrors({})
       
     } catch (error) {
-      console.error('Error al enviar formulario:', error)
       setErrorMessage(error instanceof Error ? error.message : 'Error desconocido')
       setShowErrorModal(true)
     } finally {

@@ -141,7 +141,6 @@ export default function BeneficiariesTable() {
 
       toast.success(`Exportados ${beneficiaries.length} beneficiarios a Excel`)
     } catch (error) {
-      console.error('Error exporting to Excel:', error)
       toast.error('Error al exportar el archivo')
     }
   }
@@ -169,7 +168,6 @@ export default function BeneficiariesTable() {
         setPrograms(uniquePrograms.sort())
       }
     } catch (error) {
-      console.error('Error fetching all beneficiaries:', error)
     }
   }
 
@@ -216,7 +214,6 @@ export default function BeneficiariesTable() {
         toast.error('Error al cargar beneficiarios')
       }
     } catch (error) {
-      console.error('Error fetching beneficiaries:', error)
       toast.error('Error al cargar beneficiarios')
     } finally {
       setLoading(false)
@@ -249,7 +246,6 @@ export default function BeneficiariesTable() {
         toast.error('Error al eliminar beneficiario')
       }
     } catch (error) {
-      console.error('Error deleting beneficiary:', error)
       toast.error('Error al eliminar beneficiario')
     }
   }

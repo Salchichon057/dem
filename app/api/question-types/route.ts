@@ -14,30 +14,23 @@ const supabase = createClient(
 
 export async function GET() {
   try {
-    console.log('🔍 API: Obteniendo tipos de pregunta')
-
     const { data, error } = await supabase
       .from('question_types')
       .select('*')
       .order('name', { ascending: true })
 
     if (error) {
-      console.error('❌ Error al obtener question types:', error)
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 500 }
       )
     }
-
-    console.log('✅ Question types obtenidos:', data?.length || 0)
-
     return NextResponse.json({
       success: true,
       data
     })
 
   } catch (error) {
-    console.error('❌ Error inesperado:', error)
     return NextResponse.json(
       { 
         success: false, 

@@ -45,13 +45,11 @@ export default function BeneficiariesCharts() {
       const data = await response.json()
 
       if (response.ok) {
-        console.log('Stats data received:', data)
         setStats(data.stats)
       } else {
         toast.error('Error al cargar estadísticas')
       }
     } catch (error) {
-      console.error('Error fetching stats:', error)
       toast.error('Error al cargar estadísticas')
     } finally {
       setLoading(false)

@@ -9,10 +9,6 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Usando ano
 
 // Validar que las variables de entorno existan
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Faltan variables de entorno de Supabase:', {
-    supabaseUrl: supabaseUrl ? '✓' : '✗',
-    supabaseAnonKey: supabaseAnonKey ? '✓' : '✗'
-  })
 }
 
 // Crear cliente con anon key (respeta RLS)
@@ -65,27 +61,9 @@ export async function GET(req: NextRequest) {
     if (sectionLocation) {
       query = query.eq('section_location', sectionLocation)
     }
-
-    console.log('🔍 Query Supabase:', {
-      table: 'form_templates',
-      filters: {
-        is_active: true,
-        is_public: true,
-        section_location: sectionLocation || 'all'
-      }
-    })
-
     const { data: forms, error } = await query
 
     if (error) {
-      console.error('❌ Error de Supabase al obtener formularios:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        sectionLocation
-      })
-      
       // Si es error de permisos, dar más información
       if (error.code === '42501') {
         return NextResponse.json(
@@ -103,9 +81,6 @@ export async function GET(req: NextRequest) {
         { status: 500 }
       )
     }
-
-    console.log('✅ Formularios obtenidos:', forms?.length || 0)
-
     // Obtener conteo de submissions para cada formulario usando el helper
     const formIds = (forms || []).map(f => f.id)
     
@@ -116,9 +91,7 @@ export async function GET(req: NextRequest) {
         // Usar el helper que distribuye las queries según section_location
         const { getAllSubmissionsCounts } = await import('@/lib/supabase/submissions')
         submissionCounts = await getAllSubmissionsCounts(formIds)
-        console.log('📊 Conteo de submissions por formulario:', submissionCounts)
       } catch (err) {
-        console.error('❌ Error al obtener submissions:', err)
       }
     }
 
@@ -126,11 +99,7 @@ export async function GET(req: NextRequest) {
       ...form,
       submission_count: submissionCounts[form.id] || 0
     }))
-
-    console.log('✅ Formularios con conteo:', formsWithCount.map(f => ({ 
-      name: f.name, 
-      count: f.submission_count 
-    })))
+))
 
     return NextResponse.json({ 
       forms: formsWithCount,
@@ -138,7 +107,6 @@ export async function GET(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Error al obtener formularios:', error)
     return NextResponse.json(
       { error: 'Error al obtener formularios' },
       { status: 500 }
@@ -156,14 +124,7 @@ export async function POST(req: NextRequest) {
     const { name, description, section_location, is_public = true, sections = [] } = body
 
     // DEBUG: Imprimir datos recibidos
-    console.log('📥 POST /api/formularios - Datos recibidos:')
-    console.log('- name:', name)
-    console.log('- description:', description)
-    console.log('- section_location:', section_location)
-    console.log('- is_public:', is_public)
-    console.log('- sections:', JSON.stringify(sections, null, 2))
-    console.log('- user.id:', user.id)
-
+)
     // Validar campos requeridos
     if (!name || !section_location) {
       return NextResponse.json(
@@ -208,15 +169,11 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (formError) {
-      console.error('Error de Supabase al crear formulario:', formError)
       return NextResponse.json(
         { error: 'Error al crear formulario', details: formError.message },
         { status: 500 }
       )
     }
-
-    console.log('✅ Formulario creado:', newForm.id, newForm.name)
-
     // Crear secciones y preguntas si se proporcionaron
     if (sections && sections.length > 0) {
       for (const section of sections) {
@@ -233,7 +190,6 @@ export async function POST(req: NextRequest) {
           .single()
 
         if (sectionError) {
-          console.error('Error al crear sección:', sectionError)
           // Intentar eliminar el formulario si falló la creación de secciones
           await supabase.from('form_templates').delete().eq('id', newForm.id)
           return NextResponse.json(
@@ -241,15 +197,10 @@ export async function POST(req: NextRequest) {
             { status: 500 }
           )
         }
-
-        console.log('✅ Sección creada:', newSection.id, newSection.title)
-
         // Crear preguntas de la sección
         if (section.questions && section.questions.length > 0) {
           const questionsToInsert = section.questions.map((q: any) => {
-            console.log(`📝 Procesando pregunta: ${q.title}`)
-            console.log(`   - question_type_id: ${q.question_type_id}`)
-            console.log(`   - config:`, JSON.stringify(q.config, null, 2))
+)
             
             return {
               form_template_id: newForm.id,
@@ -262,20 +213,13 @@ export async function POST(req: NextRequest) {
               config: q.config || {}
             }
           })
-
-          console.log(`🔍 Insertando ${questionsToInsert.length} preguntas:`)
-          console.log(JSON.stringify(questionsToInsert, null, 2))
+)
 
           const { error: questionsError } = await supabase
             .from('questions')
             .insert(questionsToInsert)
 
           if (questionsError) {
-            console.error('❌ Error al crear preguntas:', questionsError)
-            console.error('   - Code:', questionsError.code)
-            console.error('   - Message:', questionsError.message)
-            console.error('   - Details:', questionsError.details)
-            console.error('   - Hint:', questionsError.hint)
             // Intentar eliminar el formulario si falló la creación de preguntas
             await supabase.from('form_templates').delete().eq('id', newForm.id)
             return NextResponse.json(
@@ -283,8 +227,6 @@ export async function POST(req: NextRequest) {
               { status: 500 }
             )
           }
-
-          console.log(`✅ ${questionsToInsert.length} preguntas creadas para sección ${newSection.title}`)
         }
       }
     }
@@ -296,7 +238,6 @@ export async function POST(req: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Error al crear formulario:', error)
     return NextResponse.json(
       { error: 'Error al crear formulario' },
       { status: 500 }
@@ -346,7 +287,6 @@ export async function PUT(req: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error de Supabase:', error)
       return NextResponse.json(
         { error: 'Error al actualizar formulario' },
         { status: 500 }
@@ -359,7 +299,6 @@ export async function PUT(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Error al actualizar formulario:', error)
     return NextResponse.json(
       { error: 'Error al actualizar formulario' },
       { status: 500 }
@@ -391,7 +330,6 @@ export async function DELETE(req: NextRequest) {
       .eq('id', id)
 
     if (error) {
-      console.error('Error de Supabase:', error)
       return NextResponse.json(
         { error: 'Error al eliminar formulario' },
         { status: 500 }
@@ -403,10 +341,10 @@ export async function DELETE(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Error al eliminar formulario:', error)
     return NextResponse.json(
       { error: 'Error al eliminar formulario' },
       { status: 500 }
     )
   }
 }
+

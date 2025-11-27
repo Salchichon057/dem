@@ -108,10 +108,8 @@ class StorageHandler {
       // Retornar SOLO el path relativo (sin storage URL)
       // Formato: "bucket-name/fileName"
       const relativePath = `${bucket}/${fileName}`
-      console.log('✅ uploadFile - Path relativo generado:', relativePath)
       return relativePath
     } catch (error: any) {
-      console.error('Error uploading file:', error)
       throw new Error(`Error al subir archivo: ${error.message}`)
     }
   }
@@ -172,7 +170,6 @@ class StorageHandler {
 
       if (error) throw error
     } catch (error: any) {
-      console.error('Error deleting file:', error)
       throw new Error(`Error al eliminar archivo: ${error.message}`)
     }
   }
@@ -202,13 +199,11 @@ class StorageHandler {
       // Eliminar archivo anterior (si existe)
       if (oldPath) {
         await this.deleteFile(oldPath).catch(err => {
-          console.warn('No se pudo eliminar archivo anterior:', err)
         })
       }
       
       return newPath
     } catch (error: any) {
-      console.error('Error replacing file:', error)
       throw new Error(`Error al reemplazar archivo: ${error.message}`)
     }
   }
@@ -229,10 +224,8 @@ class StorageHandler {
         })
         
         if (error) throw error
-        console.log(`Bucket '${bucketName}' creado exitosamente`)
       }
     } catch (error: any) {
-      console.error(`Error ensuring bucket '${bucketName}' exists:`, error)
       // No lanzar error, solo loggear
     }
   }
@@ -277,11 +270,8 @@ export const uploadFormFile = (
   userId: string,
   submissionId: string
 ) => {
-  console.log('📁 uploadFormFile - Input:', { fileName: file.name, formSection, userId, submissionId })
   const bucket = STORAGE_BUCKETS[formSection]
-  console.log('🪣 Bucket seleccionado:', bucket)
   const result = storageHandler.uploadFile(file, bucket, userId, 'submission', submissionId)
-  console.log('📤 uploadFormFile - Resultado:', result)
   return result
 }
 

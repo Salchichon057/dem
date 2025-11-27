@@ -56,7 +56,6 @@ export default function GridPreviewModal({
 
       toast.success('Tabla exportada a Excel')
     } catch (error) {
-      console.error('Error exporting to Excel:', error)
       toast.error('Error al exportar el archivo')
     }
   }

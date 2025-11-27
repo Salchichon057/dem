@@ -282,7 +282,6 @@ export async function obtenerOrganizaciones(): Promise<Organizacion[]> {
     const data = await apiCall<{ organizaciones: Organizacion[] }>('/organizaciones')
     return data.organizaciones || []
   } catch (error) {
-    console.error('Error obteniendo organizaciones:', error)
     throw error
   }
 }
@@ -298,7 +297,6 @@ export async function crearOrganizacion(organizacion: NuevaOrganizacion): Promis
     })
     return data.organizacion
   } catch (error) {
-    console.error('Error creando organización:', error)
     throw error
   }
 }
@@ -317,7 +315,6 @@ export async function actualizarOrganizacion(
     })
     return data.organizacion
   } catch (error) {
-    console.error('Error actualizando organización:', error)
     throw error
   }
 }
@@ -331,7 +328,6 @@ export async function eliminarOrganizacion(id: string): Promise<void> {
       method: 'DELETE',
     })
   } catch (error) {
-    console.error('Error eliminando organización:', error)
     throw error
   }
 }
@@ -350,7 +346,6 @@ export async function cambiarEstadoOrganizacion(
     })
     return data.organizacion
   } catch (error) {
-    console.error('Error cambiando estado de organización:', error)
     throw error
   }
 }
@@ -365,7 +360,6 @@ export async function obtenerEstadisticas(): Promise<Estadistica> {
     const data = await apiCall<Estadistica>('/estadisticas')
     return data
   } catch (error) {
-    console.error('Error obteniendo estadísticas:', error)
     throw error
   }
 }
@@ -380,7 +374,6 @@ export async function obtenerPerfilUsuario(): Promise<Usuario> {
     const data = await apiCall<{ user: Usuario }>('/auth/verify')
     return data.user
   } catch (error) {
-    console.error('Error obteniendo perfil de usuario:', error)
     throw error
   }
 }
@@ -398,7 +391,6 @@ export async function actualizarPerfilUsuario(
     })
     return data.user
   } catch (error) {
-    console.error('Error actualizando perfil de usuario:', error)
     throw error
   }
 }
@@ -419,7 +411,6 @@ export async function cambiarContrasena(
       }),
     })
   } catch (error) {
-    console.error('Error cambiando contraseña:', error)
     throw error
   }
 }
@@ -434,7 +425,6 @@ export async function obtenerPlantillas(): Promise<Plantilla[]> {
     const data = await apiCall<{ plantillas: Plantilla[] }>('/plantillas')
     return data.plantillas || []
   } catch (error) {
-    console.error('Error obteniendo plantillas:', error)
     throw error
   }
 }
@@ -450,7 +440,6 @@ export async function crearPlantilla(plantilla: NuevaPlantilla): Promise<Plantil
     })
     return data.plantilla
   } catch (error) {
-    console.error('Error creando plantilla:', error)
     throw error
   }
 }
@@ -465,7 +454,6 @@ export async function obtenerFormularios(): Promise<Formulario[]> {
     const data = await apiCall<{ formularios: Formulario[] }>('/formularios')
     return data.formularios || []
   } catch (error) {
-    console.error('Error obteniendo formularios:', error)
     throw error
   }
 }
@@ -481,7 +469,6 @@ export async function crearFormulario(formulario: NuevoFormulario): Promise<Form
     })
     return data.formulario
   } catch (error) {
-    console.error('Error creando formulario:', error)
     throw error
   }
 }
@@ -498,7 +485,6 @@ export async function obtenerComunidades(): Promise<Comunidad[]> {
     })
     return data.comunidades
   } catch (error) {
-    console.error('Error obteniendo comunidades:', error)
     throw error
   }
 }
@@ -513,7 +499,6 @@ export async function obtenerComunidadPorId(id: string): Promise<Comunidad> {
     })
     return data.comunidad
   } catch (error) {
-    console.error('Error obteniendo comunidad:', error)
     throw error
   }
 }
@@ -529,7 +514,6 @@ export async function crearComunidad(comunidad: Omit<Comunidad, 'id' | 'createdA
     })
     return data.comunidad
   } catch (error) {
-    console.error('Error creando comunidad:', error)
     throw error
   }
 }
@@ -545,7 +529,6 @@ export async function actualizarComunidad(id: string, comunidad: Partial<Comunid
     })
     return data.comunidad
   } catch (error) {
-    console.error('Error actualizando comunidad:', error)
     throw error
   }
 }
@@ -559,7 +542,6 @@ export async function eliminarComunidad(id: string): Promise<void> {
       method: 'DELETE',
     })
   } catch (error) {
-    console.error('Error eliminando comunidad:', error)
     throw error
   }
 }
@@ -576,7 +558,6 @@ export async function obtenerPerfilesComunitarios(): Promise<PerfilComunitario[]
     })
     return data.perfiles
   } catch (error) {
-    console.error('Error obteniendo perfiles comunitarios:', error)
     throw error
   }
 }
@@ -592,7 +573,6 @@ export async function crearPerfilComunitario(perfil: Omit<PerfilComunitario, 'id
     })
     return data.perfil
   } catch (error) {
-    console.error('Error creando perfil comunitario:', error)
     throw error
   }
 }

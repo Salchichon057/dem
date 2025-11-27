@@ -63,9 +63,7 @@ export async function createAnswers(
 ) {
   const supabase = createClient()
   const { answers: answersTable } = getSubmissionTables(sectionLocation)
-  
-  console.log(`📝 createAnswers - Tabla destino: ${answersTable}`)
-  console.log(`📝 createAnswers - Answers a insertar:`, JSON.stringify(answers, null, 2))
+)
   
   const { data, error } = await supabase
     .from(answersTable)
@@ -73,12 +71,8 @@ export async function createAnswers(
     .select()
   
   if (error) {
-    console.error(`❌ Error al insertar en ${answersTable}:`, error)
     throw error
   }
-  
-  console.log(`✅ Insertado en ${answersTable}:`, data)
-  
   return data
 }
 
@@ -229,9 +223,9 @@ export async function getAllSubmissionsCounts(
         counts[formId] = count
       }
     } catch (error) {
-      console.error(`Error contando submissions para ${sectionLocation}:`, error)
     }
   }
   
   return counts
 }
+

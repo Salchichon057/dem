@@ -88,7 +88,6 @@ export async function GET() {
       `)
 
     if (error) {
-      console.error("Error fetching board extras stats:", error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -118,7 +117,6 @@ export async function GET() {
 
     return NextResponse.json(stats)
   } catch (error) {
-    console.error("Error in GET /api/board-extras/stats:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

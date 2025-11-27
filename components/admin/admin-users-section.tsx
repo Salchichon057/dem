@@ -76,7 +76,6 @@ export function AdminUsersSection() {
       }
       if (rolesResult.data) setRoles(rolesResult.data)
     } catch (error) {
-      console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
     }
@@ -114,7 +113,6 @@ export function AdminUsersSection() {
         toast.success('Rol actualizado correctamente')
       }
     } catch (error) {
-      console.error('Error updating role:', error)
       toast.error('Error al cambiar rol')
     } finally {
       setUpdating(null)
@@ -138,7 +136,6 @@ export function AdminUsersSection() {
       await fetchData()
       setDeactivateDialog({ open: false, user: null })
     } catch (error) {
-      console.error('Error toggling active status:', error)
       toast.error('Error al cambiar estado')
     } finally {
       setUpdating(null)
@@ -168,7 +165,6 @@ export function AdminUsersSection() {
         duration: 10000
       })
     } catch (error) {
-      console.error('Error resetting password:', error)
       toast.error('Error al resetear contraseña')
     } finally {
       setUpdating(null)

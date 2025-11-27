@@ -20,9 +20,6 @@ export async function GET(req: NextRequest) {
       serviceKeyStart: supabaseServiceKey?.substring(0, 20) + '...',
       url: supabaseUrl
     }
-
-    console.log('🔍 Debug Supabase Config:', debug)
-
     // Crear cliente
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
@@ -32,22 +29,14 @@ export async function GET(req: NextRequest) {
     })
 
     // Test 1: Consulta simple
-    console.log('📝 Test 1: SELECT simple...')
     const { data: test1, error: error1 } = await supabase
       .from('form_templates')
       .select('id, name')
       .limit(1)
-
-    console.log('Test 1 result:', { data: test1, error: error1 })
-
     // Test 2: Query con RPC (bypass RLS)
-    console.log('📝 Test 2: RPC query...')
     const { data: test2, error: error2 } = await supabase.rpc('get_forms_by_section', {
       p_section_location: 'organizaciones'
     }).limit(1)
-
-    console.log('Test 2 result:', { data: test2, error: error2 })
-
     return NextResponse.json({
       message: 'Tests completados',
       debug,
@@ -67,7 +56,6 @@ export async function GET(req: NextRequest) {
 
   } catch (err: unknown) {
     const error = err as Error
-    console.error('❌ Error en test:', error)
     return NextResponse.json({
       error: 'Error en test',
       message: error.message,

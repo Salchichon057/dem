@@ -93,7 +93,6 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Error fetching community stats:', error)
     return NextResponse.json(
       { error: 'Error al obtener estadísticas', details: error.message },
       { status: 500 }

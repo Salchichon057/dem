@@ -125,7 +125,6 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Error al obtener beneficiarios:', error)
     return NextResponse.json(
       { error: error.message || 'Error al obtener beneficiarios' },
       { status: 500 }
@@ -200,7 +199,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error: any) {
-    console.error('Error al crear beneficiario:', error)
     return NextResponse.json(
       { error: error.message || 'Error al crear beneficiario' },
       { status: 500 }

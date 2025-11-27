@@ -222,7 +222,6 @@ export function useFileUpload(options: UseFileUploadOptions) {
         try {
           await deleteFile(fileToRemove.relativePath)
         } catch (error) {
-          console.error('Error eliminando archivo del storage:', error)
         }
       }
 

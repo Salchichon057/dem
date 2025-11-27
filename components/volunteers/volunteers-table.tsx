@@ -79,7 +79,6 @@ export default function VolunteersTable() {
         toast.error('Error al cargar voluntarios')
       }
     } catch (error) {
-      console.error('Error fetching volunteers:', error)
       toast.error('Error al cargar voluntarios')
     } finally {
       setLoading(false)

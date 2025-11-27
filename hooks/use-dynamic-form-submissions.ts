@@ -64,11 +64,9 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
         const formsData = result.forms || []
         setForms(formsData)
       } else {
-        console.error('❌ Error en respuesta:', result)
         toast.error('Error al cargar formularios')
       }
     } catch (error) {
-      console.error('❌ Error fetching forms:', error)
       toast.error('Error al cargar formularios')
     }
   }
@@ -115,7 +113,6 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
         toast.error('Error al cargar envíos')
       }
     } catch (error) {
-      console.error('Error fetching submissions:', error)
       toast.error('Error al cargar envíos')
     } finally {
       setLoading(false)

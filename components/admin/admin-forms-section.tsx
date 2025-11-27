@@ -72,7 +72,6 @@ export function AdminFormsSection() {
         setForms(formsWithCreator)
       }
     } catch (error) {
-      console.error('Error fetching forms:', error)
     } finally {
       setLoading(false)
     }
@@ -91,7 +90,6 @@ export function AdminFormsSection() {
       if (error) throw error
       await fetchForms()
     } catch (error) {
-      console.error('Error toggling active:', error)
       alert('Error al cambiar visibilidad')
     } finally {
       setUpdating(null)
@@ -114,7 +112,6 @@ export function AdminFormsSection() {
       await fetchForms()
       setDeleteDialog({ open: false, form: null })
     } catch (error) {
-      console.error('Error soft deleting:', error)
       alert('Error al eliminar formulario')
     } finally {
       setUpdating(null)
@@ -137,7 +134,6 @@ export function AdminFormsSection() {
       await fetchForms()
       setRestoreDialog({ open: false, form: null })
     } catch (error) {
-      console.error('Error restoring:', error)
       alert('Error al restaurar formulario')
     } finally {
       setUpdating(null)

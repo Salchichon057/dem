@@ -17,7 +17,6 @@ export async function getCurrentUser(): Promise<User | null> {
 
     return user
   } catch (error) {
-    console.error('Error obteniendo usuario:', error)
     return null
   }
 }

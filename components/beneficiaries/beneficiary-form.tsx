@@ -290,7 +290,6 @@ export default function BeneficiaryForm({
         toast.error(error.message || 'Error al guardar beneficiario')
       }
     } catch (error) {
-      console.error('Error saving beneficiary:', error)
       toast.error('Error al guardar beneficiario')
     } finally {
       setLoading(false)

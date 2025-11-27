@@ -90,7 +90,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ stats })
 
   } catch (error: any) {
-    console.error('Error al obtener estadísticas:', error)
     return NextResponse.json(
       { error: error.message || 'Error al obtener estadísticas' },
       { status: 500 }

@@ -65,8 +65,6 @@ export default function CommunitiesTable() {
       const response = await fetch(`/api/communities?${params}`)
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        console.error('API Error:', errorData)
-        
         let errorMessage = 'Error al cargar comunidades'
         if (errorData.code === '42501') {
           errorMessage = 'Error de permisos RLS'
@@ -82,7 +80,6 @@ export default function CommunitiesTable() {
       setTotal(data.pagination.total)
       setTotalPages(data.pagination.totalPages)
     } catch (error: any) {
-      console.error('Error fetching communities:', error)
       toast.error(error.message || 'Error al cargar comunidades')
     } finally {
       setLoading(false)

@@ -49,7 +49,6 @@ export default function AuthPage() {
         router.refresh();
       }
     } catch (error) {
-      console.error("Error en login:", error);
       toast.error("Error al iniciar sesión. Verifica tus credenciales.");
     } finally {
       setIsLoading(false);
@@ -85,7 +84,6 @@ export default function AuthPage() {
         router.refresh();
       }
     } catch (error) {
-      console.error("Error en registro:", error);
       toast.error("Error al crear la cuenta. Intenta con otro email.");
     } finally {
       setIsLoading(false);

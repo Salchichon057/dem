@@ -18,10 +18,7 @@ export async function POST(request: NextRequest) {
     const { form_template_id, answers } = body
 
     // Debug: Ver qué llega al servidor
-    console.log('🔍 API /submissions - Body recibido:', JSON.stringify(body, null, 2))
-    console.log('🔍 API /submissions - Answers:', answers)
-    console.log('🔍 API /submissions - User ID:', user.id)
-
+)
     if (!form_template_id || !answers) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos: form_template_id, answers' },
@@ -67,14 +64,10 @@ export async function POST(request: NextRequest) {
       answer_value: answer.answer_value,
       created_at: new Date().toISOString()
     }))
-
-    console.log('💾 Preparando answers para insertar:', JSON.stringify(answersData, null, 2))
+)
 
     // Crear las respuestas en la tabla correspondiente
     const createdAnswers = await createAnswers(sectionLocation, answersData)
-
-    console.log('✅ Answers creados exitosamente:', createdAnswers)
-
     return NextResponse.json({
       success: true,
       submission,
@@ -82,7 +75,6 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Error al crear submission:', error)
     return NextResponse.json(
       { error: error.message || 'Error al crear submission' },
       { status: 500 }
@@ -142,10 +134,10 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('❌ Error al obtener submissions:', error)
     return NextResponse.json(
       { error: error.message || 'Error al obtener submissions' },
       { status: 500 }
     )
   }
 }
+

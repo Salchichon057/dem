@@ -37,7 +37,6 @@ export async function GET(
     return NextResponse.json({ beneficiary })
 
   } catch (error: any) {
-    console.error('Error al obtener beneficiario:', error)
     return NextResponse.json(
       { error: error.message || 'Error al obtener beneficiario' },
       { status: 500 }

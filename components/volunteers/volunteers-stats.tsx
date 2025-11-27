@@ -70,7 +70,6 @@ export default function VolunteersStats() {
         ]
       })
     } catch (error) {
-      console.error('Error fetching volunteer stats:', error)
       toast.error('Error al cargar estadísticas de voluntarios')
     } finally {
       setLoading(false)

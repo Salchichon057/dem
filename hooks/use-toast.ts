@@ -11,14 +11,11 @@ export function useToast() {
 
   const toast = (toast: Toast) => {
     // Simular toast con console y alert por ahora
-    console.log(`${toast.variant === 'destructive' ? '❌' : '✅'} ${toast.title}: ${toast.description}`)
-    
     if (toast.variant === 'destructive') {
       alert(`Error: ${toast.description}`)
     } else {
       // Para éxito, simplemente log por ahora
       setTimeout(() => {
-        console.log('Toast:', toast.title)
       }, 100)
     }
 

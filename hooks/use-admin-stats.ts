@@ -168,7 +168,6 @@ export function useAdminStats() {
         setGeneralStats(stats)
         setSectionStats(sections)
       } catch (err) {
-        console.error('Error fetching stats:', err)
         setError(err instanceof Error ? err.message : 'Error al cargar estadísticas')
       } finally {
         setLoading(false)

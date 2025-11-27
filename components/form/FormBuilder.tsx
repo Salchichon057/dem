@@ -114,7 +114,6 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
           
           if (!response.ok) {
             const errorText = await response.text()
-            console.error('❌ [FormBuilder] Error cargando formulario:', errorText)
             throw new Error(`Error ${response.status}: ${errorText}`)
           }
           
@@ -151,7 +150,6 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
             }
           }
         } catch (error) {
-          console.error('💥 [FormBuilder] Error cargando formulario:', error)
           setModal({
             isOpen: true,
             type: 'error',
@@ -197,7 +195,6 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
           setQuestionTypes(result.data)
         }
       } catch (error) {
-        console.error('Error loading question types:', error)
       }
     }
     loadQuestionTypes()

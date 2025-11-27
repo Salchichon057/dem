@@ -10,9 +10,6 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('❌ Faltan variables de entorno:')
-  console.error('  - NEXT_PUBLIC_SUPABASE_URL')
-  console.error('  - SUPABASE_SERVICE_ROLE_KEY o NEXT_PUBLIC_SUPABASE_ANON_KEY')
   process.exit(1)
 }
 
@@ -70,37 +67,23 @@ const REQUIRED_BUCKETS = [
 ]
 
 async function setupBuckets() {
-  console.log('🔍 Verificando buckets de Supabase Storage...\n')
-  console.log(`📡 URL: ${SUPABASE_URL}`)
-  console.log(`🔑 Usando: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Service Role Key' : 'Anon Key'}`)
-  console.log()
-
   // Obtener lista de buckets existentes
   const { data: existingBuckets, error: listError } = await supabase.storage.listBuckets()
   
   if (listError) {
-    console.error('❌ Error al listar buckets:', listError.message)
-    console.log('\n⚠️  Nota: Para crear buckets necesitas la SUPABASE_SERVICE_ROLE_KEY')
-    console.log('    Puedes obtenerla en: https://supabase.com/dashboard/project/rslboufatgzicrvmrbnu/settings/api')
     return
   }
 
   const existingBucketNames = existingBuckets?.map(b => b.name) || []
-  console.log('📦 Buckets existentes:', existingBucketNames.join(', ') || 'ninguno')
-  console.log()
-
+|| 'ninguno')
   // Verificar y crear cada bucket necesario
   let bucketsToCreate = 0
   for (const bucket of REQUIRED_BUCKETS) {
     if (existingBucketNames.includes(bucket.name)) {
-      console.log(`✅ Bucket "${bucket.name}" ya existe`)
     } else {
-      console.log(`❌ Bucket "${bucket.name}" NO existe`)
       bucketsToCreate++
       
       if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        console.log(`⏳ Creando bucket "${bucket.name}"...`)
-        
         const { error } = await supabase.storage.createBucket(bucket.name, {
           public: bucket.public,
           fileSizeLimit: bucket.fileSizeLimit,
@@ -108,21 +91,16 @@ async function setupBuckets() {
         })
 
         if (error) {
-          console.error(`❌ Error al crear bucket "${bucket.name}":`, error.message)
         } else {
-          console.log(`✅ Bucket "${bucket.name}" creado exitosamente`)
         }
       }
     }
   }
 
   if (bucketsToCreate > 0 && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.log(`\n⚠️  Faltan ${bucketsToCreate} buckets por crear`)
-    console.log('    Para crearlos automáticamente, agrega SUPABASE_SERVICE_ROLE_KEY en .env.local')
-    console.log('    O créalos manualmente en: https://supabase.com/dashboard/project/rslboufatgzicrvmrbnu/storage/buckets')
   } else {
-    console.log('\n✨ Configuración de buckets completada!')
   }
 }
 
 setupBuckets().catch(console.error)
+

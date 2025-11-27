@@ -67,24 +67,16 @@ export function TableroConsolidadoSection() {
   const fetchSubmissions = async () => {
     try {
       setLoading(true)
-      console.log('🔍 Fetching submissions for form:', formTemplateId)
       const response = await fetch(`/api/submissions/${formTemplateId}`)
       const result = await response.json()
-
-      console.log('📊 API Response:', result)
-      console.log('📋 Columns:', result.columns)
-      console.log('📦 Data:', result.data)
-
       if (response.ok) {
         setColumns(result.columns || [])
         setData(result.data || [])
         setFilteredData(result.data || [])
       } else {
-        console.error('❌ API Error:', result)
         toast.error('Error al cargar envíos: ' + (result.error || 'Error desconocido'))
       }
     } catch (error) {
-      console.error('❌ Error fetching submissions:', error)
       toast.error('Error al cargar envíos')
     } finally {
       setLoading(false)
@@ -104,14 +96,12 @@ export function TableroConsolidadoSection() {
               extrasMap[row.submission_id] = extras
             }
           } catch (error) {
-            console.error(`Error fetching extras for ${row.submission_id}:`, error)
           }
         })
       )
       
       setBoardExtras(extrasMap)
     } catch (error) {
-      console.error('Error fetching board extras:', error)
     }
   }
 
@@ -263,7 +253,6 @@ export function TableroConsolidadoSection() {
 
       toast.success('Archivo Excel descargado')
     } catch (error) {
-      console.error('Error exporting to Excel:', error)
       toast.error('Error al exportar el archivo')
     }
   }

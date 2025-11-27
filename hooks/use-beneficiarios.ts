@@ -40,7 +40,6 @@ export function useBeneficiarios() {
       const data = await response.json()
       setBeneficiarios(data.beneficiaries || [])
     } catch (error) {
-      console.error('Error al cargar beneficiarios:', error)
       toast.error('Error al cargar beneficiarios')
     } finally {
       setLoading(false)
@@ -69,7 +68,6 @@ export function useBeneficiarios() {
       
       return { success: true, data: beneficiario }
     } catch (error) {
-      console.error('Error al agregar beneficiario:', error)
       toast.error('Error al agregar beneficiario')
       return { success: false, error }
     }
@@ -99,7 +97,6 @@ export function useBeneficiarios() {
       toast.success('Beneficiario actualizado correctamente')
       return { success: true, data: beneficiario }
     } catch (error) {
-      console.error('Error al actualizar beneficiario:', error)
       toast.error('Error al actualizar beneficiario')
       return { success: false, error }
     }
@@ -120,7 +117,6 @@ export function useBeneficiarios() {
       toast.success('Beneficiario eliminado correctamente')
       return { success: true }
     } catch (error) {
-      console.error('Error al eliminar beneficiario:', error)
       toast.error('Error al eliminar beneficiario')
       return { success: false, error }
     }

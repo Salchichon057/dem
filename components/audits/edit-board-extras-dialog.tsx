@@ -83,10 +83,8 @@ export function EditBoardExtrasDialog({
           setFormData(data)
         }
       } else if (response.status !== 404) {
-        console.error('Error fetching board extras')
       }
     } catch (error) {
-      console.error('Error:', error)
     } finally {
       setLoading(false)
     }
@@ -127,7 +125,6 @@ export function EditBoardExtrasDialog({
         toast.error('Error al guardar: ' + (error.error || 'Error desconocido'))
       }
     } catch (error) {
-      console.error('Error saving:', error)
       toast.error('Error al guardar los datos')
     } finally {
       setSaving(false)

@@ -55,7 +55,6 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (error) {
-        console.error("Error updating board extras:", error)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
 
@@ -79,7 +78,6 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (error) {
-        console.error("Error creating board extras:", error)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
 
@@ -88,7 +86,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error("Error in POST /api/board-extras:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

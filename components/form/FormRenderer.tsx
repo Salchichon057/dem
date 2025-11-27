@@ -48,7 +48,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
       // Obtener userId del usuario autenticado
       const userId = user?.id
       if (!userId) {
-        console.error('Usuario no autenticado')
         setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
         return null
       }
@@ -56,7 +55,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
       // Validar que el form tenga section_location
       const sectionLocation = form.section_location
       if (!sectionLocation) {
-        console.error('❌ El formulario no tiene section_location definido')
         setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
         return null
       }
@@ -64,14 +62,13 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
       // Mapear section_location a bucket key
       const bucketKey = SECTION_TO_BUCKET_KEY[sectionLocation]
       if (!bucketKey) {
-        console.error('❌ Section location no válido:', sectionLocation, 'Valores permitidos:', Object.keys(SECTION_TO_BUCKET_KEY))
+)
         setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
         return null
       }
       
       // Type guard: verificar que bucketKey no sea BENEFICIARIES
       if (bucketKey === 'BENEFICIARIES') {
-        console.error('❌ BENEFICIARIES no es un bucket válido para formularios')
         setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
         return null
       }
@@ -80,14 +77,10 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
       const tempSubmissionId = `temp-${Date.now()}`
       
       // Subir archivo usando el handler existente
-      console.log('📤 Subiendo archivo:', file.name, 'Bucket:', bucketKey)
       const relativePath = await uploadFormFile(file, bucketKey, userId, tempSubmissionId)
-      console.log('✅ Archivo subido, path relativo:', relativePath)
-      
       setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
       return relativePath // Guardamos el path relativo, no la URL
     } catch (error) {
-      console.error('Error en upload:', error)
       setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
       return null
     }
@@ -253,11 +246,10 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
     startTransition(async () => {
       try {
         // PASO 1: Subir todos los archivos pendientes
-        console.log('📤 Subiendo archivos pendientes:', Object.keys(pendingFiles))
+)
         const uploadedPaths: Record<string, string> = {}
         
         for (const [questionId, file] of Object.entries(pendingFiles)) {
-          console.log(`📎 Subiendo ${file.name} para question ${questionId}`)
           const relativePath = await uploadFileToStorage(file, questionId)
           
           if (!relativePath) {
@@ -265,12 +257,11 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
           }
           
           uploadedPaths[questionId] = relativePath
-          console.log(`✅ Archivo subido: ${relativePath}`)
         }
 
         // PASO 2: Combinar answers con los paths de archivos subidos
         const finalAnswers = { ...answers, ...uploadedPaths }
-        console.log('📦 Answers finales (con archivos):', finalAnswers)
+:', finalAnswers)
 
         // PASO 3: Preparar el payload
         const payload = {
@@ -282,9 +273,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
             }
           }))
         }
-
-        console.log('📤 Enviando formulario:', payload)
-
         const response = await fetch('/api/submissions', {
           method: 'POST',
           headers: {
@@ -294,9 +282,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
         })
 
         const result = await response.json()
-
-        console.log('📥 Respuesta del servidor:', result)
-
         if (result.success) {
           // Limpiar archivos pendientes
           setPendingFiles({})
@@ -306,7 +291,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
           setShowErrorModal(true)
         }
       } catch (error) {
-        console.error('❌ Error al enviar:', error)
         setErrorMessage(error instanceof Error ? error.message : 'Error de conexión. Por favor, intenta de nuevo.')
         setShowErrorModal(true)
       }
@@ -626,7 +610,6 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
                   }
 
                   // Solo guardamos el archivo, NO lo subimos todavía
-                  console.log('📎 Archivo seleccionado:', file.name)
                   setPendingFiles(prev => ({ ...prev, [question.id]: file }))
                   setErrors({ ...errors, [question.id]: '' })
                 }
@@ -1021,3 +1004,4 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
     </form>
   )
 }
+

@@ -92,7 +92,6 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Error al obtener voluntarios:', error)
     return NextResponse.json(
       { error: error.message || 'Error al obtener voluntarios' },
       { status: 500 }
@@ -159,7 +158,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(volunteer, { status: 201 })
 
   } catch (error: any) {
-    console.error('Error al crear voluntario:', error)
     return NextResponse.json(
       { error: error.message || 'Error al crear voluntario' },
       { status: 500 }

@@ -119,7 +119,6 @@ export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) 
 
       toast.success('Resumen exportado a Excel')
     } catch (error) {
-      console.error('Error exporting to Excel:', error)
       toast.error('Error al exportar el archivo')
     }
   }
