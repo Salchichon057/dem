@@ -1,8 +1,10 @@
 'use client'
 
 import { BeneficiaryStats } from '@/lib/types'
-import { Download } from 'lucide-react'
+import { FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { exportToExcel, type ExcelColumn } from '@/lib/utils/excel-export'
+import { toast } from 'sonner'
 import {
   Table,
   TableBody,
@@ -55,45 +57,71 @@ export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) 
 
   // Función para descargar Excel
   const handleDownloadExcel = () => {
-    // Construir headers dinámicamente
-    const headers = ['Departamento', 'Población', 'Femenino', 'Masculino', ...allPrograms]
-    
-    // Construir filas dinámicamente
-    const rows = departmentData.map(row => [
-      row.department,
-      row.total,
-      row.feminine,
-      row.masculine,
-      ...allPrograms.map(program => row.programs[program] || 0)
-    ])
+    try {
+      // Build Excel columns dynamically
+      const excelColumns: ExcelColumn[] = [
+        { header: 'Departamento', key: 'department', width: 25 },
+        { header: 'Población', key: 'total', width: 15 },
+        { header: 'Femenino', key: 'feminine', width: 15 },
+        { header: 'Masculino', key: 'masculine', width: 15 },
+      ]
 
-    // Construir CSV
-    let csvContent = headers.join(',') + '\n'
-    rows.forEach(row => {
-      csvContent += row.join(',') + '\n'
-    })
+      // Add program columns
+      allPrograms.forEach(program => {
+        excelColumns.push({
+          header: program,
+          key: program,
+          width: 20,
+        })
+      })
 
-    // Agregar totales al final
-    const programTotals = allPrograms.map(program => stats.by_program[program] || 0)
-    const totalRow = [
-      'TOTAL',
-      stats.total,
-      stats.by_gender?.femenino || 0,
-      stats.by_gender?.masculino || 0,
-      ...programTotals
-    ]
-    csvContent += totalRow.join(',') + '\n'
+      // Build data rows
+      const excelData = departmentData.map(row => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dataRow: any = {
+          department: row.department,
+          total: row.total,
+          feminine: row.feminine,
+          masculine: row.masculine,
+        }
 
-    // Crear blob y descargar
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', `resumen-beneficiarios-${new Date().toISOString().split('T')[0]}.csv`)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+        // Add program values
+        allPrograms.forEach(program => {
+          dataRow[program] = row.programs[program] || 0
+        })
+
+        return dataRow
+      })
+
+      // Add totals row
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const totalRow: any = {
+        department: 'TOTAL',
+        total: stats.total,
+        feminine: stats.by_gender?.femenino || 0,
+        masculine: stats.by_gender?.masculino || 0,
+      }
+
+      allPrograms.forEach(program => {
+        totalRow[program] = stats.by_program[program] || 0
+      })
+
+      excelData.push(totalRow)
+
+      // Export to Excel
+      exportToExcel({
+        fileName: 'resumen-beneficiarios',
+        sheetName: 'Resumen por Departamento',
+        columns: excelColumns,
+        data: excelData,
+        includeTimestamp: true,
+      })
+
+      toast.success('Resumen exportado a Excel')
+    } catch (error) {
+      console.error('Error exporting to Excel:', error)
+      toast.error('Error al exportar el archivo')
+    }
   }
 
   return (
@@ -104,8 +132,8 @@ export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) 
           <Text>Datos consolidados de beneficiarios</Text>
         </div>
         <Button onClick={handleDownloadExcel} className="gap-2">
-          <Download className="w-4 h-4" />
-          Descargar Excel
+          <FileSpreadsheet className="w-4 h-4" />
+          Exportar Excel
         </Button>
       </div>
 

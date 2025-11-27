@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,8 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Search, Eye, Pencil, Trash2, Settings2, Download, FileText, Image as ImageIcon, Table as TableIcon } from 'lucide-react'
-import { toast } from 'sonner'
+import { Search, Eye, Settings2, FileText, Image as ImageIcon, Table as TableIcon } from 'lucide-react'
 import DateFilter from '@/components/shared/date-filter'
 import {
   Popover,
@@ -29,11 +28,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import FilePreviewModal from './file-preview-modal'
 import GridPreviewModal from './grid-preview-modal'
-
-interface FormOption {
-  id: string
-  name: string
-}
+import { ExportExcelButton } from './export-excel-button'
+import { SubmissionDetailModal } from './submission-detail-modal'
+import { useDynamicFormSubmissions } from '@/hooks/use-dynamic-form-submissions'
 
 interface ColumnDefinition {
   id: string
@@ -58,31 +55,37 @@ export default function DynamicFormSubmissionsTable({
   sectionLocation,
   sectionTitle 
 }: DynamicFormSubmissionsTableProps) {
-  // Forms list
-  const [forms, setForms] = useState<FormOption[]>([])
-  const [selectedFormId, setSelectedFormId] = useState<string>('none')
-  const [formName, setFormName] = useState<string>('')
-  
-  // Table data
-  const [columns, setColumns] = useState<ColumnDefinition[]>([])
-  const [data, setData] = useState<SubmissionRow[]>([])
-  const [filteredData, setFilteredData] = useState<SubmissionRow[]>([])
-  const [loading, setLoading] = useState(false)
-  
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(50)
-  const [totalPages, setTotalPages] = useState(1)
-  
-  // Filters
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedYear, setSelectedYear] = useState<string>('all')
-  const [selectedMonth, setSelectedMonth] = useState<string>('all')
-  
-  // Column visibility - dinámico basado en las columnas del formulario
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({})
+  // Use custom hook for data management
+  const {
+    forms,
+    selectedFormId,
+    formName,
+    columns,
+    filteredData,
+    paginatedData,
+    loading,
+    currentPage,
+    totalPages,
+    itemsPerPage,
+    searchTerm,
+    selectedYear,
+    selectedMonth,
+    visibleColumns,
+    allColumnsChecked,
+    setSelectedFormId,
+    setSearchTerm,
+    setSelectedYear,
+    setSelectedMonth,
+    setCurrentPage,
+    toggleColumn,
+    toggleAllColumns,
+  } = useDynamicFormSubmissions({ sectionLocation })
 
   // Modals
+  const [detailModal, setDetailModal] = useState<{
+    open: boolean
+    submission: SubmissionRow | null
+  }>({ open: false, submission: null })
   const [filePreviewModal, setFilePreviewModal] = useState<{
     open: boolean
     fileUrl: string
@@ -95,240 +98,6 @@ export default function DynamicFormSubmissionsTable({
     gridData: any
     questionTitle: string
   }>({ open: false, gridData: null, questionTitle: '' })
-
-  // Load forms list for this section
-  useEffect(() => {
-    fetchForms()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionLocation])
-
-  const fetchForms = async () => {
-    try {
-      const response = await fetch(`/api/formularios?section=${sectionLocation}`)
-      const result = await response.json()
-      
-      if (response.ok) {
-        const formsData = result.forms || []
-        console.log('📋 Formularios cargados:', formsData)
-        setForms(formsData)
-      } else {
-        console.error('❌ Error en respuesta:', result)
-        toast.error('Error al cargar formularios')
-      }
-    } catch (error) {
-      console.error('❌ Error fetching forms:', error)
-      toast.error('Error al cargar formularios')
-    }
-  }
-
-  // Load submissions when form is selected
-  useEffect(() => {
-    if (selectedFormId && selectedFormId !== 'none') {
-      fetchSubmissions()
-    } else {
-      setColumns([])
-      setData([])
-      setFilteredData([])
-      setFormName('')
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFormId])
-
-  const fetchSubmissions = async () => {
-    if (!selectedFormId || selectedFormId === 'none') return
-    
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/submissions/${selectedFormId}`)
-      const result = await response.json()
-      
-      if (response.ok) {
-        setFormName(result.formName)
-        setColumns(result.columns)
-        setData(result.data)
-        setFilteredData(result.data)
-        
-        // Initialize column visibility (all visible by default)
-        const initialVisibility: Record<string, boolean> = {
-          user_name: true,
-          user_email: true,
-          submitted_at: true,
-        }
-        result.columns.forEach((col: ColumnDefinition) => {
-          initialVisibility[col.id] = true
-        })
-        setVisibleColumns(initialVisibility)
-        
-      } else {
-        toast.error('Error al cargar envíos')
-      }
-    } catch (error) {
-      console.error('Error fetching submissions:', error)
-      toast.error('Error al cargar envíos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Search and date filters
-  useEffect(() => {
-    let filtered = data
-    
-    // Aplicar filtro de búsqueda
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase()
-      filtered = filtered.filter(row => {
-        return (
-          row.user_name?.toLowerCase().includes(searchLower) ||
-          row.user_email?.toLowerCase().includes(searchLower) ||
-          columns.some(col => {
-            const value = row[col.id]
-            return value && String(value).toLowerCase().includes(searchLower)
-          })
-        )
-      })
-    }
-    
-    // Aplicar filtro de fecha (submitted_at)
-    if (selectedYear !== 'all') {
-      filtered = filtered.filter(row => {
-        const submittedDate = new Date(row.submitted_at)
-        const rowYear = submittedDate.getFullYear()
-        
-        if (rowYear !== parseInt(selectedYear)) return false
-        
-        if (selectedMonth !== 'all') {
-          const rowMonth = submittedDate.getMonth() + 1
-          return rowMonth === parseInt(selectedMonth)
-        }
-        
-        return true
-      })
-    }
-    
-    setFilteredData(filtered)
-    setCurrentPage(1) // Reset to page 1 on filter change
-  }, [searchTerm, selectedYear, selectedMonth, data, columns])
-
-  // Pagination
-  useEffect(() => {
-    const total = Math.ceil(filteredData.length / itemsPerPage)
-    setTotalPages(total || 1)
-  }, [filteredData, itemsPerPage])
-
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
-
-  // Column visibility helpers
-  const toggleColumn = (column: string) => {
-    setVisibleColumns(prev => ({ ...prev, [column]: !prev[column] }))
-  }
-
-  const toggleAllColumns = () => {
-    const allChecked = Object.values(visibleColumns).every(v => v)
-    const newState: Record<string, boolean> = {}
-    Object.keys(visibleColumns).forEach(key => {
-      newState[key] = !allChecked
-    })
-    setVisibleColumns(newState)
-  }
-
-  const allColumnsChecked = Object.values(visibleColumns).every(v => v)
-
-  // Export to CSV (respetando columnas visibles)
-  const exportToCSV = () => {
-    if (filteredData.length === 0) {
-      toast.error('No hay datos para exportar')
-      return
-    }
-
-    // Función auxiliar para limpiar valores complejos para CSV
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cleanValueForCSV = (value: any, type?: string): string => {
-      if (value === null || value === undefined || value === '') return ''
-      
-      // Manejar arrays (checkboxes múltiples)
-      if (Array.isArray(value)) {
-        return value.join(', ')
-      }
-      
-      // Manejar objetos (GRID, etc)
-      if (typeof value === 'object') {
-        // Para GRID, convertir a formato legible
-        const entries = Object.entries(value)
-        return entries.map(([k, v]) => `${k}: ${v}`).join(' | ')
-      }
-      
-      // Manejar booleanos
-      if (typeof value === 'boolean') {
-        return value ? 'Sí' : 'No'
-      }
-      
-      // Manejar fechas
-      if (type === 'DATE') {
-        try {
-          return new Date(value).toLocaleDateString('es-GT')
-        } catch {
-          return String(value)
-        }
-      }
-      
-      // Escapar comillas dobles
-      return String(value).replace(/"/g, '""')
-    }
-
-    // Crear headers solo con columnas visibles
-    const headers: string[] = []
-    if (visibleColumns.user_name) headers.push('Nombre Usuario')
-    if (visibleColumns.user_email) headers.push('Email Usuario')
-    if (visibleColumns.submitted_at) headers.push('Fecha Envío')
-    
-    columns.forEach(col => {
-      if (visibleColumns[col.id]) {
-        headers.push(col.title)
-      }
-    })
-
-    // Crear filas CSV solo con columnas visibles
-    const rows = filteredData.map(row => {
-      const rowData: string[] = []
-      
-      if (visibleColumns.user_name) rowData.push(cleanValueForCSV(row.user_name))
-      if (visibleColumns.user_email) rowData.push(cleanValueForCSV(row.user_email))
-      if (visibleColumns.submitted_at) {
-        rowData.push(new Date(row.submitted_at).toLocaleString('es-GT'))
-      }
-      
-      columns.forEach(col => {
-        if (visibleColumns[col.id]) {
-          rowData.push(cleanValueForCSV(row[col.id], col.type))
-        }
-      })
-      
-      return rowData
-    })
-
-    // Crear contenido CSV
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n')
-
-    // Descargar archivo
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', `${formName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    
-    toast.success(`Archivo CSV exportado (${filteredData.length} filas, ${headers.length} columnas)`)
-  }
 
   // Render value based on question type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -582,14 +351,12 @@ export default function DynamicFormSubmissionsTable({
         <div className="flex items-center gap-2">
           {selectedFormId !== 'none' && filteredData.length > 0 && (
             <>
-              <Button 
-                variant="outline" 
-                onClick={exportToCSV}
-                className="gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Exportar CSV
-              </Button>
+              <ExportExcelButton
+                filteredData={filteredData}
+                columns={columns}
+                visibleColumns={visibleColumns}
+                formName={formName}
+              />
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="gap-2">
@@ -779,26 +546,29 @@ export default function DynamicFormSubmissionsTable({
 
       {/* Table */}
       {selectedFormId !== 'none' && (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {visibleColumns.user_name && <TableHead>Nombre Usuario</TableHead>}
-                {visibleColumns.user_email && <TableHead>Email Usuario</TableHead>}
-                {visibleColumns.submitted_at && <TableHead>Fecha Envío</TableHead>}
-                {columns.map((col) => (
-                  visibleColumns[col.id] && (
-                    <TableHead key={col.id}>
-                      {col.title}
-                      <span className="text-xs text-muted-foreground ml-1">
-                        ({col.type})
-                      </span>
-                    </TableHead>
-                  )
-                ))}
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
+        <div className="border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {visibleColumns.user_name && <TableHead>Nombre Usuario</TableHead>}
+                  {visibleColumns.user_email && <TableHead>Email Usuario</TableHead>}
+                  {visibleColumns.submitted_at && <TableHead>Fecha Envío</TableHead>}
+                  {columns.map((col) => (
+                    visibleColumns[col.id] && (
+                      <TableHead key={col.id}>
+                        {col.title}
+                        <span className="text-xs text-muted-foreground ml-1">
+                          ({col.type})
+                        </span>
+                      </TableHead>
+                    )
+                  ))}
+                  <TableHead className="text-right sticky right-0 bg-[#F9FAFB] shadow-[-4px_0_8px_rgba(0,0,0,0.08)] z-10">
+                    Acciones
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
@@ -865,16 +635,15 @@ export default function DynamicFormSubmissionsTable({
                         </TableCell>
                       )
                     ))}
-                    <TableCell>
+                    <TableCell className="sticky right-0 bg-[#fbfcfe] shadow-[-4px_0_8px_rgba(0,0,0,0.08)] z-10">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" title="Ver detalles">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          title="Ver detalles"
+                          onClick={() => setDetailModal({ open: true, submission: row })}
+                        >
                           <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Editar">
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Eliminar">
-                          <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </div>
                     </TableCell>
@@ -882,7 +651,8 @@ export default function DynamicFormSubmissionsTable({
                 ))
               )}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
         </div>
       )}
 
@@ -977,6 +747,16 @@ export default function DynamicFormSubmissionsTable({
           questionTitle={gridPreviewModal.questionTitle}
         />
       )}
+
+      {/* Submission Detail Modal */}
+      <SubmissionDetailModal
+        open={detailModal.open}
+        onOpenChange={(open) => setDetailModal({ ...detailModal, open })}
+        submission={detailModal.submission}
+        columns={columns}
+        onOpenFilePreview={(fileUrl, fileName) => setFilePreviewModal({ open: true, fileUrl, fileName })}
+        onOpenGridPreview={(gridData, questionTitle) => setGridPreviewModal({ open: true, gridData, questionTitle })}
+      />
     </div>
   )
 }

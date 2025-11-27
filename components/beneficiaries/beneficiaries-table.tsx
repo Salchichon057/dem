@@ -20,9 +20,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Search, Eye, Pencil, Trash2, Settings2, Image as ImageIcon, MapPin, ExternalLink, Download } from 'lucide-react'
+import { Plus, Search, Eye, Pencil, Trash2, Settings2, Image as ImageIcon, MapPin, ExternalLink, FileSpreadsheet } from 'lucide-react'
 import { Beneficiary, } from '@/lib/types'
 import { toast } from 'sonner'
+import { exportToExcel, type ExcelColumn } from '@/lib/utils/excel-export'
 import BeneficiaryForm from './beneficiary-form'
 import PhotoPreviewModal from './photo-preview-modal'
 import Image from 'next/image'
@@ -100,38 +101,49 @@ export default function BeneficiariesTable() {
 
   // Download Excel function
   const handleDownloadExcel = () => {
-    // Preparar headers
-    const headers = ['Nombre', 'Edad', 'Género', 'Departamento', 'Municipio', 'Aldea', 'Programa', 'Estado', 'Fecha de Ingreso']
-    
-    // Preparar filas
-    const rows = beneficiaries.map(b => [
-      b.name,
-      b.age,
-      b.gender,
-      b.department,
-      b.municipality,
-      b.village || '',
-      b.program,
-      b.is_active ? 'Activo' : 'Inactivo',
-      new Date(b.admission_date).toLocaleDateString('es-GT')
-    ])
+    if (beneficiaries.length === 0) {
+      toast.error('No hay datos para exportar')
+      return
+    }
 
-    // Construir CSV
-    let csvContent = headers.join(',') + '\n'
-    rows.forEach(row => {
-      csvContent += row.map(cell => `"${cell}"`).join(',') + '\n'
-    })
+    try {
+      const excelColumns: ExcelColumn[] = [
+        { header: 'Nombre', key: 'name', width: 30 },
+        { header: 'Edad', key: 'age', width: 10 },
+        { header: 'Género', key: 'gender', width: 15 },
+        { header: 'Departamento', key: 'department', width: 20 },
+        { header: 'Municipio', key: 'municipality', width: 20 },
+        { header: 'Aldea', key: 'village', width: 20 },
+        { header: 'Programa', key: 'program', width: 25 },
+        { header: 'Estado', key: 'is_active', width: 15 },
+        { header: 'Fecha de Ingreso', key: 'admission_date', width: 20 },
+      ]
 
-    // Descargar
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', `beneficiarios-${new Date().toISOString().split('T')[0]}.csv`)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+      const excelData = beneficiaries.map(b => ({
+        name: b.name,
+        age: b.age,
+        gender: b.gender,
+        department: b.department,
+        municipality: b.municipality,
+        village: b.village || '',
+        program: b.program,
+        is_active: b.is_active ? 'Activo' : 'Inactivo',
+        admission_date: new Date(b.admission_date).toLocaleDateString('es-GT'),
+      }))
+
+      exportToExcel({
+        fileName: 'beneficiarios',
+        sheetName: 'Beneficiarios',
+        columns: excelColumns,
+        data: excelData,
+        includeTimestamp: true,
+      })
+
+      toast.success(`Exportados ${beneficiaries.length} beneficiarios a Excel`)
+    } catch (error) {
+      console.error('Error exporting to Excel:', error)
+      toast.error('Error al exportar el archivo')
+    }
   }
 
   // Load all beneficiaries once to generate filter options
@@ -310,8 +322,8 @@ export default function BeneficiariesTable() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleDownloadExcel} className="gap-2">
-            <Download className="w-4 h-4" />
-            Descargar Excel
+            <FileSpreadsheet className="w-4 h-4" />
+            Exportar Excel
           </Button>
           <Popover>
             <PopoverTrigger asChild>

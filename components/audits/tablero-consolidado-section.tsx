@@ -5,12 +5,13 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Loader2, Search, FileText, Download, Edit, Table, BarChart3 } from "lucide-react"
+import { Loader2, Search, FileText, FileSpreadsheet, Edit, Table, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { EditBoardExtrasDialog } from "./edit-board-extras-dialog"
 import { SemaforoEstadisticas } from "./semaforo-estadisticas"
 import DateFilter from "@/components/shared/date-filter"
+import { exportToExcel, type ExcelColumn } from "@/lib/utils/excel-export"
 
 type ViewMode = 'table' | 'stats'
 
@@ -189,63 +190,82 @@ export function TableroConsolidadoSection() {
     return String(value)
   }
 
-  const exportToCSV = () => {
+  const handleExportToExcel = () => {
     if (filteredData.length === 0) {
       toast.error('No hay datos para exportar')
       return
     }
 
-    // Crear headers con campos extras
-    const headers = [
-      'Nombre Usuario', 'Email Usuario', 'Fecha Envío',
-      ...columns.map(col => col.title),
-      'Semáforo', 'Recomendaciones', 'Se dio seguimiento',
-      'Fecha del seguimiento', 'Concluido (está resuelto o no)si o no',
-      'Soluciones', 'INFORME PRELIMINAR', 'Informe completo'
-    ]
-    
-    // Crear filas con campos extras
-    const rows = filteredData.map(row => {
-      const baseValues = [
-        row.user_name || '',
-        row.user_email || '',
-        new Date(row.submitted_at).toLocaleDateString('es-GT')
+    try {
+      // Build Excel columns
+      const excelColumns: ExcelColumn[] = [
+        { header: 'Nombre Usuario', key: 'user_name', width: 25 },
+        { header: 'Email Usuario', key: 'user_email', width: 30 },
+        { header: 'Fecha Envío', key: 'submitted_at', width: 20 },
       ]
-      
-      const dynamicValues = columns.map(col => {
-        const value = row[col.id]
-        return formatCellValue(value, col.type).replace(/,/g, ';') // Escapar comas
+
+      // Add dynamic form columns
+      columns.forEach(col => {
+        excelColumns.push({
+          header: col.title,
+          key: col.id,
+          width: 25,
+        })
       })
-      
-      const extras = boardExtras[row.submission_id]
-      const extrasValues = [
-        extras?.traffic_light || '',
-        extras?.recommendations || '',
-        extras?.follow_up_given ? 'Sí' : 'No',
-        extras?.follow_up_date || '',
-        extras?.concluded_result_red_or_no || '',
-        extras?.solutions || '',
-        extras?.preliminary_report || '',
-        extras?.full_report || '',
-      ]
-      
-      return [...baseValues, ...dynamicValues, ...extrasValues]
-    })
 
-    // Convertir a CSV
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n')
+      // Add board extras columns
+      excelColumns.push(
+        { header: 'Semáforo', key: 'traffic_light', width: 15 },
+        { header: 'Recomendaciones', key: 'recommendations', width: 40 },
+        { header: 'Se dio seguimiento', key: 'follow_up_given', width: 20 },
+        { header: 'Fecha del seguimiento', key: 'follow_up_date', width: 20 },
+        { header: 'Concluido', key: 'concluded_result_red_or_no', width: 15 },
+        { header: 'Soluciones', key: 'solutions', width: 40 },
+        { header: 'Informe Preliminar', key: 'preliminary_report', width: 40 },
+        { header: 'Informe Completo', key: 'full_report', width: 40 },
+      )
 
-    // Descargar
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = `tablero_consolidado_auditorias_${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-    
-    toast.success('Archivo CSV descargado')
+      // Transform data for Excel
+      const excelData = filteredData.map(row => {
+        const extras = boardExtras[row.submission_id]
+        const transformedRow: any = {
+          user_name: row.user_name || '',
+          user_email: row.user_email || '',
+          submitted_at: new Date(row.submitted_at).toLocaleDateString('es-GT'),
+        }
+
+        // Add dynamic columns
+        columns.forEach(col => {
+          transformedRow[col.id] = formatCellValue(row[col.id], col.type)
+        })
+
+        // Add board extras
+        transformedRow.traffic_light = extras?.traffic_light || ''
+        transformedRow.recommendations = extras?.recommendations || ''
+        transformedRow.follow_up_given = extras?.follow_up_given ? 'Sí' : 'No'
+        transformedRow.follow_up_date = extras?.follow_up_date || ''
+        transformedRow.concluded_result_red_or_no = extras?.concluded_result_red_or_no || ''
+        transformedRow.solutions = extras?.solutions || ''
+        transformedRow.preliminary_report = extras?.preliminary_report || ''
+        transformedRow.full_report = extras?.full_report || ''
+
+        return transformedRow
+      })
+
+      // Export to Excel
+      exportToExcel({
+        fileName: 'tablero_consolidado_auditorias',
+        sheetName: 'Auditorías',
+        columns: excelColumns,
+        data: excelData,
+        includeTimestamp: true,
+      })
+
+      toast.success('Archivo Excel descargado')
+    } catch (error) {
+      console.error('Error exporting to Excel:', error)
+      toast.error('Error al exportar el archivo')
+    }
   }
 
   if (loading) {
@@ -302,13 +322,13 @@ export function TableroConsolidadoSection() {
               {filteredData.length} envíos encontrados
             </p>
             <Button
-              onClick={exportToCSV}
+              onClick={handleExportToExcel}
               variant="outline"
               className="gap-2"
               disabled={filteredData.length === 0}
             >
-              <Download className="w-4 h-4" />
-              Exportar CSV
+              <FileSpreadsheet className="w-4 h-4" />
+              Exportar Excel
             </Button>
           </div>
 

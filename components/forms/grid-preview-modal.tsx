@@ -10,8 +10,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Download } from 'lucide-react'
+import { FileSpreadsheet } from 'lucide-react'
 import { toast } from 'sonner'
+import { exportToExcel, type ExcelColumn } from '@/lib/utils/excel-export'
 
 interface GridPreviewModalProps {
   open: boolean
@@ -30,42 +31,34 @@ export default function GridPreviewModal({
   questionTitle,
 }: GridPreviewModalProps) {
   
-  const exportToCSV = () => {
+  const handleExportToExcel = () => {
     if (!gridData.rows.length) {
       toast.error('No hay datos para exportar')
       return
     }
 
-    // Crear CSV headers
-    const headers = gridData.columns.map(col => col.label)
+    try {
+      // Build Excel columns
+      const excelColumns: ExcelColumn[] = gridData.columns.map(col => ({
+        header: col.label,
+        key: col.id,
+        width: 20,
+      }))
 
-    // Crear filas CSV
-    const rows = gridData.rows.map(row => 
-      gridData.columns.map(col => {
-        const value = row[col.id]
-        if (value === null || value === undefined) return ''
-        return String(value).replace(/"/g, '""')
+      // Export to Excel
+      exportToExcel({
+        fileName: questionTitle.replace(/\s+/g, '_'),
+        sheetName: 'Datos',
+        columns: excelColumns,
+        data: gridData.rows,
+        includeTimestamp: true,
       })
-    )
 
-    // Crear contenido CSV
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n')
-
-    // Descargar archivo
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', `${questionTitle.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    
-    toast.success('Tabla exportada a CSV')
+      toast.success('Tabla exportada a Excel')
+    } catch (error) {
+      console.error('Error exporting to Excel:', error)
+      toast.error('Error al exportar el archivo')
+    }
   }
 
   return (
@@ -77,12 +70,12 @@ export default function GridPreviewModal({
             <Button
               variant="outline"
               size="sm"
-              onClick={exportToCSV}
-              title="Exportar tabla a CSV"
+              onClick={handleExportToExcel}
+              title="Exportar tabla a Excel"
               className="ml-4"
             >
-              <Download className="w-4 h-4 mr-2" />
-              Exportar CSV
+              <FileSpreadsheet className="w-4 h-4 mr-2" />
+              Exportar Excel
             </Button>
           </DialogTitle>
         </DialogHeader>
