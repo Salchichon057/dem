@@ -1,17 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -19,91 +18,161 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Plus, Search, Eye, Pencil, Trash2, MapPin, ExternalLink, Download, Users } from 'lucide-react'
-import { Community } from '@/lib/types/community'
-import { toast } from 'sonner'
-import DateFilter from '@/components/shared/date-filter'
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  Search,
+  Eye,
+  Pencil,
+  Trash2,
+  MapPin,
+  ExternalLink,
+  Download,
+} from "lucide-react";
+import { Community } from "@/lib/types/community";
+import { toast } from "sonner";
+import DateFilter from "@/components/shared/date-filter";
+import CommunitySelector from "./community-selector";
+import CommunityCrudForm from "./community-crud-form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function CommunitiesTable() {
-  const [communities, setCommunities] = useState<Community[]>([])
-  const [loading, setLoading] = useState(true)
-  const [total, setTotal] = useState(0)
-  
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [showForm, setShowForm] = useState(false);
+  const [showCrudForm, setShowCrudForm] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
+    null
+  );
+  const [communityToDelete, setCommunityToDelete] = useState<Community | null>(
+    null
+  );
+
   // Paginación
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [itemsPerPage] = useState(50)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(50);
 
   // Filtros
-  const [searchTerm, setSearchTerm] = useState('')
-  const [departmentFilter, setDepartmentFilter] = useState<string>('')
-  const [municipalityFilter, setMunicipalityFilter] = useState<string>('')
-  const [statusFilter, setStatusFilter] = useState<'activa' | 'inactiva' | 'suspendida' | ''>('')
-  const [classificationFilter, setClassificationFilter] = useState<string>('')
-  const [selectedYear, setSelectedYear] = useState<string>('all')
-  const [selectedMonth, setSelectedMonth] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("");
+  const [municipalityFilter, setMunicipalityFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<
+    "activa" | "inactiva" | "suspendida" | ""
+  >("");
+  const [classificationFilter, setClassificationFilter] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
   // Cargar comunidades
   const fetchCommunities = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: itemsPerPage.toString(),
-      })
+      });
 
-      if (searchTerm) params.append('search', searchTerm)
-      if (departmentFilter) params.append('department', departmentFilter)
-      if (municipalityFilter) params.append('municipality', municipalityFilter)
-      if (statusFilter) params.append('status', statusFilter)
-      if (classificationFilter) params.append('classification', classificationFilter)
-      if (selectedYear !== 'all') params.append('year', selectedYear)
-      if (selectedMonth !== 'all') params.append('month', selectedMonth)
+      if (searchTerm) params.append("search", searchTerm);
+      if (departmentFilter) params.append("department", departmentFilter);
+      if (municipalityFilter) params.append("municipality", municipalityFilter);
+      if (statusFilter) params.append("status", statusFilter);
+      if (classificationFilter)
+        params.append("classification", classificationFilter);
+      if (selectedYear !== "all") params.append("year", selectedYear);
+      if (selectedMonth !== "all") params.append("month", selectedMonth);
 
-      const response = await fetch(`/api/communities?${params}`)
+      const response = await fetch(`/api/communities?${params}`);
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        let errorMessage = 'Error al cargar comunidades'
-        if (errorData.code === '42501') {
-          errorMessage = 'Error de permisos RLS'
+        const errorData = await response.json().catch(() => ({}));
+        let errorMessage = "Error al cargar comunidades";
+        if (errorData.code === "42501") {
+          errorMessage = "Error de permisos RLS";
         } else if (errorData.details) {
-          errorMessage = `Error: ${errorData.details}`
+          errorMessage = `Error: ${errorData.details}`;
         }
-        
-        throw new Error(errorMessage)
+
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json()
-      setCommunities(data.communities || [])
-      setTotal(data.pagination.total)
-      setTotalPages(data.pagination.totalPages)
+      const data = await response.json();
+      setCommunities(data.communities || []);
+      setTotal(data.pagination.total);
+      setTotalPages(data.pagination.totalPages);
     } catch {
-      toast.error('Error al cargar comunidades')
+      toast.error("Error al cargar comunidades");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchCommunities()
-  }, [currentPage, searchTerm, departmentFilter, municipalityFilter, statusFilter, classificationFilter, selectedYear, selectedMonth])
+    fetchCommunities();
+  }, [
+    currentPage,
+    searchTerm,
+    departmentFilter,
+    municipalityFilter,
+    statusFilter,
+    classificationFilter,
+    selectedYear,
+    selectedMonth,
+  ]);
+
+  // Manejar edición
+  const handleEdit = (community: Community) => {
+    setSelectedCommunity(community);
+    setShowCrudForm(true);
+  };
+
+  // Manejar eliminación
+  const handleDeleteConfirm = async () => {
+    if (!communityToDelete) return;
+
+    try {
+      const response = await fetch(`/api/communities/${communityToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar comunidad");
+      }
+
+      toast.success("Comunidad eliminada exitosamente");
+      fetchCommunities();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Error al eliminar comunidad");
+    } finally {
+      setCommunityToDelete(null);
+    }
+  };
 
   // Exportar a Excel
   const handleExport = async () => {
-    toast.info('Exportación en construcción')
-  }
+    toast.info("Exportación en construcción");
+  };
 
   // Formatear fecha
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('es-GT', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("es-GT", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   if (loading) {
     return (
@@ -113,7 +182,7 @@ export default function CommunitiesTable() {
           <p className="text-muted-foreground">Cargando comunidades...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -123,17 +192,30 @@ export default function CommunitiesTable() {
         <div>
           <h2 className="text-2xl font-bold">Comunidades Beneficiarias</h2>
           <p className="text-muted-foreground">
-            {total} {total === 1 ? 'comunidad registrada' : 'comunidades registradas'}
+            {total}{" "}
+            {total === 1 ? "comunidad registrada" : "comunidades registradas"}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleExport} variant="outline" size="sm" className="gap-2">
+          <Button
+            onClick={handleExport}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
             <Download className="w-4 h-4" />
             Exportar Excel
           </Button>
-          <Button size="sm" className="gap-2">
+          <Button
+            onClick={() => {
+              setSelectedCommunity(null);
+              setShowCrudForm(true);
+            }}
+            size="sm"
+            className="gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+          >
             <Plus className="w-4 h-4" />
-            Nueva Comunidad
+            Agregar Comunidad
           </Button>
         </div>
       </div>
@@ -149,8 +231,13 @@ export default function CommunitiesTable() {
             className="pl-10"
           />
         </div>
-        
-        <Select value={departmentFilter || 'all'} onValueChange={(value) => setDepartmentFilter(value === 'all' ? '' : value)}>
+
+        <Select
+          value={departmentFilter || "all"}
+          onValueChange={(value) =>
+            setDepartmentFilter(value === "all" ? "" : value)
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Departamento" />
           </SelectTrigger>
@@ -162,17 +249,31 @@ export default function CommunitiesTable() {
           </SelectContent>
         </Select>
 
-        <Select value={municipalityFilter || 'all'} onValueChange={(value) => setMunicipalityFilter(value === 'all' ? '' : value)}>
+        <Select
+          value={municipalityFilter || "all"}
+          onValueChange={(value) =>
+            setMunicipalityFilter(value === "all" ? "" : value)
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Municipio" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="San Martin Jilotepeque">San Martin Jilotepeque</SelectItem>
+            <SelectItem value="San Martin Jilotepeque">
+              San Martin Jilotepeque
+            </SelectItem>
           </SelectContent>
         </Select>
 
-        <Select value={statusFilter || 'all'} onValueChange={(value) => setStatusFilter(value === 'all' ? '' : value as typeof statusFilter)}>
+        <Select
+          value={statusFilter || "all"}
+          onValueChange={(value) =>
+            setStatusFilter(
+              value === "all" ? "" : (value as typeof statusFilter)
+            )
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
@@ -184,7 +285,12 @@ export default function CommunitiesTable() {
           </SelectContent>
         </Select>
 
-        <Select value={classificationFilter || 'all'} onValueChange={(value) => setClassificationFilter(value === 'all' ? '' : value)}>
+        <Select
+          value={classificationFilter || "all"}
+          onValueChange={(value) =>
+            setClassificationFilter(value === "all" ? "" : value)
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Clasificación" />
           </SelectTrigger>
@@ -196,10 +302,12 @@ export default function CommunitiesTable() {
           </SelectContent>
         </Select>
       </div>
-      
+
       {/* Date Filter */}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Fecha de Registro:</span>
+        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+          Fecha de Registro:
+        </span>
         <DateFilter
           selectedYear={selectedYear}
           selectedMonth={selectedMonth}
@@ -209,113 +317,304 @@ export default function CommunitiesTable() {
         />
       </div>
 
-      {/* Tabla */}
-      <div className="border rounded-lg">
+      {/* Tabla con scroll horizontal para todas las columnas */}
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Aldea/Comunidad</TableHead>
-              <TableHead>Departamento</TableHead>
-              <TableHead>Municipio</TableHead>
-              <TableHead>Líder</TableHead>
-              <TableHead>Familias</TableHead>
-              <TableHead>Clasificación</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha Inscripción</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              {/* Columnas básicas */}
+              <TableHead className="min-w-[150px]">Aldea/Comunidad</TableHead>
+              <TableHead className="min-w-[120px]">Departamento</TableHead>
+              <TableHead className="min-w-[150px]">Municipio</TableHead>
+              <TableHead className="min-w-[100px]">Caseríos</TableHead>
+
+              {/* Información del líder */}
+              <TableHead className="min-w-[150px]">Líder</TableHead>
+              <TableHead className="min-w-[120px]">Teléfono</TableHead>
+              <TableHead className="min-w-[100px]">Grupo Líderes</TableHead>
+              <TableHead className="min-w-[200px]">Comité</TableHead>
+
+              {/* Estado */}
+              <TableHead className="min-w-[100px]">Estado</TableHead>
+              <TableHead className="min-w-[150px]">Razón Inactiva</TableHead>
+
+              {/* Familias */}
+              <TableHead className="min-w-[100px]">Total Familias</TableHead>
+              <TableHead className="min-w-[100px]">Familias RA</TableHead>
+
+              {/* Demografía (14 columnas) */}
+              <TableHead className="min-w-20">Mujeres 0-2</TableHead>
+              <TableHead className="min-w-20">Hombres 0-2</TableHead>
+              <TableHead className="min-w-20">Mujeres 3-5</TableHead>
+              <TableHead className="min-w-20">Hombres 3-5</TableHead>
+              <TableHead className="min-w-20">Mujeres 6-10</TableHead>
+              <TableHead className="min-w-20">Hombres 6-10</TableHead>
+              <TableHead className="min-w-[90px]">Mujeres 11-18</TableHead>
+              <TableHead className="min-w-[90px]">Hombres 11-18</TableHead>
+              <TableHead className="min-w-[90px]">Mujeres 19-60</TableHead>
+              <TableHead className="min-w-[90px]">Hombres 19-60</TableHead>
+              <TableHead className="min-w-[90px]">Mujeres 61+</TableHead>
+              <TableHead className="min-w-[90px]">Hombres 61+</TableHead>
+              <TableHead className="min-w-20">Gestantes</TableHead>
+              <TableHead className="min-w-20">Lactantes</TableHead>
+
+              {/* Otros datos */}
+              <TableHead className="min-w-[120px]">Tipo Colocación</TableHead>
+              <TableHead className="min-w-[100px]">Whatsapp</TableHead>
+              <TableHead className="min-w-[120px]">Clasificación</TableHead>
+              <TableHead className="min-w-[150px]">Capacidad Almac.</TableHead>
+              <TableHead className="min-w-[150px]">Formas Colocación</TableHead>
+
+              {/* Fechas */}
+              <TableHead className="min-w-[120px]">Fecha Inscripción</TableHead>
+              <TableHead className="min-w-[120px]">Fecha Baja</TableHead>
+              <TableHead className="min-w-[150px]">Motivo Baja</TableHead>
+
+              {/* Auditoría */}
+              <TableHead className="min-w-[120px]">Creado</TableHead>
+              <TableHead className="min-w-[120px]">Actualizado</TableHead>
+
+              {/* Acciones fijas */}
+              <TableHead className="sticky right-0 bg-white dark:bg-gray-950 border-l min-w-[180px] text-right shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">
+                Acciones
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {communities.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={35}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No se encontraron comunidades
                 </TableCell>
               </TableRow>
             ) : (
               communities.map((community) => (
                 <TableRow key={community.id}>
+                  {/* Columnas básicas */}
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <div>{community.villages || 'Sin nombre'}</div>
-                        {community.hamlets_count && (
-                          <div className="text-xs text-muted-foreground">
-                            {community.hamlets_count} {community.hamlets_count === 1 ? 'caserío' : 'caseríos'}
-                          </div>
-                        )}
-                      </div>
+                      <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span>{community.villages || "Sin nombre"}</span>
                     </div>
                   </TableCell>
                   <TableCell>{community.department}</TableCell>
                   <TableCell>{community.municipality}</TableCell>
                   <TableCell>
-                    {community.leader_name ? (
-                      <div>
-                        <div className="text-sm">{community.leader_name}</div>
-                        {community.leader_phone && (
-                          <div className="text-xs text-muted-foreground">{community.leader_phone}</div>
-                        )}
-                      </div>
+                    {community.hamlets_count ? (
+                      <span>{community.hamlets_count}</span>
                     ) : (
-                      <span className="text-muted-foreground">No asignado</span>
+                      <span className="text-muted-foreground">0</span>
+                    )}
+                  </TableCell>
+
+                  {/* Información del líder */}
+                  <TableCell>
+                    {community.leader_name || (
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <span>{community.total_families || 0}</span>
-                      {community.families_in_ra && (
-                        <span className="text-xs text-muted-foreground">
-                          ({community.families_in_ra} RA)
-                        </span>
-                      )}
-                    </div>
+                    {community.leader_phone || (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        community.is_in_leaders_group ? "default" : "outline"
+                      }
+                    >
+                      {community.is_in_leaders_group ? "Sí" : "No"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell
+                    className="max-w-[200px] truncate"
+                    title={community.community_committee || ""}
+                  >
+                    {community.community_committee || (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+
+                  {/* Estado */}
+                  <TableCell>
+                    <Badge
+                      variant={
+                        community.status === "activa"
+                          ? "default"
+                          : community.status === "suspendida"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                    >
+                      {community.status === "activa"
+                        ? "Activa"
+                        : community.status === "suspendida"
+                        ? "Suspendida"
+                        : "Inactiva"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell
+                    className="max-w-[150px] truncate"
+                    title={community.inactive_reason || ""}
+                  >
+                    {community.inactive_reason || (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+
+                  {/* Familias */}
+                  <TableCell>
+                    {community.total_families || (
+                      <span className="text-muted-foreground">0</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {community.families_in_ra || (
+                      <span className="text-muted-foreground">0</span>
+                    )}
+                  </TableCell>
+
+                  {/* Demografía (14 columnas) */}
+                  <TableCell>{community.early_childhood_women}</TableCell>
+                  <TableCell>{community.early_childhood_men}</TableCell>
+                  <TableCell>{community.childhood_3_5_women}</TableCell>
+                  <TableCell>{community.childhood_3_5_men}</TableCell>
+                  <TableCell>{community.youth_6_10_women}</TableCell>
+                  <TableCell>{community.youth_6_10_men}</TableCell>
+                  <TableCell>{community.adults_11_18_women}</TableCell>
+                  <TableCell>{community.adults_11_18_men}</TableCell>
+                  <TableCell>{community.adults_19_60_women}</TableCell>
+                  <TableCell>{community.adults_19_60_men}</TableCell>
+                  <TableCell>{community.seniors_61_plus_women}</TableCell>
+                  <TableCell>{community.seniors_61_plus_men}</TableCell>
+                  <TableCell>{community.pregnant_women}</TableCell>
+                  <TableCell>{community.lactating_women}</TableCell>
+
+                  {/* Otros datos */}
+                  <TableCell>
+                    {community.placement_type || (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        community.has_whatsapp_group ? "default" : "outline"
+                      }
+                    >
+                      {community.has_whatsapp_group ? "Sí" : "No"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {community.classification ? (
-                      <Badge variant={
-                        community.classification === 'Grande' ? 'default' :
-                        community.classification === 'Mediana' ? 'secondary' : 'outline'
-                      }>
+                      <Badge
+                        variant={
+                          community.classification === "Grande"
+                            ? "default"
+                            : community.classification === "Mediana"
+                            ? "secondary"
+                            : "outline"
+                        }
+                      >
                         {community.classification}
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground">N/A</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={
-                      community.status === 'activa' ? 'default' :
-                      community.status === 'suspendida' ? 'destructive' : 'secondary'
-                    }>
-                      {community.status === 'activa' ? 'Activa' : 
-                       community.status === 'suspendida' ? 'Suspendida' : 'Inactiva'}
-                    </Badge>
+                  <TableCell
+                    className="max-w-[150px] truncate"
+                    title={community.storage_capacity || ""}
+                  >
+                    {community.storage_capacity || (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
+                  <TableCell
+                    className="max-w-[150px] truncate"
+                    title={community.placement_methods || ""}
+                  >
+                    {community.placement_methods || (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+
+                  {/* Fechas */}
                   <TableCell className="text-sm text-muted-foreground">
                     {formatDate(community.registration_date)}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(community.termination_date)}
+                  </TableCell>
+                  <TableCell
+                    className="max-w-[150px] truncate"
+                    title={community.termination_reason || ""}
+                  >
+                    {community.termination_reason || (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+
+                  {/* Auditoría */}
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(community.created_at)}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(community.updated_at)}
+                  </TableCell>
+
+                  {/* Acciones fijas */}
+                  <TableCell className="sticky right-0 bg-white dark:bg-gray-950 border-l shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">
                     <div className="flex justify-end gap-1">
                       {community.google_maps_url && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.open(community.google_maps_url || '', '_blank')}
+                          onClick={() =>
+                            window.open(
+                              community.google_maps_url || "",
+                              "_blank"
+                            )
+                          }
                           title="Ver en Google Maps"
+                          className="bg-white dark:bg-gray-950"
                         >
                           <ExternalLink className="w-4 h-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="sm" title="Ver detalles">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Ver detalles"
+                        onClick={() => {
+                          setSelectedCommunity(community);
+                          // TODO: Abrir modal de detalles
+                          toast.info("Modal de detalles en construcción");
+                        }}
+                        className="bg-white dark:bg-gray-950"
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" title="Editar">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Editar"
+                        onClick={() => handleEdit(community)}
+                        className="bg-white dark:bg-gray-950"
+                      >
                         <Pencil className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" title="Eliminar">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Eliminar"
+                        onClick={() => setCommunityToDelete(community)}
+                        className="hover:text-destructive bg-white dark:bg-gray-950"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -328,49 +627,128 @@ export default function CommunitiesTable() {
       </div>
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Página {currentPage} de {totalPages} • {total} {total === 1 ? 'resultado' : 'resultados'} en total
-          </p>
-          <div className="flex gap-2">
+      {!loading && communities.length > 0 && (
+        <div className="flex items-center justify-between px-2 py-4">
+          <div className="text-sm text-muted-foreground">
+            Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
+            {Math.min(currentPage * itemsPerPage, total)} de {total} comunidades
+          </div>
+
+          <div className="flex items-center gap-1">
+            {/* Primera página */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
+              className="w-9"
             >
-              Primera
+              &laquo;
             </Button>
+
+            {/* Anterior */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
+              className="w-9"
             >
-              Anterior
+              &lsaquo;
             </Button>
+
+            {/* Números de página (solo 3) */}
+            <div className="flex items-center gap-1">
+              {(() => {
+                const startPage = Math.max(1, currentPage - 1);
+                const endPage = Math.min(totalPages, startPage + 2);
+
+                const pages = [];
+                for (let i = startPage; i <= endPage; i++) {
+                  pages.push(
+                    <Button
+                      key={i}
+                      variant={currentPage === i ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(i)}
+                      className="w-9"
+                    >
+                      {i}
+                    </Button>
+                  );
+                }
+                return pages;
+              })()}
+            </div>
+
+            {/* Siguiente */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
+              className="w-9"
             >
-              Siguiente
+              &rsaquo;
             </Button>
+
+            {/* Última página */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages}
+              className="w-9"
             >
-              Última
+              &raquo;
             </Button>
           </div>
         </div>
       )}
+
+      {/* Modal para seleccionar comunidades (para Perfil Comunitario) */}
+      <CommunitySelector
+        open={showForm}
+        onOpenChange={setShowForm}
+        onSuccess={fetchCommunities}
+      />
+
+      {/* Modal CRUD para crear/editar comunidades */}
+      <CommunityCrudForm
+        open={showCrudForm}
+        onOpenChange={(open) => {
+          setShowCrudForm(open);
+          if (!open) setSelectedCommunity(null);
+        }}
+        onSuccess={fetchCommunities}
+        community={selectedCommunity}
+      />
+
+      {/* Dialog de confirmación para eliminar */}
+      <AlertDialog
+        open={!!communityToDelete}
+        onOpenChange={(open) => !open && setCommunityToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente la comunidad{" "}
+              <strong>{communityToDelete?.villages}</strong>. Esta acción no se
+              puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-  )
+  );
 }
-
-
