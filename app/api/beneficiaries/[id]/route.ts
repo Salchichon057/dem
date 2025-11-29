@@ -109,6 +109,7 @@ export async function PUT(
     if (body.personal_number !== undefined) updateData.personal_number = body.personal_number
     if (body.community_contact !== undefined) updateData.community_contact = body.community_contact
     if (body.community_number !== undefined) updateData.community_number = body.community_number
+    if (body.bag !== undefined) updateData.bag = body.bag
 
     // Actualizar (updated_at se actualiza automáticamente por trigger)
     const { data: beneficiary, error: updateError } = await supabase

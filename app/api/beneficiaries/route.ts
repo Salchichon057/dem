@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth-server'
 import type { Beneficiary, BeneficiaryFilters, CreateBeneficiaryInput } from '@/lib/types'
@@ -186,6 +186,7 @@ export async function POST(request: NextRequest) {
         personal_number: body.personal_number || null,
         community_contact: body.community_contact || null,
         community_number: body.community_number || null,
+        bag: body.bag || null,
         created_by: user.id  // ID del usuario autenticado
       })
       .select()
