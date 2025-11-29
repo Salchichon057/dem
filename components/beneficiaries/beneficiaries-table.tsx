@@ -78,6 +78,7 @@ export default function BeneficiariesTable() {
     municipality: true,
     village: true,
     program: true,
+    bag: true,
     googleMaps: true,
     status: true,
     admissionDate: true,
@@ -115,6 +116,7 @@ export default function BeneficiariesTable() {
         { header: 'Municipio', key: 'municipality', width: 20 },
         { header: 'Aldea', key: 'village', width: 20 },
         { header: 'Programa', key: 'program', width: 25 },
+        { header: 'Bolsa', key: 'bag', width: 15 },
         { header: 'Estado', key: 'is_active', width: 15 },
         { header: 'Fecha de Ingreso', key: 'admission_date', width: 20 },
       ]
@@ -127,6 +129,7 @@ export default function BeneficiariesTable() {
         municipality: b.municipality,
         village: b.village || '',
         program: b.program,
+        bag: b.bag || '',
         is_active: b.is_active ? 'Activo' : 'Inactivo',
         admission_date: new Date(b.admission_date).toLocaleDateString('es-GT'),
       }))
@@ -401,6 +404,14 @@ export default function BeneficiariesTable() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
+                      id="col-bag"
+                      checked={visibleColumns.bag}
+                      onCheckedChange={() => toggleColumn('bag')}
+                    />
+                    <Label htmlFor="col-bag" className="text-sm cursor-pointer">Bolsa</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
                       id="col-maps"
                       checked={visibleColumns.googleMaps}
                       onCheckedChange={() => toggleColumn('googleMaps')}
@@ -544,6 +555,7 @@ export default function BeneficiariesTable() {
               {visibleColumns.municipality && <TableHead className="whitespace-nowrap">Municipio</TableHead>}
               {visibleColumns.village && <TableHead className="whitespace-nowrap">Aldea</TableHead>}
               {visibleColumns.program && <TableHead className="whitespace-nowrap">Programa</TableHead>}
+              {visibleColumns.bag && <TableHead className="whitespace-nowrap">Bolsa</TableHead>}
               {visibleColumns.googleMaps && <TableHead className="whitespace-nowrap">Google Maps</TableHead>}
               {visibleColumns.status && <TableHead className="whitespace-nowrap">Estado</TableHead>}
               {visibleColumns.admissionDate && <TableHead className="whitespace-nowrap">Fecha Ingreso</TableHead>}
@@ -602,6 +614,7 @@ export default function BeneficiariesTable() {
                   {visibleColumns.municipality && <TableCell className="whitespace-nowrap">{beneficiary.municipality}</TableCell>}
                   {visibleColumns.village && <TableCell className="whitespace-nowrap">{beneficiary.village || '-'}</TableCell>}
                   {visibleColumns.program && <TableCell className="whitespace-nowrap">{beneficiary.program}</TableCell>}
+                  {visibleColumns.bag && <TableCell className="whitespace-nowrap">{beneficiary.bag || '-'}</TableCell>}
                   {visibleColumns.googleMaps && (
                     <TableCell>
                       {beneficiary.google_maps_url ? (

@@ -71,6 +71,7 @@ export default function BeneficiaryForm({
   const [personalNumber, setPersonalNumber] = useState('')
   const [communityContact, setCommunityContact] = useState('')
   const [communityNumber, setCommunityNumber] = useState('')
+  const [bag, setBag] = useState('')
 
   // Location data
   const [departments, setDepartments] = useState<string[]>([])
@@ -135,6 +136,7 @@ export default function BeneficiaryForm({
       setPersonalNumber(beneficiary.personal_number || '')
       setCommunityContact(beneficiary.community_contact || '')
       setCommunityNumber(beneficiary.community_number || '')
+      setBag(beneficiary.bag || '')
     } else {
       resetForm()
     }
@@ -169,6 +171,7 @@ export default function BeneficiaryForm({
     setPersonalNumber('')
     setCommunityContact('')
     setCommunityNumber('')
+    setBag('')
   }
 
   // Manejar selección de archivo de foto (solo preview, no subir aún)
@@ -251,6 +254,7 @@ export default function BeneficiaryForm({
         personal_number: personalNumber || '',
         community_contact: communityContact || '',
         community_number: communityNumber || '',
+        bag: bag || '',
       }
 
       // Validar con Zod
@@ -508,6 +512,19 @@ export default function BeneficiaryForm({
                 {validationErrors.program && (
                   <p className="text-xs text-red-500">{validationErrors.program}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bag" className="text-sm font-medium">
+                  Número de Bolsa
+                </Label>
+                <Input
+                  id="bag"
+                  value={bag}
+                  onChange={(e) => setBag(e.target.value)}
+                  placeholder="Ej: 12345"
+                  className="w-full"
+                />
               </div>
 
               <div className="space-y-2">
