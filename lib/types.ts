@@ -240,6 +240,7 @@ export interface Beneficiary {
   personal_number: string | null
   community_contact: string | null
   community_number: string | null
+  bag: string | null
   created_at: string
   updated_at: string
   created_by: string | null
@@ -264,6 +265,7 @@ export interface CreateBeneficiaryInput {
   personal_number?: string
   community_contact?: string
   community_number?: string
+  bag?: string
 }
 
 export interface UpdateBeneficiaryInput extends Partial<CreateBeneficiaryInput> {
