@@ -256,7 +256,7 @@ export default function CommunityCrudForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold text-gray-900">
             {isEditMode ? 'Editar Comunidad' : 'Agregar Nueva Comunidad'}
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
@@ -269,8 +269,8 @@ export default function CommunityCrudForm({
             <div className="space-y-6 pb-4">
               {/* Datos Básicos */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-600" />
                   Datos Básicos
                 </h3>
                 
@@ -362,7 +362,7 @@ export default function CommunityCrudForm({
 
               {/* Líder y Comité */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <Users className="w-5 h-5 text-purple-600" />
                   Líder y Comité
                 </h3>
@@ -418,7 +418,7 @@ export default function CommunityCrudForm({
 
               {/* Estado */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Estado</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Estado</h3>
                 
                 <div className="flex gap-2">
                   <Button
@@ -426,7 +426,7 @@ export default function CommunityCrudForm({
                     size="sm"
                     variant={status === 'activa' ? 'default' : 'outline'}
                     onClick={() => setStatus('activa')}
-                    className={status === 'activa' ? 'bg-green-500 hover:bg-green-600' : ''}
+                    className={status === 'activa' ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-300' : 'hover:bg-green-50 hover:text-green-700 hover:border-green-200'}
                   >
                     Activa
                   </Button>
@@ -435,7 +435,7 @@ export default function CommunityCrudForm({
                     size="sm"
                     variant={status === 'suspendida' ? 'default' : 'outline'}
                     onClick={() => setStatus('suspendida')}
-                    className={status === 'suspendida' ? 'bg-yellow-500 hover:bg-yellow-600' : ''}
+                    className={status === 'suspendida' ? 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300' : 'hover:bg-yellow-50 hover:text-yellow-700 hover:border-yellow-200'}
                   >
                     Suspendida
                   </Button>
@@ -444,7 +444,7 @@ export default function CommunityCrudForm({
                     size="sm"
                     variant={status === 'inactiva' ? 'default' : 'outline'}
                     onClick={() => setStatus('inactiva')}
-                    className={status === 'inactiva' ? 'bg-red-500 hover:bg-red-600' : ''}
+                    className={status === 'inactiva' ? 'bg-red-100 hover:bg-red-200 text-red-800 border-red-300' : 'hover:bg-red-50 hover:text-red-700 hover:border-red-200'}
                   >
                     Inactiva
                   </Button>
@@ -490,8 +490,8 @@ export default function CommunityCrudForm({
 
               {/* Familias */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-green-600" />
                   Familias
                 </h3>
                 
@@ -539,7 +539,7 @@ export default function CommunityCrudForm({
 
               {/* Datos Demográficos */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Datos Demográficos</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Datos Demográficos</h3>
                 
                 <div className="grid grid-cols-4 gap-3">
                   <div className="col-span-2 text-sm font-medium">Rango de Edad</div>
@@ -582,8 +582,8 @@ export default function CommunityCrudForm({
 
               {/* Otros Datos */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-indigo-600" />
                   Otros Datos
                 </h3>
                 

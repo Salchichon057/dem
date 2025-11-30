@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
@@ -48,9 +49,34 @@ export default function VolunteersTable() {
   const [total, setTotal] = useState(0)
   const itemsPerPage = 50
 
+  const [organizations, setOrganizations] = useState<string[]>([])
+
+  // Cargar opciones dinámicas al montar
+  useEffect(() => {
+    fetchOrganizations()
+  }, [])
+
   useEffect(() => {
     fetchVolunteers()
   }, [searchTerm, volunteerTypeFilter, shiftFilter, statusFilter, selectedYear, selectedMonth, currentPage])
+
+  // Reset a página 1 cuando cambian filtros
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, volunteerTypeFilter, shiftFilter, statusFilter, selectedYear, selectedMonth])
+
+  const fetchOrganizations = async () => {
+    try {
+      const response = await fetch('/api/volunteers?limit=1000')
+      if (response.ok) {
+        const data: VolunteersResponse = await response.json()
+        const uniqueOrgs = [...new Set(data.volunteers.map(v => v.organization).filter(Boolean))] as string[]
+        setOrganizations(uniqueOrgs.sort())
+      }
+    } catch (error) {
+      console.error('Error al cargar organizaciones:', error)
+    }
+  }
 
   const fetchVolunteers = async () => {
     try {

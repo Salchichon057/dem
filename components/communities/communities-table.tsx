@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import DateFilter from "@/components/shared/date-filter";
 import CommunitySelector from "./community-selector";
 import CommunityCrudForm from "./community-crud-form";
+import CommunityViewModal from "./community-view-modal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,7 @@ export default function CommunitiesTable() {
   const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [showCrudForm, setShowCrudForm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
     null
   );
@@ -74,6 +76,49 @@ export default function CommunitiesTable() {
   const [classificationFilter, setClassificationFilter] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
+
+  // Opciones dinámicas de filtros (desde la API)
+  const [allCommunities, setAllCommunities] = useState<Community[]>([]);
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [municipalities, setMunicipalities] = useState<string[]>([]);
+  const [classifications, setClassifications] = useState<string[]>([]);
+
+  // Cargar todas las comunidades para generar opciones de filtros
+  const fetchAllCommunitiesForFilters = async () => {
+    try {
+      const response = await fetch('/api/communities?limit=1000');
+      if (response.ok) {
+        const data = await response.json();
+        const allData = data.communities || [];
+        setAllCommunities(allData);
+        
+        // Extraer departamentos únicos
+        const uniqueDepts = [...new Set(allData.map((c: Community) => c.department).filter(Boolean))] as string[];
+        setDepartments(uniqueDepts.sort());
+        
+        // Extraer clasificaciones únicas
+        const uniqueClassifications = [...new Set(allData.map((c: Community) => c.classification).filter(Boolean))] as string[];
+        setClassifications(uniqueClassifications.sort());
+      }
+    } catch (error) {
+      console.error('Error al cargar opciones de filtros:', error);
+    }
+  };
+
+  // Actualizar municipios cuando cambia el departamento
+  useEffect(() => {
+    if (departmentFilter) {
+      const munis = allCommunities
+        .filter(c => c.department === departmentFilter)
+        .map(c => c.municipality)
+        .filter(Boolean);
+      const uniqueMunis = [...new Set(munis)].sort();
+      setMunicipalities(uniqueMunis);
+      setMunicipalityFilter(''); // Reset municipality cuando cambia department
+    } else {
+      setMunicipalities([]);
+    }
+  }, [departmentFilter, allCommunities]);
 
   // Cargar comunidades
   const fetchCommunities = async () => {
@@ -117,6 +162,12 @@ export default function CommunitiesTable() {
     }
   };
 
+  // Cargar opciones de filtros al montar
+  useEffect(() => {
+    fetchAllCommunitiesForFilters();
+  }, []);
+
+  // Cargar comunidades cuando cambian filtros
   useEffect(() => {
     fetchCommunities();
   }, [
@@ -129,6 +180,11 @@ export default function CommunitiesTable() {
     selectedYear,
     selectedMonth,
   ]);
+
+  // Reset a página 1 cuando cambian filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, departmentFilter, municipalityFilter, statusFilter, classificationFilter, selectedYear, selectedMonth]);
 
   // Manejar edición
   const handleEdit = (community: Community) => {
@@ -242,10 +298,12 @@ export default function CommunitiesTable() {
             <SelectValue placeholder="Departamento" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="Chimaltenango">Chimaltenango</SelectItem>
-            <SelectItem value="Guatemala">Guatemala</SelectItem>
-            <SelectItem value="Sacatepéquez">Sacatepéquez</SelectItem>
+            <SelectItem value="all">Todos los departamentos</SelectItem>
+            {departments.map((dept) => (
+              <SelectItem key={dept} value={dept}>
+                {dept}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -254,15 +312,18 @@ export default function CommunitiesTable() {
           onValueChange={(value) =>
             setMunicipalityFilter(value === "all" ? "" : value)
           }
+          disabled={!departmentFilter}
         >
           <SelectTrigger>
             <SelectValue placeholder="Municipio" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="San Martin Jilotepeque">
-              San Martin Jilotepeque
-            </SelectItem>
+            <SelectItem value="all">Todos los municipios</SelectItem>
+            {municipalities.map((muni) => (
+              <SelectItem key={muni} value={muni}>
+                {muni}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -278,7 +339,7 @@ export default function CommunitiesTable() {
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="all">Todos los estados</SelectItem>
             <SelectItem value="activa">Activa</SelectItem>
             <SelectItem value="inactiva">Inactiva</SelectItem>
             <SelectItem value="suspendida">Suspendida</SelectItem>
@@ -295,10 +356,12 @@ export default function CommunitiesTable() {
             <SelectValue placeholder="Clasificación" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
-            <SelectItem value="Pequeña">Pequeña (1-50)</SelectItem>
-            <SelectItem value="Mediana">Mediana (51-150)</SelectItem>
-            <SelectItem value="Grande">Grande (&gt;150)</SelectItem>
+            <SelectItem value="all">Todas las clasificaciones</SelectItem>
+            {classifications.map((classification) => (
+              <SelectItem key={classification} value={classification}>
+                {classification}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -375,7 +438,7 @@ export default function CommunitiesTable() {
               <TableHead className="min-w-[120px]">Actualizado</TableHead>
 
               {/* Acciones fijas */}
-              <TableHead className="sticky right-0 bg-white dark:bg-gray-950 border-l min-w-[180px] text-right shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">
+              <TableHead className="sticky right-0 bg-white border-l min-w-[180px] text-right shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">
                 Acciones
               </TableHead>
             </TableRow>
@@ -442,12 +505,12 @@ export default function CommunitiesTable() {
                   {/* Estado */}
                   <TableCell>
                     <Badge
-                      variant={
+                      className={
                         community.status === "activa"
-                          ? "default"
+                          ? "bg-green-100 text-green-800 hover:bg-green-200"
                           : community.status === "suspendida"
-                          ? "destructive"
-                          : "secondary"
+                          ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                          : "bg-red-100 text-red-800 hover:bg-red-200"
                       }
                     >
                       {community.status === "activa"
@@ -568,7 +631,7 @@ export default function CommunitiesTable() {
                   </TableCell>
 
                   {/* Acciones fijas */}
-                  <TableCell className="sticky right-0 bg-white dark:bg-gray-950 border-l shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">
+                  <TableCell className="sticky right-0 bg-white border-l shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]">
                     <div className="flex justify-end gap-1">
                       {community.google_maps_url && (
                         <Button
@@ -581,7 +644,7 @@ export default function CommunitiesTable() {
                             )
                           }
                           title="Ver en Google Maps"
-                          className="bg-white dark:bg-gray-950"
+                          className="bg-white"
                         >
                           <ExternalLink className="w-4 h-4" />
                         </Button>
@@ -592,10 +655,9 @@ export default function CommunitiesTable() {
                         title="Ver detalles"
                         onClick={() => {
                           setSelectedCommunity(community);
-                          // TODO: Abrir modal de detalles
-                          toast.info("Modal de detalles en construcción");
+                          setShowViewModal(true);
                         }}
-                        className="bg-white dark:bg-gray-950"
+                        className="bg-white"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -604,7 +666,7 @@ export default function CommunitiesTable() {
                         size="sm"
                         title="Editar"
                         onClick={() => handleEdit(community)}
-                        className="bg-white dark:bg-gray-950"
+                        className="bg-white"
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -613,7 +675,7 @@ export default function CommunitiesTable() {
                         size="sm"
                         title="Eliminar"
                         onClick={() => setCommunityToDelete(community)}
-                        className="hover:text-destructive bg-white dark:bg-gray-950"
+                        className="hover:text-destructive bg-white"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -721,6 +783,16 @@ export default function CommunitiesTable() {
           if (!open) setSelectedCommunity(null);
         }}
         onSuccess={fetchCommunities}
+        community={selectedCommunity}
+      />
+
+      {/* Modal de vista completa */}
+      <CommunityViewModal
+        open={showViewModal}
+        onOpenChange={(open) => {
+          setShowViewModal(open);
+          if (!open) setSelectedCommunity(null);
+        }}
         community={selectedCommunity}
       />
 
