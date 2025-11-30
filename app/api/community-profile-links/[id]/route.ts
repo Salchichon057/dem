@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { withAuth } from '@/lib/auth-server'
 
 /**
  * DELETE /api/community-profile-links/[id]
  * Remove a community from Community Profile (soft delete - sets is_active = false)
  */
-export const DELETE = withAuth(async (
+export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
-) => {
+) {
+  const { supabase, error: authError } = await withAuth()
+  if (authError) return authError
+
   try {
-    const supabase = await createClient()
     const { id } = await params
 
     // Soft delete - just deactivate
@@ -43,18 +44,20 @@ export const DELETE = withAuth(async (
       { status: 500 }
     )
   }
-})
+}
 
 /**
  * PUT /api/community-profile-links/[id]
  * Update a community profile link (notes, reactivate, etc.)
  */
-export const PUT = withAuth(async (
+export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
-) => {
+) {
+  const { supabase, error: authError } = await withAuth()
+  if (authError) return authError
+
   try {
-    const supabase = await createClient()
     const { id } = await params
     const body = await request.json()
 
@@ -97,4 +100,4 @@ export const PUT = withAuth(async (
       { status: 500 }
     )
   }
-})
+}
