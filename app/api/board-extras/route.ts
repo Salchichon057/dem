@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         .update({
           traffic_light: traffic_light || null,
           recommendations: recommendations || null,
-          follow_up_given: follow_up_given || false,
+          follow_up_given: follow_up_given || null,
           follow_up_date: follow_up_date || null,
           concluded_result_red_or_no: concluded_result_red_or_no || null,
           solutions: solutions || null,
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
           submission_id,
           traffic_light: traffic_light || null,
           recommendations: recommendations || null,
-          follow_up_given: follow_up_given || false,
+          follow_up_given: follow_up_given || null,
           follow_up_date: follow_up_date || null,
           concluded_result_red_or_no: concluded_result_red_or_no || null,
           solutions: solutions || null,

@@ -165,9 +165,9 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       
       // Comunidades
       case "comunidades-lista":
-        return "Comunidades - Gestión"
-      case "comunidades-estadistica":
-        return "Comunidades - Estadística"
+        return "Comunidades - Estadísticas"
+      // case "comunidades-estadistica":
+      //   return "Comunidades - Estadística"
       case "comunidades-formularios":
         return "Comunidades - Formularios"
       case "comunidades-plantillas":

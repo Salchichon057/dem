@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, AlertTriangle, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -36,8 +36,10 @@ interface TrafficLightStats {
     green: number;
   }>;
   follow_up: {
-    with_follow_up: number;
-    without_follow_up: number;
+    sin_datos: number;
+    no_iniciado: number;
+    en_proceso: number;
+    completado: number;
   };
   concluded: {
     yes: number;
@@ -109,16 +111,26 @@ export function SemaforoEstadisticas() {
   // Datos para gráfico de barras de seguimiento
   const seguimientoData = [
     {
-      name: "Con Seguimiento",
-      value: stats.follow_up.with_follow_up,
-      fill: "#22c55e",
+      name: "Sin datos",
+      value: stats.follow_up.sin_datos,
+      fill: "#9ca3af",
     },
     {
-      name: "Sin Seguimiento",
-      value: stats.follow_up.without_follow_up,
+      name: "No iniciado",
+      value: stats.follow_up.no_iniciado,
       fill: "#ef4444",
     },
-  ];
+    {
+      name: "En proceso",
+      value: stats.follow_up.en_proceso,
+      fill: "#f59e0b",
+    },
+    {
+      name: "Completado",
+      value: stats.follow_up.completado,
+      fill: "#22c55e",
+    },
+  ].filter((item) => item.value > 0);
 
   const porcentajeRojo =
     stats.total > 0 ? ((stats.red / stats.total) * 100).toFixed(1) : "0";
@@ -142,11 +154,10 @@ export function SemaforoEstadisticas() {
       {/* Cards de resumen */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
               Total Auditorías
             </CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -157,11 +168,10 @@ export function SemaforoEstadisticas() {
         </Card>
 
         <Card className="border-red-200 bg-red-50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
-              🔴 Hallazgos Altos
+              Hallazgos Altos
             </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats.red}</div>
@@ -170,11 +180,10 @@ export function SemaforoEstadisticas() {
         </Card>
 
         <Card className="border-yellow-200 bg-yellow-50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
-              🟡 Hallazgos Medios
+              Hallazgos Medios
             </CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
@@ -187,11 +196,10 @@ export function SemaforoEstadisticas() {
         </Card>
 
         <Card className="border-green-200 bg-green-50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
-              🟢 Hallazgos Bajos
+              Hallazgos Bajos
             </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
@@ -259,4 +267,3 @@ export function SemaforoEstadisticas() {
     </div>
   );
 }
-

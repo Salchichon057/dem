@@ -33,7 +33,7 @@ interface SubmissionRow {
 interface BoardExtras {
   traffic_light: string | null
   recommendations: string | null
-  follow_up_given: boolean
+  follow_up_given: string | null
   follow_up_date: string | null
   concluded_result_red_or_no: string | null
   solutions: string | null
@@ -208,7 +208,7 @@ export function TableroConsolidadoSection() {
         // Add board extras
         transformedRow.traffic_light = extras?.traffic_light || ''
         transformedRow.recommendations = extras?.recommendations || ''
-        transformedRow.follow_up_given = extras?.follow_up_given ? 'Sí' : 'No'
+        transformedRow.follow_up_given = extras?.follow_up_given || 'No iniciado'
         transformedRow.follow_up_date = extras?.follow_up_date || ''
         transformedRow.concluded_result_red_or_no = extras?.concluded_result_red_or_no || ''
         transformedRow.solutions = extras?.solutions || ''
@@ -390,7 +390,7 @@ export function TableroConsolidadoSection() {
                         {boardExtras[row.submission_id]?.recommendations || '-'}
                       </td>
                       <td className="p-3 text-xs">
-                        {boardExtras[row.submission_id]?.follow_up_given ? 'Sí' : 'No'}
+                        {boardExtras[row.submission_id]?.follow_up_given || '-'}
                       </td>
                       <td className="p-3 text-xs whitespace-nowrap">
                         {boardExtras[row.submission_id]?.follow_up_date

@@ -92,7 +92,7 @@ const menuItems = [
       },
     ],
   },
-  // Comunidades - Subniveles en sidebar (Gestión + Estadística + Plantillas)
+  // Comunidades - Subniveles en sidebar (Estadísticas + Plantillas)
   {
     id: "comunidades",
     title: "Comunidades",
@@ -100,15 +100,15 @@ const menuItems = [
     children: [
       {
         id: "comunidades-lista",
-        title: "Gestión",
-        icon: MapPin,
-      },
-      {
-        id: "comunidades-estadistica",
-        title: "Estadística",
+        title: "Estadísticas",
         icon: BarChart3,
-        requiresData: true, // Bloqueado si no hay datos
       },
+      // {
+      //   id: "comunidades-estadistica",
+      //   title: "Estadística",
+      //   icon: BarChart3,
+      //   requiresData: true,
+      // },
       {
         id: "comunidades-plantillas",
         title: "Plantillas",

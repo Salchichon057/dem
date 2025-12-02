@@ -31,7 +31,7 @@ interface BoardExtras {
   submission_id: string
   traffic_light: string | null
   recommendations: string | null
-  follow_up_given: boolean
+  follow_up_given: string | null
   follow_up_date: string | null
   concluded_result_red_or_no: string | null
   solutions: string | null
@@ -59,7 +59,7 @@ export function EditBoardExtrasDialog({
     submission_id: submissionId,
     traffic_light: null,
     recommendations: null,
-    follow_up_given: false,
+    follow_up_given: null,
     follow_up_date: null,
     concluded_result_red_or_no: null,
     solutions: null,
@@ -183,17 +183,18 @@ export function EditBoardExtrasDialog({
             <div className="space-y-2">
               <Label htmlFor="follow_up_given">Se dio seguimiento?</Label>
               <Select
-                value={formData.follow_up_given ? "true" : "false"}
+                value={formData.follow_up_given || ''}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, follow_up_given: value === "true" })
+                  setFormData({ ...formData, follow_up_given: value || null })
                 }
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Seleccionar..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="true">Sí</SelectItem>
-                  <SelectItem value="false">No</SelectItem>
+                  <SelectItem value="No iniciado">No iniciado</SelectItem>
+                  <SelectItem value="En proceso">En proceso</SelectItem>
+                  <SelectItem value="Completado">Completado</SelectItem>
                 </SelectContent>
               </Select>
             </div>

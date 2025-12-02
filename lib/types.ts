@@ -372,7 +372,7 @@ export interface BoardExtra {
   submission_id: string
   traffic_light: TrafficLightStatus | null
   recommendations: string | null
-  follow_up_given: boolean
+  follow_up_given: string | null
   follow_up_date: string | null
   concluded_result_red_or_no: ConcludedStatus | null
   solutions: string | null
@@ -400,8 +400,10 @@ export interface BoardExtraStats {
   undefined: number
   by_month: MonthlyTrafficLightData[]
   follow_up: {
-    with_follow_up: number
-    without_follow_up: number
+    sin_datos: number
+    no_iniciado: number
+    en_proceso: number
+    completado: number
   }
   concluded: {
     yes: number

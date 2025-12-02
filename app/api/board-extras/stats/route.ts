@@ -22,8 +22,10 @@ function countByTrafficLight(extras: BoardExtra[]) {
  */
 function countByFollowUp(extras: BoardExtra[]) {
   return {
-    with_follow_up: extras.filter(e => e.follow_up_given === true).length,
-    without_follow_up: extras.filter(e => e.follow_up_given === false).length,
+    sin_datos: extras.filter(e => !e.follow_up_given).length,
+    no_iniciado: extras.filter(e => e.follow_up_given === 'No iniciado').length,
+    en_proceso: extras.filter(e => e.follow_up_given === 'En proceso').length,
+    completado: extras.filter(e => e.follow_up_given === 'Completado').length,
   }
 }
 
@@ -106,8 +108,10 @@ export async function GET() {
       undefined: trafficLightCounts.undefined,
       by_month: monthlyData,
       follow_up: {
-        with_follow_up: followUpCounts.with_follow_up,
-        without_follow_up: followUpCounts.without_follow_up,
+        sin_datos: followUpCounts.sin_datos,
+        no_iniciado: followUpCounts.no_iniciado,
+        en_proceso: followUpCounts.en_proceso,
+        completado: followUpCounts.completado,
       },
       concluded: {
         yes: concludedCounts.yes,
