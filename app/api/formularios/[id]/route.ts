@@ -182,7 +182,7 @@ export async function PUT(
 ) {
   try {
     // Verificar autenticación
-    const { user, error: authError } = await withAuth()
+    const { error: authError } = await withAuth()
     if (authError) return authError
 
     const { id } = await params

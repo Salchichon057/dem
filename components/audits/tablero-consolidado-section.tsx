@@ -5,13 +5,11 @@
 import { useState, useEffect } from "react"
 import { getConsolidatedBoardFormId, getTrafficLightBadgeClasses } from "@/lib/config/audits.config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Loader2, Search, FileText, FileSpreadsheet, Edit, Table, BarChart3 } from "lucide-react"
+import { Loader2, FileText, FileSpreadsheet, Edit, Table, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { EditBoardExtrasDialog } from "./edit-board-extras-dialog"
 import { SemaforoEstadisticas } from "./semaforo-estadisticas"
-import DateFilter from "@/components/shared/date-filter"
 import { exportToExcel, type ExcelColumn } from "@/lib/utils/excel-export"
 
 type ViewMode = 'table' | 'stats'
