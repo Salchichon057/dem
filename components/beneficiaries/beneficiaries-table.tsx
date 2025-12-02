@@ -635,7 +635,7 @@ export default function BeneficiariesTable() {
                   )}
                   {visibleColumns.status && (
                     <TableCell>
-                      <Badge variant={beneficiary.is_active ? 'default' : 'secondary'}>
+                      <Badge className={beneficiary.is_active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}>
                         {beneficiary.is_active ? 'Activo' : 'Inactivo'}
                       </Badge>
                     </TableCell>

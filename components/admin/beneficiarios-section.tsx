@@ -232,11 +232,11 @@ export function AdminBeneficiariosSection() {
 
   const getEstadoColor = (estado: string) => {
     const colores = {
-      activo: 'bg-green-100 text-green-700',
-      inactivo: 'bg-red-100 text-red-700',
-      graduado: 'bg-blue-100 text-blue-700'
+      activo: 'bg-green-100 text-green-800 hover:bg-green-200',
+      inactivo: 'bg-red-100 text-red-800 hover:bg-red-200',
+      graduado: 'bg-blue-100 text-blue-800 hover:bg-blue-200'
     }
-    return colores[estado as keyof typeof colores] || 'bg-gray-100 text-gray-700'
+    return colores[estado as keyof typeof colores] || 'bg-gray-100 text-gray-800 hover:bg-gray-200'
   }
 
   const calcularEdadPromedio = () => {

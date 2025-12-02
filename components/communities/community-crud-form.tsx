@@ -254,7 +254,7 @@ export default function CommunityCrudForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">
             {isEditMode ? 'Editar Comunidad' : 'Agregar Nueva Comunidad'}
@@ -264,8 +264,8 @@ export default function CommunityCrudForm({
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
-          <ScrollArea className="flex-1 pr-4">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+          <div className="flex-1 pr-4">
             <div className="space-y-6 pb-4">
               {/* Datos Básicos */}
               <div className="space-y-4">
@@ -644,7 +644,7 @@ export default function CommunityCrudForm({
                 </div>
               </div>
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Footer con botones */}
           <div className="flex items-center justify-end gap-2 pt-4 border-t">

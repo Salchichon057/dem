@@ -294,7 +294,7 @@ export default function CommunityForm({ open, onOpenChange, onSuccess }: Communi
                                     size="sm"
                                     variant={data.status === 'activa' ? 'default' : 'outline'}
                                     onClick={() => updateCommunityStatus(community.id, 'activa')}
-                                    className={data.status === 'activa' ? 'bg-green-500 hover:bg-green-600' : ''}
+                                    className={data.status === 'activa' ? 'bg-green-100 hover:bg-green-200 text-green-800' : ''}
                                   >
                                     Activa
                                   </Button>
@@ -303,7 +303,7 @@ export default function CommunityForm({ open, onOpenChange, onSuccess }: Communi
                                     size="sm"
                                     variant={data.status === 'suspendida' ? 'default' : 'outline'}
                                     onClick={() => updateCommunityStatus(community.id, 'suspendida')}
-                                    className={data.status === 'suspendida' ? 'bg-yellow-500 hover:bg-yellow-600' : ''}
+                                    className={data.status === 'suspendida' ? 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800' : ''}
                                   >
                                     Suspendida
                                   </Button>
@@ -312,7 +312,7 @@ export default function CommunityForm({ open, onOpenChange, onSuccess }: Communi
                                     size="sm"
                                     variant={data.status === 'inactiva' ? 'default' : 'outline'}
                                     onClick={() => updateCommunityStatus(community.id, 'inactiva')}
-                                    className={data.status === 'inactiva' ? 'bg-red-500 hover:bg-red-600' : ''}
+                                    className={data.status === 'inactiva' ? 'bg-red-100 hover:bg-red-200 text-red-800' : ''}
                                   >
                                     Inactiva
                                   </Button>

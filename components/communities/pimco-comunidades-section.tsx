@@ -251,12 +251,12 @@ export default function PimcoComunidadesSection() {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={
+                        className={
                           community.status === "activa"
-                            ? "default"
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
                             : community.status === "suspendida"
-                            ? "destructive"
-                            : "secondary"
+                            ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                            : "bg-red-100 text-red-800 hover:bg-red-200"
                         }
                       >
                         {community.status === "activa"

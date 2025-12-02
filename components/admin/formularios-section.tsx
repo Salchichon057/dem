@@ -135,11 +135,11 @@ export function AdminFormulariosSection() {
 
   const getEstadoColor = (estado: string) => {
     const colores = {
-      activo: 'bg-green-100 text-green-700',
-      cerrado: 'bg-red-100 text-red-700',
-      borrador: 'bg-yellow-100 text-yellow-700'
+      activo: 'bg-green-100 text-green-800 hover:bg-green-200',
+      cerrado: 'bg-red-100 text-red-800 hover:bg-red-200',
+      borrador: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
     }
-    return colores[estado as keyof typeof colores] || 'bg-gray-100 text-gray-700'
+    return colores[estado as keyof typeof colores] || 'bg-gray-100 text-gray-800 hover:bg-gray-200'
   }
 
   const getEstadoIcon = (estado: string) => {

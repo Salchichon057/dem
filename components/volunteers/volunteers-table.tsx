@@ -298,16 +298,16 @@ export default function VolunteersTable() {
                     </TableCell>
                     <TableCell>
                       {volunteer.receives_benefit ? (
-                        <Badge variant="default" className="bg-green-500">Sí</Badge>
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Sí</Badge>
                       ) : (
-                        <Badge variant="secondary">No</Badge>
+                        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">No</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-sm">
                       {formatDate(volunteer.work_date)}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={volunteer.is_active ? 'default' : 'secondary'}>
+                      <Badge className={volunteer.is_active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}>
                         {volunteer.is_active ? 'Activo' : 'Inactivo'}
                       </Badge>
                     </TableCell>

@@ -212,11 +212,11 @@ export function AdminVoluntariosSection() {
 
   const getEstadoColor = (estado: string) => {
     const colores = {
-      activo: 'bg-green-100 text-green-700',
-      inactivo: 'bg-gray-100 text-gray-700',
-      suspendido: 'bg-red-100 text-red-700'
+      activo: 'bg-green-100 text-green-800 hover:bg-green-200',
+      inactivo: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+      suspendido: 'bg-red-100 text-red-800 hover:bg-red-200'
     }
-    return colores[estado as keyof typeof colores] || 'bg-gray-100 text-gray-700'
+    return colores[estado as keyof typeof colores] || 'bg-gray-100 text-gray-800 hover:bg-gray-200'
   }
 
   const renderEstrellas = (calificacion: number) => {
