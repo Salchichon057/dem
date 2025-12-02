@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import type { BoardExtra, MonthlyTrafficLightData, BoardExtraStats } from "@/lib/types"
+import { AUDITS_CONFIG } from "@/lib/config/audits.config"
 
 const LAST_MONTHS_TO_SHOW = 6
 
@@ -9,9 +10,9 @@ const LAST_MONTHS_TO_SHOW = 6
  */
 function countByTrafficLight(extras: BoardExtra[]) {
   return {
-    red: extras.filter(e => e.traffic_light === 'Rojo').length,
-    yellow: extras.filter(e => e.traffic_light === 'Amarillo').length,
-    green: extras.filter(e => e.traffic_light === 'Verde').length,
+    red: extras.filter(e => e.traffic_light === AUDITS_CONFIG.TRAFFIC_LIGHT.RED).length,
+    yellow: extras.filter(e => e.traffic_light === AUDITS_CONFIG.TRAFFIC_LIGHT.YELLOW).length,
+    green: extras.filter(e => e.traffic_light === AUDITS_CONFIG.TRAFFIC_LIGHT.GREEN).length,
     undefined: extras.filter(e => !e.traffic_light).length,
   }
 }
@@ -31,8 +32,8 @@ function countByFollowUp(extras: BoardExtra[]) {
  */
 function countByConcluded(extras: BoardExtra[]) {
   return {
-    yes: extras.filter(e => e.concluded_result_red_or_no === 'Sí').length,
-    no: extras.filter(e => e.concluded_result_red_or_no === 'No').length,
+    yes: extras.filter(e => e.concluded_result_red_or_no === AUDITS_CONFIG.CONCLUDED_STATUS.YES).length,
+    no: extras.filter(e => e.concluded_result_red_or_no === AUDITS_CONFIG.CONCLUDED_STATUS.NO).length,
     undefined: extras.filter(e => !e.concluded_result_red_or_no).length,
   }
 }
@@ -53,9 +54,9 @@ function groupByMonth(extras: BoardExtra[]): MonthlyTrafficLightData[] {
       acc.push(monthData)
     }
     
-    if (item.traffic_light === 'Rojo') monthData.red++
-    else if (item.traffic_light === 'Amarillo') monthData.yellow++
-    else if (item.traffic_light === 'Verde') monthData.green++
+    if (item.traffic_light === AUDITS_CONFIG.TRAFFIC_LIGHT.RED) monthData.red++
+    else if (item.traffic_light === AUDITS_CONFIG.TRAFFIC_LIGHT.YELLOW) monthData.yellow++
+    else if (item.traffic_light === AUDITS_CONFIG.TRAFFIC_LIGHT.GREEN) monthData.green++
     
     return acc
   }, [])

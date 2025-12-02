@@ -1,10 +1,15 @@
 import { z } from 'zod'
+import { AUDITS_CONFIG } from '@/lib/config/audits.config'
 
 // Esquema de validación para los campos extras del Tablero Consolidado
 export const boardExtrasSchema = z.object({
   submission_id: z.string().uuid('ID de envío inválido'),
   
-  traffic_light: z.enum(['Rojo', 'Amarillo', 'Verde']).nullable(),
+  traffic_light: z.enum([
+    AUDITS_CONFIG.TRAFFIC_LIGHT.RED,
+    AUDITS_CONFIG.TRAFFIC_LIGHT.YELLOW,
+    AUDITS_CONFIG.TRAFFIC_LIGHT.GREEN
+  ] as const).nullable(),
   
   recommendations: z.string()
     .max(2000, 'Las recomendaciones no pueden exceder 2000 caracteres')

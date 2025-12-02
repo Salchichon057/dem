@@ -3,6 +3,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { getConsolidatedBoardFormId, getTrafficLightBadgeClasses } from "@/lib/config/audits.config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Loader2, Search, FileText, FileSpreadsheet, Edit, Table, BarChart3 } from "lucide-react"
@@ -49,7 +50,7 @@ export function TableroConsolidadoSection() {
   const [filteredData, setFilteredData] = useState<SubmissionRow[]>([])
   const [selectedYear, setSelectedYear] = useState<string>('all')
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
-  const [formTemplateId] = useState("5bd783b6-e52c-48de-ab3b-9e7ae8538bd2") // Consolidado de Auditorías 2025
+  const [formTemplateId] = useState(getConsolidatedBoardFormId())
   const [boardExtras, setBoardExtras] = useState<Record<string, BoardExtras>>({})
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null)
@@ -428,11 +429,7 @@ export function TableroConsolidadoSection() {
                       {/* Columnas extras */}
                       <td className="p-3 text-xs">
                         {boardExtras[row.submission_id]?.traffic_light && (
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            boardExtras[row.submission_id].traffic_light === 'Rojo' ? 'bg-red-100 text-red-800' :
-                            boardExtras[row.submission_id].traffic_light === 'Amarillo' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-green-100 text-green-800'
-                          }`}>
+                          <span className={`px-2 py-1 rounded text-xs ${getTrafficLightBadgeClasses(boardExtras[row.submission_id].traffic_light)}`}>
                             {boardExtras[row.submission_id].traffic_light}
                           </span>
                         )}

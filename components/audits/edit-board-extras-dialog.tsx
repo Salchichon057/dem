@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { AUDITS_CONFIG, getTrafficLightBadgeClasses, getTrafficLightEmoji } from "@/lib/config/audits.config"
 import {
   Dialog,
   DialogContent,
@@ -152,12 +153,8 @@ export function EditBoardExtrasDialog({
               <Label htmlFor="traffic_light">Semáforo (automático)</Label>
               <div className="flex items-center gap-2 p-3 border rounded-md bg-gray-50">
                 {formData.traffic_light ? (
-                  <span className={`px-3 py-1 rounded text-sm font-medium ${
-                    formData.traffic_light === 'Rojo' ? 'bg-red-100 text-red-800' :
-                    formData.traffic_light === 'Amarillo' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {formData.traffic_light === 'Rojo' ? '🔴' : formData.traffic_light === 'Amarillo' ? '🟡' : '🟢'} {formData.traffic_light}
+                  <span className={`px-3 py-1 rounded text-sm font-medium ${getTrafficLightBadgeClasses(formData.traffic_light)}`}>
+                    {getTrafficLightEmoji(formData.traffic_light)} {formData.traffic_light}
                   </span>
                 ) : (
                   <span className="text-gray-500">Sin definir</span>
@@ -229,8 +226,8 @@ export function EditBoardExtrasDialog({
                   <SelectValue placeholder="Selecciona una opción" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Sí">Sí</SelectItem>
-                  <SelectItem value="No">No</SelectItem>
+                  <SelectItem value={AUDITS_CONFIG.CONCLUDED_STATUS.YES}>{AUDITS_CONFIG.CONCLUDED_STATUS.YES}</SelectItem>
+                  <SelectItem value={AUDITS_CONFIG.CONCLUDED_STATUS.NO}>{AUDITS_CONFIG.CONCLUDED_STATUS.NO}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

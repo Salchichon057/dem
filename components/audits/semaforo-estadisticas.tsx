@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AUDITS_CONFIG } from "@/lib/config/audits.config";
 import {
   Card,
   CardContent,
@@ -46,10 +47,10 @@ interface TrafficLightStats {
 }
 
 const COLORS = {
-  rojo: "#ef4444",
-  amarillo: "#eab308",
-  verde: "#22c55e",
-  sin_definir: "#94a3b8",
+  rojo: AUDITS_CONFIG.TRAFFIC_LIGHT_COLORS.RED,
+  amarillo: AUDITS_CONFIG.TRAFFIC_LIGHT_COLORS.YELLOW,
+  verde: AUDITS_CONFIG.TRAFFIC_LIGHT_COLORS.GREEN,
+  sin_definir: AUDITS_CONFIG.TRAFFIC_LIGHT_COLORS.UNDEFINED,
 };
 
 export function SemaforoEstadisticas() {
