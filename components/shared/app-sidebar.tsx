@@ -136,7 +136,7 @@ const menuItems = [
       },
       {
         id: "auditorias-tablero-consolidado",
-        title: "Tablero Consolidado",
+        title: "Status de Hallazgos",
         icon: Activity,
       },
     ],
@@ -164,7 +164,7 @@ const menuItems = [
       },
       {
         id: "voluntariado-tablero",
-        title: "Tablero Consolidado",
+        title: "Status de Hallazgos",
         icon: FileText,
       },
     ],

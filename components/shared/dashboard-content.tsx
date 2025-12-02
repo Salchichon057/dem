@@ -179,7 +179,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "auditorias-formularios":
         return "Auditorías - Formularios"
       case "auditorias-tablero-consolidado":
-        return "Auditorías - Tablero Consolidado"
+        return "Auditorías - Status de Hallazgos"
       case "auditorias-semaforo":
         return "Auditorías - Semáforo"
       
@@ -193,7 +193,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "voluntariado-formularios":
         return "Voluntariado - Formularios"
       case "voluntariado-tablero":
-        return "Voluntariado - Tablero Consolidado"
+        return "Voluntariado - Status de Hallazgos"
       
       // Configuración y Perfil
       case "perfil":

@@ -116,7 +116,7 @@ export default function BeneficiariesTable() {
         { header: 'Municipio', key: 'municipality', width: 20 },
         { header: 'Aldea', key: 'village', width: 20 },
         { header: 'Programa', key: 'program', width: 25 },
-        { header: 'Bolsa', key: 'bag', width: 15 },
+        { header: 'Cantidad de Bolsas', key: 'bag', width: 20 },
         { header: 'Estado', key: 'is_active', width: 15 },
         { header: 'Fecha de Ingreso', key: 'admission_date', width: 20 },
       ]
@@ -408,7 +408,7 @@ export default function BeneficiariesTable() {
                       checked={visibleColumns.bag}
                       onCheckedChange={() => toggleColumn('bag')}
                     />
-                    <Label htmlFor="col-bag" className="text-sm cursor-pointer">Bolsa</Label>
+                    <Label htmlFor="col-bag" className="text-sm cursor-pointer">Cantidad de Bolsas</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -555,7 +555,7 @@ export default function BeneficiariesTable() {
               {visibleColumns.municipality && <TableHead className="whitespace-nowrap">Municipio</TableHead>}
               {visibleColumns.village && <TableHead className="whitespace-nowrap">Aldea</TableHead>}
               {visibleColumns.program && <TableHead className="whitespace-nowrap">Programa</TableHead>}
-              {visibleColumns.bag && <TableHead className="whitespace-nowrap">Bolsa</TableHead>}
+              {visibleColumns.bag && <TableHead className="whitespace-nowrap">Cantidad de Bolsas</TableHead>}
               {visibleColumns.googleMaps && <TableHead className="whitespace-nowrap">Google Maps</TableHead>}
               {visibleColumns.status && <TableHead className="whitespace-nowrap">Estado</TableHead>}
               {visibleColumns.admissionDate && <TableHead className="whitespace-nowrap">Fecha Ingreso</TableHead>}

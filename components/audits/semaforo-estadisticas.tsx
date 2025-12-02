@@ -143,7 +143,7 @@ export function SemaforoEstadisticas() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold text-black">
           Estadísticas del Semáforo
         </h1>
         <p className="text-gray-600 mt-2">

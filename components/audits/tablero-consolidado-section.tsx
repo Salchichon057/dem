@@ -238,7 +238,7 @@ export function TableroConsolidadoSection() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando datos del tablero consolidado...</p>
+          <p className="text-gray-600">Cargando datos del status de hallazgos...</p>
         </div>
       </div>
     )
@@ -249,7 +249,7 @@ export function TableroConsolidadoSection() {
       {/* Header con título y tabs */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tablero Consolidado</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Status de Hallazgos</h1>
           <p className="text-muted-foreground">
             Consolidado de Auditorías 2025
           </p>
