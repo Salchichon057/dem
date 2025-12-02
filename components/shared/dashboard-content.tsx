@@ -14,6 +14,7 @@ import { PlantillasTemplateSection } from "@/components/communities/plantillas-t
 import { PimcoFormulariosSection } from "@/components/communities/pimco-formularios-section"
 import { FormulariosAuditoriaSection } from "@/components/audits/formularios-auditoria-section"
 import { TableroConsolidadoSection } from "@/components/audits/tablero-consolidado-section"
+import { TableroVoluntariosSection } from "@/components/volunteers/tablero-voluntarios-section"
 import AbrazandoLeyendasSection from "@/components/forms/abrazando-leyendas-section"
 import { FormularioVoluntariadoSection } from "@/components/forms/formulario-voluntariado-section"
 import { OrganizacionesEstadisticaSection } from "@/components/statistics/organizaciones-estadistica-section"
@@ -126,6 +127,8 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return <VoluntariadoEstadisticaSection />
       case "voluntariado-formularios":
         return <FormularioVoluntariadoSection />
+      case "voluntariado-tablero":
+        return <TableroVoluntariosSection />
       
       // Configuración y Perfil (no están en sidebar pero se acceden desde footer dropdown)
       case "perfil":
@@ -189,6 +192,8 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
         return "Voluntariado - Estadística"
       case "voluntariado-formularios":
         return "Voluntariado - Formularios"
+      case "voluntariado-tablero":
+        return "Voluntariado - Tablero Consolidado"
       
       // Configuración y Perfil
       case "perfil":

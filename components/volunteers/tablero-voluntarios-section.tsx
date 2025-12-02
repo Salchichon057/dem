@@ -1,20 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect } from "react"
-import { getConsolidatedBoardFormId, getTrafficLightBadgeClasses } from "@/lib/config/audits.config"
+import { getVolunteerFormId } from "@/lib/config/volunteers.config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Loader2, Search, FileText, FileSpreadsheet, Edit, Table, BarChart3 } from "lucide-react"
+import { Loader2, FileText, FileSpreadsheet, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { EditBoardExtrasDialog } from "./edit-board-extras-dialog"
-import { SemaforoEstadisticas } from "./semaforo-estadisticas"
-import DateFilter from "@/components/shared/date-filter"
+import { EditVolunteerExtrasDialog } from "./edit-volunteer-extras-dialog"
 import { exportToExcel, type ExcelColumn } from "@/lib/utils/excel-export"
-
-type ViewMode = 'table' | 'stats'
 
 interface ColumnDefinition {
   id: string
@@ -27,27 +21,30 @@ interface SubmissionRow {
   user_name: string
   user_email: string
   submitted_at: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
-interface BoardExtras {
-  traffic_light: string | null
-  recommendations: string | null
-  follow_up_given: boolean
-  follow_up_date: string | null
-  concluded_result_red_or_no: string | null
-  solutions: string | null
-  preliminary_report: string | null
-  full_report: string | null
+interface VolunteerExtras {
+  total_hours: number
+  receives_benefit: boolean
+  benefit_number: string | null
+  agricultural_pounds: number
+  unit_cost_q: number | null
+  unit_cost_usd: number | null
+  viveres_bags: number | null
+  average_cost_30lbs: number | null
+  picking_gtq: number | null
+  picking_5lbs: number | null
+  total_amount_q: number | null
+  group_number: number | null
 }
 
-export function TableroConsolidadoSection() {
-  const [viewMode, setViewMode] = useState<ViewMode>('table')
+export function TableroVoluntariosSection() {
   const [data, setData] = useState<SubmissionRow[]>([])
   const [columns, setColumns] = useState<ColumnDefinition[]>([])
   const [loading, setLoading] = useState(true)
-  const [formTemplateId] = useState(getConsolidatedBoardFormId())
-  const [boardExtras, setBoardExtras] = useState<Record<string, BoardExtras>>({})
+  const [formTemplateId] = useState(getVolunteerFormId())
+  const [volunteerExtras, setVolunteerExtras] = useState<Record<string, VolunteerExtras>>({})
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null)
   
@@ -85,7 +82,7 @@ export function TableroConsolidadoSection() {
       if (response.ok) {
         setColumns(result.columns || [])
         setData(result.data || [])
-        fetchPageBoardExtras(result.data || [])
+        fetchPageVolunteerExtras(result.data || [])
       } else {
         toast.error('Error al cargar envíos: ' + (result.error || 'Error desconocido'))
       }
@@ -96,16 +93,16 @@ export function TableroConsolidadoSection() {
     }
   }
 
-  const fetchPageBoardExtras = async (pageData: SubmissionRow[]) => {
+  const fetchPageVolunteerExtras = async (pageData: SubmissionRow[]) => {
     try {
-      const extrasMap: Record<string, BoardExtras> = { ...boardExtras }
+      const extrasMap: Record<string, VolunteerExtras> = { ...volunteerExtras }
       
       await Promise.all(
         pageData.map(async (row) => {
           if (extrasMap[row.submission_id]) return
           
           try {
-            const response = await fetch(`/api/board-extras/${row.submission_id}`)
+            const response = await fetch(`/api/volunteer-extras/${row.submission_id}`)
             if (response.ok) {
               const extras = await response.json()
               extrasMap[row.submission_id] = extras
@@ -115,7 +112,7 @@ export function TableroConsolidadoSection() {
         })
       )
       
-      setBoardExtras(extrasMap)
+      setVolunteerExtras(extrasMap)
     } catch {
     }
   }
@@ -126,10 +123,10 @@ export function TableroConsolidadoSection() {
   }
 
   const handleExtrasSaved = () => {
-    fetchPageBoardExtras(data)
+    fetchPageVolunteerExtras(data)
   }
 
-  const formatCellValue = (value: any, type: string): string => {
+  const formatCellValue = (value: unknown, type: string): string => {
     if (value === null || value === undefined || value === '') return '-'
     
     if (Array.isArray(value)) {
@@ -147,7 +144,7 @@ export function TableroConsolidadoSection() {
     
     if (type === 'DATE') {
       try {
-        return new Date(value).toLocaleDateString('es-GT')
+        return new Date(String(value)).toLocaleDateString('es-GT')
       } catch {
         return String(value)
       }
@@ -163,14 +160,12 @@ export function TableroConsolidadoSection() {
     }
 
     try {
-      // Build Excel columns
       const excelColumns: ExcelColumn[] = [
         { header: 'Nombre Usuario', key: 'user_name', width: 25 },
         { header: 'Email Usuario', key: 'user_email', width: 30 },
         { header: 'Fecha Envío', key: 'submitted_at', width: 20 },
       ]
 
-      // Add dynamic form columns
       columns.forEach(col => {
         excelColumns.push({
           header: col.title,
@@ -179,55 +174,58 @@ export function TableroConsolidadoSection() {
         })
       })
 
-      // Add board extras columns
       excelColumns.push(
-        { header: 'Semáforo', key: 'traffic_light', width: 15 },
-        { header: 'Recomendaciones', key: 'recommendations', width: 40 },
-        { header: 'Se dio seguimiento', key: 'follow_up_given', width: 20 },
-        { header: 'Fecha del seguimiento', key: 'follow_up_date', width: 20 },
-        { header: 'Concluido', key: 'concluded_result_red_or_no', width: 15 },
-        { header: 'Soluciones', key: 'solutions', width: 40 },
-        { header: 'Informe Preliminar', key: 'preliminary_report', width: 40 },
-        { header: 'Informe Completo', key: 'full_report', width: 40 },
+        { header: 'Horas Totales', key: 'total_hours', width: 15 },
+        { header: 'Recibe Beneficio', key: 'receives_benefit', width: 20 },
+        { header: 'Número de Beneficio', key: 'benefit_number', width: 20 },
+        { header: 'Libras Agrícolas', key: 'agricultural_pounds', width: 20 },
+        { header: 'Costo Unitario Q', key: 'unit_cost_q', width: 20 },
+        { header: 'Costo Unitario USD', key: 'unit_cost_usd', width: 20 },
+        { header: 'Bolsas de Víveres', key: 'viveres_bags', width: 20 },
+        { header: 'Costo Promedio 30lbs', key: 'average_cost_30lbs', width: 20 },
+        { header: 'Picking GTQ', key: 'picking_gtq', width: 15 },
+        { header: 'Picking 5lbs', key: 'picking_5lbs', width: 15 },
+        { header: 'Monto Total Q', key: 'total_amount_q', width: 20 },
+        { header: 'Número de Grupo', key: 'group_number', width: 20 },
       )
 
-      // Transform data for Excel
       const excelData = data.map(row => {
-        const extras = boardExtras[row.submission_id]
-        const transformedRow: any = {
+        const extras = volunteerExtras[row.submission_id]
+        const transformedRow: Record<string, unknown> = {
           user_name: row.user_name || '',
           user_email: row.user_email || '',
           submitted_at: new Date(row.submitted_at).toLocaleDateString('es-GT'),
         }
 
-        // Add dynamic columns
         columns.forEach(col => {
           transformedRow[col.id] = formatCellValue(row[col.id], col.type)
         })
 
-        // Add board extras
-        transformedRow.traffic_light = extras?.traffic_light || ''
-        transformedRow.recommendations = extras?.recommendations || ''
-        transformedRow.follow_up_given = extras?.follow_up_given ? 'Sí' : 'No'
-        transformedRow.follow_up_date = extras?.follow_up_date || ''
-        transformedRow.concluded_result_red_or_no = extras?.concluded_result_red_or_no || ''
-        transformedRow.solutions = extras?.solutions || ''
-        transformedRow.preliminary_report = extras?.preliminary_report || ''
-        transformedRow.full_report = extras?.full_report || ''
+        transformedRow.total_hours = extras?.total_hours || ''
+        transformedRow.receives_benefit = extras?.receives_benefit ? 'Sí' : 'No'
+        transformedRow.benefit_number = extras?.benefit_number || ''
+        transformedRow.agricultural_pounds = extras?.agricultural_pounds || ''
+        transformedRow.unit_cost_q = extras?.unit_cost_q || ''
+        transformedRow.unit_cost_usd = extras?.unit_cost_usd || ''
+        transformedRow.viveres_bags = extras?.viveres_bags || ''
+        transformedRow.average_cost_30lbs = extras?.average_cost_30lbs || ''
+        transformedRow.picking_gtq = extras?.picking_gtq || ''
+        transformedRow.picking_5lbs = extras?.picking_5lbs || ''
+        transformedRow.total_amount_q = extras?.total_amount_q || ''
+        transformedRow.group_number = extras?.group_number || ''
 
         return transformedRow
       })
 
-      // Export to Excel
       exportToExcel({
-        fileName: 'tablero_consolidado_auditorias',
-        sheetName: 'Auditorías',
+        fileName: 'tablero_voluntarios_pagina',
+        sheetName: 'Voluntarios',
         columns: excelColumns,
         data: excelData,
         includeTimestamp: true,
       })
 
-      toast.success('Archivo Excel descargado')
+      toast.success('Archivo Excel descargado (página actual)')
     } catch {
       toast.error('Error al exportar el archivo')
     }
@@ -238,7 +236,7 @@ export function TableroConsolidadoSection() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando datos del tablero consolidado...</p>
+          <p className="text-gray-600">Cargando datos de voluntariado...</p>
         </div>
       </div>
     )
@@ -246,58 +244,30 @@ export function TableroConsolidadoSection() {
 
   return (
     <div className="space-y-6">
-      {/* Header con título y tabs */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tablero Consolidado</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Tablero de Voluntariado</h1>
           <p className="text-muted-foreground">
-            Consolidado de Auditorías 2025
+            Consolidado de Voluntarios 2025
           </p>
         </div>
       </div>
 
-      {/* Tabs navigation */}
-      <div className="flex gap-2 border-b">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p className="text-gray-600">
+          Mostrando página {currentPage} de {totalPages} ({totalRecords} registros totales)
+        </p>
         <Button
-          variant={viewMode === 'table' ? 'default' : 'ghost'}
-          onClick={() => setViewMode('table')}
+          onClick={handleExportToExcel}
+          variant="outline"
           className="gap-2"
+          disabled={data.length === 0}
         >
-          <Table className="w-5 h-5" />
-          Tabla de Datos
-        </Button>
-        <Button
-          variant={viewMode === 'stats' ? 'default' : 'ghost'}
-          onClick={() => setViewMode('stats')}
-          className="gap-2"
-        >
-          <BarChart3 className="w-5 h-5" />
-          Estadísticas Semáforo
+          <FileSpreadsheet className="w-4 h-4" />
+          Exportar Página Actual
         </Button>
       </div>
 
-      {/* Content based on selected tab */}
-      {viewMode === 'stats' ? (
-        <SemaforoEstadisticas />
-      ) : (
-        <>
-          {/* Header de tabla con botón exportar */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <p className="text-gray-600">
-              Mostrando página {currentPage} de {totalPages} ({totalRecords} registros totales)
-            </p>
-            <Button
-              onClick={handleExportToExcel}
-              variant="outline"
-              className="gap-2"
-              disabled={data.length === 0}
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              Exportar Página Actual
-            </Button>
-          </div>
-
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -307,16 +277,15 @@ export function TableroConsolidadoSection() {
           <CardContent>
             <div className="text-2xl font-bold">{totalRecords}</div>
             <p className="text-xs text-muted-foreground">
-              auditorías registradas
+              voluntariados registrados
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Tabla de Datos - Auditorías</CardTitle>
+          <CardTitle>Tabla de Datos - Voluntariado</CardTitle>
           <CardDescription>
             Página {currentPage} de {totalPages}
           </CardDescription>
@@ -340,21 +309,25 @@ export function TableroConsolidadoSection() {
                       {col.title}
                     </th>
                   ))}
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Semáforo</th>
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Recomendaciones</th>
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Se dio seguimiento</th>
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Fecha del seguimiento</th>
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Concluido</th>
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Soluciones</th>
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Informe Preliminar</th>
-                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Informe Completo</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Horas Totales</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Recibe Beneficio</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Número de Beneficio</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Libras Agrícolas</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Costo Unitario Q</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Costo Unitario USD</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Bolsas de Víveres</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Costo Promedio 30lbs</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Picking GTQ</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Picking 5lbs</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Monto Total Q</th>
+                  <th className="text-left p-3 font-semibold text-xs whitespace-nowrap">Número de Grupo</th>
                   <th className="text-left p-3 font-semibold text-xs whitespace-nowrap sticky right-0 bg-gray-50 z-10">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length + 12} className="text-center p-8 text-gray-500">
+                    <td colSpan={columns.length + 15} className="text-center p-8 text-gray-500">
                       <div className="flex flex-col items-center gap-2">
                         <FileText className="w-12 h-12 text-gray-300" />
                         <p>No se encontraron envíos</p>
@@ -378,38 +351,42 @@ export function TableroConsolidadoSection() {
                           {formatCellValue(row[col.id], col.type)}
                         </td>
                       ))}
-                      {/* Columnas extras */}
                       <td className="p-3 text-xs">
-                        {boardExtras[row.submission_id]?.traffic_light && (
-                          <span className={`px-2 py-1 rounded text-xs ${getTrafficLightBadgeClasses(boardExtras[row.submission_id].traffic_light)}`}>
-                            {boardExtras[row.submission_id].traffic_light}
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-3 text-xs max-w-xs truncate" title={boardExtras[row.submission_id]?.recommendations || '-'}>
-                        {boardExtras[row.submission_id]?.recommendations || '-'}
+                        {volunteerExtras[row.submission_id]?.total_hours || '-'}
                       </td>
                       <td className="p-3 text-xs">
-                        {boardExtras[row.submission_id]?.follow_up_given ? 'Sí' : 'No'}
+                        {volunteerExtras[row.submission_id]?.receives_benefit ? 'Sí' : 'No'}
                       </td>
-                      <td className="p-3 text-xs whitespace-nowrap">
-                        {boardExtras[row.submission_id]?.follow_up_date
-                          ? new Date(boardExtras[row.submission_id].follow_up_date!).toLocaleDateString('es-GT')
-                          : '-'}
+                      <td className="p-3 text-xs max-w-xs truncate" title={volunteerExtras[row.submission_id]?.benefit_number || '-'}>
+                        {volunteerExtras[row.submission_id]?.benefit_number || '-'}
                       </td>
-                      <td className="p-3 text-xs max-w-xs truncate" title={boardExtras[row.submission_id]?.concluded_result_red_or_no || '-'}>
-                        {boardExtras[row.submission_id]?.concluded_result_red_or_no || '-'}
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.agricultural_pounds || '-'}
                       </td>
-                      <td className="p-3 text-xs max-w-xs truncate" title={boardExtras[row.submission_id]?.solutions || '-'}>
-                        {boardExtras[row.submission_id]?.solutions || '-'}
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.unit_cost_q || '-'}
                       </td>
-                      <td className="p-3 text-xs max-w-xs truncate" title={boardExtras[row.submission_id]?.preliminary_report || '-'}>
-                        {boardExtras[row.submission_id]?.preliminary_report || '-'}
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.unit_cost_usd || '-'}
                       </td>
-                      <td className="p-3 text-xs max-w-xs truncate" title={boardExtras[row.submission_id]?.full_report || '-'}>
-                        {boardExtras[row.submission_id]?.full_report || '-'}
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.viveres_bags || '-'}
                       </td>
-                      {/* Columna de acciones */}
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.average_cost_30lbs || '-'}
+                      </td>
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.picking_gtq || '-'}
+                      </td>
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.picking_5lbs || '-'}
+                      </td>
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.total_amount_q || '-'}
+                      </td>
+                      <td className="p-3 text-xs">
+                        {volunteerExtras[row.submission_id]?.group_number || '-'}
+                      </td>
                       <td className="p-3 text-xs sticky right-0 bg-white hover:bg-gray-50">
                         <Button
                           size="sm"
@@ -503,18 +480,14 @@ export function TableroConsolidadoSection() {
         </div>
       )}
 
-          {/* Diálogo de edición */}
-          {selectedSubmissionId && (
-            <EditBoardExtrasDialog
-              open={editDialogOpen}
-              onOpenChange={setEditDialogOpen}
-              submissionId={selectedSubmissionId}
-              onSaved={handleExtrasSaved}
-            />
-          )}
-        </>
+      {selectedSubmissionId && (
+        <EditVolunteerExtrasDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          submissionId={selectedSubmissionId}
+          onSaved={handleExtrasSaved}
+        />
       )}
     </div>
   )
 }
-

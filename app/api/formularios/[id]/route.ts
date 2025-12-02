@@ -202,13 +202,13 @@ export async function PUT(
       )
     }
 
-    // Solo el creador puede modificar el formulario
-    if (formCheck.created_by !== user.id) {
-      return NextResponse.json(
-        { error: 'No tienes permiso para modificar este formulario' },
-        { status: 403 }
-      )
-    }
+    // ! Solo el creador puede modificar el formulario
+    // if (formCheck.created_by !== user.id) {
+    //   return NextResponse.json(
+    //     { error: 'No tienes permiso para modificar este formulario' },
+    //     { status: 403 }
+    //   )
+    // }
 
     // Caso 1: Solo actualizar is_active (toggle activate/deactivate)
     if ('is_active' in body && !body.sections && !body.name) {      

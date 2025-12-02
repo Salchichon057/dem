@@ -73,12 +73,13 @@ export async function GET(
                         formTemplate.section_location === 'perfil-comunitario' ? 'community_profile_answers' :
                         'embracing_legends_answers'
 
-    // 4. Obtener TODAS las submissions del formulario
-    const { data: submissions, error: submissionsError } = await supabase
+    // 4. Obtener TODAS las submissions del formulario (sin límite)
+    const { data: submissions, error: submissionsError, count } = await supabase
       .from(submissionsTable)
-      .select('id, submitted_at, user_id')
+      .select('id, submitted_at, user_id', { count: 'exact' })
       .eq('form_template_id', formId)
       .order('submitted_at', { ascending: false })
+      .limit(10000)
 
     if (submissionsError) {
       console.error('❌ Error al obtener submissions:', submissionsError)
@@ -138,7 +139,7 @@ export async function GET(
     
     // CRÍTICO: Hacer múltiples queries si hay más de 1000 respuestas esperadas
     // Supabase tiene límite de 1000 por defecto
-    const batchSize = 20 // Procesar 20 submissions a la vez para evitar límite
+    const batchSize = 100 // Procesar 100 submissions a la vez
     let allAnswers: any[] = []
     
     for (let i = 0; i < submissionIds.length; i += batchSize) {
@@ -147,6 +148,7 @@ export async function GET(
         .from(answersTable)
         .select('submission_id, question_id, answer_value')
         .in('submission_id', batch)
+        .limit(1000)
       
       if (batchError) {
         console.error(`❌ Error en batch ${i}-${i+batchSize}:`, batchError)

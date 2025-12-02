@@ -147,7 +147,6 @@ const menuItems = [
     title: "Abrazando Leyendas",
     icon: Heart,
   },
-  // Voluntariado - Subniveles en sidebar (Estadística + Formularios) - ESTRUCTURA ORIGINAL CORRECTA
   {
     id: "voluntariado",
     title: "Voluntariado",
@@ -161,6 +160,11 @@ const menuItems = [
       {
         id: "voluntariado-formularios",
         title: "Formularios",
+        icon: FileText,
+      },
+      {
+        id: "voluntariado-tablero",
+        title: "Tablero Consolidado",
         icon: FileText,
       },
     ],
