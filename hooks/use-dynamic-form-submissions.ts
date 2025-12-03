@@ -40,6 +40,7 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(50)
   const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   
   // Filters
   const [searchTerm, setSearchTerm] = useState('')
@@ -71,25 +72,45 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
     }
   }
 
-  // Load submissions when form is selected
+  // Load submissions when form is selected or page changes
   useEffect(() => {
     if (selectedFormId && selectedFormId !== 'none') {
+      fetchCount()
       fetchSubmissions()
     } else {
       setColumns([])
       setData([])
       setFilteredData([])
       setFormName('')
+      setTotalCount(0)
+      setCurrentPage(1)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFormId])
+  }, [selectedFormId, currentPage])
+
+  const fetchCount = async () => {
+    if (!selectedFormId || selectedFormId === 'none') return
+    
+    try {
+      const response = await fetch(`/api/submissions/${selectedFormId}/count`)
+      const result = await response.json()
+      
+      if (response.ok) {
+        setTotalCount(result.count)
+        const total = Math.ceil(result.count / itemsPerPage)
+        setTotalPages(total || 1)
+      }
+    } catch {
+      toast.error('Error al obtener conteo')
+    }
+  }
 
   const fetchSubmissions = async () => {
     if (!selectedFormId || selectedFormId === 'none') return
     
     try {
       setLoading(true)
-      const response = await fetch(`/api/submissions/${selectedFormId}`)
+      const response = await fetch(`/api/submissions/${selectedFormId}/paginated?page=${currentPage}&limit=${itemsPerPage}`)
       const result = await response.json()
       
       if (response.ok) {
@@ -99,15 +120,17 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
         setFilteredData(result.data)
         
         // Initialize column visibility (all visible by default)
-        const initialVisibility: Record<string, boolean> = {
-          user_name: true,
-          user_email: true,
-          submitted_at: true,
+        if (result.columns.length > 0) {
+          const initialVisibility: Record<string, boolean> = {
+            user_name: true,
+            user_email: true,
+            submitted_at: true,
+          }
+          result.columns.forEach((col: ColumnDefinition) => {
+            initialVisibility[col.id] = true
+          })
+          setVisibleColumns(initialVisibility)
         }
-        result.columns.forEach((col: ColumnDefinition) => {
-          initialVisibility[col.id] = true
-        })
-        setVisibleColumns(initialVisibility)
         
       } else {
         toast.error('Error al cargar envíos')
@@ -119,11 +142,11 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
     }
   }
 
-  // Search and date filters
+  // Client-side filters for current page data
   useEffect(() => {
     let filtered = data
     
-    // Apply search filter
+    // Apply search filter (only on current page data)
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase()
       filtered = filtered.filter(row => {
@@ -156,19 +179,10 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
     }
     
     setFilteredData(filtered)
-    setCurrentPage(1) // Reset to page 1 on filter change
   }, [searchTerm, selectedYear, selectedMonth, data, columns])
 
-  // Pagination
-  useEffect(() => {
-    const total = Math.ceil(filteredData.length / itemsPerPage)
-    setTotalPages(total || 1)
-  }, [filteredData, itemsPerPage])
-
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
+  // Use server-side pagination (data is already paginated)
+  const paginatedData = filteredData
 
   // Column visibility helpers
   const toggleColumn = (column: string) => {
@@ -199,6 +213,7 @@ export function useDynamicFormSubmissions({ sectionLocation }: UseDynamicFormSub
     currentPage,
     totalPages,
     itemsPerPage,
+    totalCount,
     searchTerm,
     selectedYear,
     selectedMonth,

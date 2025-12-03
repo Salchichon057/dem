@@ -60,7 +60,7 @@ export default function DynamicFormSubmissionsTable({
     loading,
     currentPage,
     totalPages,
-    itemsPerPage,
+    totalCount,
     searchTerm,
     selectedYear,
     selectedMonth,
@@ -338,7 +338,7 @@ export default function DynamicFormSubmissionsTable({
           <h2 className="text-2xl font-bold">Tabla de Datos - {sectionTitle}</h2>
           <p className="text-muted-foreground">
             {selectedFormId !== 'none' 
-              ? `${filteredData.length} envíos encontrados` 
+              ? `${totalCount} envíos encontrados` 
               : 'Selecciona un formulario para ver los datos'}
           </p>
         </div>
@@ -654,7 +654,7 @@ export default function DynamicFormSubmissionsTable({
       {!loading && paginatedData.length > 0 && totalPages > 1 && (
         <div className="flex items-center justify-between px-2 py-4">
           <div className="text-sm text-muted-foreground">
-            Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredData.length)} de {filteredData.length} registros
+            Mostrando página {currentPage} de {totalPages} ({totalCount} registros totales)
           </div>
           
           <div className="flex items-center gap-1">
