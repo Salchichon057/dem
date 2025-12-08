@@ -11,11 +11,13 @@ import { FormSectionType } from '@/lib/types'
  */
 export async function POST(request: NextRequest) {
   try {
-    const { supabase, user, error: authError } = await withAuth()
-    if (authError) return authError
+    // Intentar autenticar, pero no fallar si no hay usuario (para formularios públicos)
+    const authResult = await withAuth()
+    const authenticatedSupabase = authResult.error ? null : authResult.supabase
+    const authenticatedUser = authResult.error ? null : authResult.user
 
     const body = await request.json()
-    const { form_template_id, answers } = body
+    const { form_template_id, answers, isPublic } = body
 
     if (!form_template_id || !answers) {
       return NextResponse.json(
@@ -24,10 +26,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Obtener el section_location del formulario
+    // Para formularios públicos, usar cliente sin auth
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = isPublic 
+      ? createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          { auth: { autoRefreshToken: false, persistSession: false } }
+        )
+      : authenticatedSupabase
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
+
+    // Obtener el section_location y validar si es público
     const { data: formTemplate, error: formError } = await supabase
       .from('form_templates')
-      .select('section_location')
+      .select('section_location, is_public, is_active')
       .eq('id', form_template_id)
       .single()
 
@@ -35,6 +54,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Formulario no encontrado' },
         { status: 404 }
+      )
+    }
+
+    // Si se intenta enviar como público, validar que realmente sea público y activo
+    if (isPublic && (!formTemplate.is_public || !formTemplate.is_active)) {
+      return NextResponse.json(
+        { error: 'Este formulario no acepta envíos públicos' },
+        { status: 403 }
       )
     }
 
@@ -48,9 +75,10 @@ export async function POST(request: NextRequest) {
     const sectionLocation = formTemplate.section_location as FormSectionType
 
     // Crear la submission en la tabla correspondiente
+    // user_id será null para formularios públicos
     const submission = await createSubmission(sectionLocation, {
       form_template_id,
-      user_id: user.id,
+      user_id: isPublic ? null : (authenticatedUser?.id ?? null),
       submitted_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })

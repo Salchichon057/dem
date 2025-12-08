@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Eye, Edit, Trash2, Loader2, Search, Plus, AlertCircle, Inbox, Globe, Pause, FileText } from 'lucide-react'
+import { Eye, Edit, Trash2, Loader2, Search, Plus, AlertCircle, Inbox, Globe, Lock, Pause, FileText } from 'lucide-react'
 import { authFetch } from '@/lib/auth-fetch'
 import { FormSectionType, FormListResponse, FormTemplateWithQuestions } from '@/lib/types'
 import Modal from '@/components/ui/Modal'
+import PublicFormConfigModal from './PublicFormConfigModal'
 
 interface FormTemplate {
   id: string
@@ -34,6 +35,21 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loadingFormId, setLoadingFormId] = useState<string | null>(null)
+  
+  // Estado para modal de configuración pública
+  const [publicConfigModal, setPublicConfigModal] = useState<{
+    isOpen: boolean
+    formId: string
+    formName: string
+    isPublic: boolean
+    slug: string
+  }>({
+    isOpen: false,
+    formId: '',
+    formName: '',
+    isPublic: false,
+    slug: ''
+  })
   
   // Estado para modales
   const [modal, setModal] = useState<{
@@ -311,11 +327,28 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                   </div>
                   
                   <div className="flex gap-1 ml-2">
-                    {form.is_public && (
-                      <span className="text-green-500" title="Público">
+                    {/* Botón de configuración de acceso (siempre visible) */}
+                    <button
+                      onClick={() => setPublicConfigModal({
+                        isOpen: true,
+                        formId: form.id,
+                        formName: form.name,
+                        isPublic: form.is_public,
+                        slug: form.slug
+                      })}
+                      className={`p-1 rounded transition-colors ${
+                        form.is_public 
+                          ? 'text-green-500 hover:text-green-600 hover:bg-green-50' 
+                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                      }`}
+                      title={form.is_public ? 'Público - Configurar acceso' : 'Privado - Configurar acceso'}
+                    >
+                      {form.is_public ? (
                         <Globe className="w-4 h-4" />
-                      </span>
-                    )}
+                      ) : (
+                        <Lock className="w-4 h-4" />
+                      )}
+                    </button>
                     {!form.is_active && (
                       <span className="text-gray-400" title="Inactivo">
                         <Pause className="w-4 h-4" />
@@ -414,7 +447,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modal de confirmación */}
       <Modal
         isOpen={modal.isOpen}
         onClose={() => setModal({ ...modal, isOpen: false })}
@@ -422,6 +455,23 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
         title={modal.title}
         message={modal.message}
         onConfirm={modal.onConfirm}
+      />
+
+      {/* Modal de configuración pública */}
+      <PublicFormConfigModal
+        isOpen={publicConfigModal.isOpen}
+        onClose={() => setPublicConfigModal({ ...publicConfigModal, isOpen: false })}
+        formId={publicConfigModal.formId}
+        formName={publicConfigModal.formName}
+        isPublic={publicConfigModal.isPublic}
+        slug={publicConfigModal.slug}
+        onUpdate={(newIsPublic) => {
+          setForms(forms.map(f => 
+            f.id === publicConfigModal.formId 
+              ? { ...f, is_public: newIsPublic } 
+              : f
+          ))
+        }}
       />
     </div>
   )

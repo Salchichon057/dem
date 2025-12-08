@@ -9,7 +9,7 @@ import { FormSectionType, SUBMISSION_TABLES_MAP } from '@/lib/types'
 
 interface SubmissionData {
   form_template_id: string
-  user_id: string
+  user_id: string | null
   submitted_at?: string
   updated_at?: string
 }

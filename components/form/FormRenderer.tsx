@@ -12,6 +12,7 @@ import { useUser } from '@/hooks/use-user'
 interface FormRendererProps {
   form: FormTemplateWithQuestions
   onSuccess?: () => void
+  isPublic?: boolean // Indica si es un formulario público (sin autenticación)
 }
 
 // Mapeo de FormSectionType a las keys de STORAGE_BUCKETS
@@ -24,7 +25,7 @@ const SECTION_TO_BUCKET_KEY: Record<FormSectionType, keyof typeof STORAGE_BUCKET
   'voluntariado': 'FORM_VOLUNTARIADO',
 }
 
-export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
+export default function FormRenderer({ form, onSuccess, isPublic = false }: FormRendererProps) {
   const { user } = useUser()
   const [answers, setAnswers] = useState<Record<string, unknown>>({})
   const [isPending, startTransition] = useTransition()
@@ -45,11 +46,15 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
     try {
       setUploadingFiles(prev => ({ ...prev, [questionId]: true }))
       
-      // Obtener userId del usuario autenticado
-      const userId = user?.id
-      if (!userId) {
+      // Obtener userId del usuario autenticado (puede ser null en formularios públicos)
+      const userId = user?.id || 'anonymous'
+      
+      // Para formularios públicos, solo almacenar el archivo temporalmente
+      if (isPublic && !user?.id) {
+        // En público, guardamos el archivo pendiente para subirlo después del submit
+        setPendingFiles(prev => ({ ...prev, [questionId]: file }))
         setUploadingFiles(prev => ({ ...prev, [questionId]: false }))
-        return null
+        return `pending:${file.name}` // Marcador temporal
       }
       
       // Validar que el form tenga section_location
@@ -263,6 +268,7 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
         // PASO 3: Preparar el payload
         const payload = {
           form_template_id: form.id,
+          isPublic: isPublic, // 🔥 Indicar si es público para que el backend valide y use user_id null
           answers: Object.entries(finalAnswers).map(([questionId, answerValue]) => ({
             question_id: questionId,
             answer_value: {
@@ -270,6 +276,8 @@ export default function FormRenderer({ form, onSuccess }: FormRendererProps) {
             }
           }))
         }
+        
+        // Siempre usar /api/submissions (maneja tanto públicos como privados)
         const response = await fetch('/api/submissions', {
           method: 'POST',
           headers: {
