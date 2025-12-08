@@ -9,9 +9,10 @@ interface SuccessModalProps {
   message: string
   onRedirect?: () => void  // Callback opcional antes de redirigir
   redirectPath?: string    // Ruta personalizada de redirección
+  confirmText?: string     // Texto personalizado para el botón
 }
 
-export default function SuccessModal({ isOpen, onClose, message, onRedirect, redirectPath }: SuccessModalProps) {
+export default function SuccessModal({ isOpen, onClose, message, onRedirect, redirectPath, confirmText = 'Volver al Panel' }: SuccessModalProps) {
   const router = useRouter()
 
   const handleClose = () => {
@@ -32,7 +33,7 @@ export default function SuccessModal({ isOpen, onClose, message, onRedirect, red
       type="success"
       title="¡Formulario Enviado!"
       message={message}
-      confirmText="Volver al Panel"
+      confirmText={confirmText}
       onConfirm={handleClose}
       showCloseButton={true}
     />

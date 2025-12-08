@@ -231,20 +231,20 @@ export default function PublicFormConfigModal({
           >
             Cancelar
           </Button>
-          <Button
+          <button
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-[#e6235a] hover:bg-[#c91d4d]"
+            className="btn-primary px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block" />
                 Guardando...
               </>
             ) : (
               'Guardar Cambios'
             )}
-          </Button>
+          </button>
         </div>
       </div>
     </div>

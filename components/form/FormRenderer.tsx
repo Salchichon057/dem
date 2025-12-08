@@ -993,6 +993,7 @@ export default function FormRenderer({ form, onSuccess, isPublic = false }: Form
           }
         }}
         message="Tu formulario ha sido enviado exitosamente. Gracias por tu tiempo."
+        confirmText={isPublic ? "Cerrar" : "Volver al Panel"}
       />
       
       <ErrorModal
