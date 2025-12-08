@@ -34,15 +34,24 @@ export default async function PublicFormPage({ params }: PageProps) {
 
   if (!form) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4">
         <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Formulario no encontrado</h1>
+          <div className="mb-6 flex justify-center">
+            <div className="rounded-full bg-red-100 p-3">
+              <svg className="w-16 h-16 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Formulario no disponible
+          </h1>
           <p className="text-gray-600 mb-6">
-            Este formulario no existe o no está disponible públicamente.
+            Este formulario no existe, no está disponible públicamente o ha sido desactivado.
           </p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
