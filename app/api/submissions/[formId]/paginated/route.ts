@@ -89,12 +89,14 @@ export async function GET(
       })
     }
 
-    const userIds = [...new Set(submissions.map(s => s.user_id))]
+    const userIds = [...new Set(submissions.map(s => s.user_id))].filter(id => id !== null)
+    
+    
     const { data: users } = await supabase
       .from('users')
       .select('id, name, email')
       .in('id', userIds)
-    
+        
     const usersMap = new Map(users?.map(u => [u.id, u]) || [])
 
     const { data: questions } = await supabase
@@ -135,6 +137,13 @@ export async function GET(
     const data = submissions.map((submission: any) => {
       const user = usersMap.get(submission.user_id)
       const submissionAnswers = answersBySubmission.get(submission.id) || new Map()
+
+      // console.log(`📊 [PAGINATED] Procesando submission ${submission.id}:`, {
+      //   user_id: submission.user_id,
+      //   user_found: !!user,
+      //   user_name: user?.name,
+      //   user_email: user?.email
+      // })
 
       const row: any = {
         submission_id: submission.id,

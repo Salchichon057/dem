@@ -276,6 +276,14 @@ export default function FormRenderer({ form, onSuccess, isPublic = false }: Form
             }
           }))
         }
+
+        console.log('📤 [FORM RENDERER] Enviando formulario:', {
+          form_id: form.id,
+          form_name: form.name,
+          isPublic,
+          answersCount: payload.answers.length,
+          currentUser: user?.email || 'No user'
+        })
         
         // Siempre usar /api/submissions (maneja tanto públicos como privados)
         const response = await fetch('/api/submissions', {
@@ -283,6 +291,7 @@ export default function FormRenderer({ form, onSuccess, isPublic = false }: Form
           headers: {
             'Content-Type': 'application/json'
           },
+          credentials: 'include', // Incluir cookies para autenticación
           body: JSON.stringify(payload)
         })
 

@@ -16,8 +16,21 @@ export async function POST(request: NextRequest) {
     const authenticatedSupabase = authResult.error ? null : authResult.supabase
     const authenticatedUser = authResult.error ? null : authResult.user
 
+    // console.log('🔍 [SUBMISSIONS] Auth Result:', {
+    //   hasError: !!authResult.error,
+    //   errorMessage: authResult.error,
+    //   userId: authenticatedUser?.id,
+    //   userEmail: authenticatedUser?.email
+    // })
+
     const body = await request.json()
     const { form_template_id, answers, isPublic } = body
+
+    // console.log('📋 [SUBMISSIONS] Request Data:', {
+    //   form_template_id,
+    //   isPublic,
+    //   answersCount: answers?.length
+    // })
 
     if (!form_template_id || !answers) {
       return NextResponse.json(
@@ -74,14 +87,36 @@ export async function POST(request: NextRequest) {
 
     const sectionLocation = formTemplate.section_location as FormSectionType
 
+    // Si no es público, validar que haya usuario autenticado
+    if (!isPublic && !authenticatedUser?.id) {
+      // console.log('❌ [SUBMISSIONS] No hay usuario autenticado para formulario privado')
+      return NextResponse.json(
+        { error: 'Debe iniciar sesión para enviar este formulario' },
+        { status: 401 }
+      )
+    }
+
+    const finalUserId = isPublic ? null : authenticatedUser!.id
+    // console.log('✅ [SUBMISSIONS] Creando submission con:', {
+    //   sectionLocation,
+    //   form_template_id,
+    //   user_id: finalUserId,
+    //   isPublic
+    // })
+
     // Crear la submission en la tabla correspondiente
-    // user_id será null para formularios públicos
+    // user_id será null solo para formularios públicos
     const submission = await createSubmission(sectionLocation, {
       form_template_id,
-      user_id: isPublic ? null : (authenticatedUser?.id ?? null),
+      user_id: finalUserId,
       submitted_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
+
+    // console.log('💾 [SUBMISSIONS] Submission creada:', {
+    //   submission_id: submission.id,
+    //   user_id: submission.user_id
+    // })
 
     // Preparar las respuestas
     const answersData = answers.map((answer: any) => ({
