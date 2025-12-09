@@ -2,9 +2,10 @@
 
 import { FormRenderer } from '@/components/form'
 import { useRouter } from 'next/navigation'
+import type { FormTemplateWithQuestions } from '@/lib/types'
 
 interface PublicFormWrapperProps {
-  form: any
+  form: FormTemplateWithQuestions
   slug: string
 }
 
