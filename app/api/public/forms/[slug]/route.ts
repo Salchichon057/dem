@@ -1,24 +1,16 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const supabase = await createClient()
     const { slug } = await params
 
     console.log('🔍 [PUBLIC API] Obteniendo formulario por slug:', slug)
+    console.log('🔑 [PUBLIC API] Supabase client created')
 
     // Obtener formulario con secciones y preguntas usando JOIN desde form_templates
     // NOTA: Las opciones de las preguntas están en el campo 'config' (JSONB), no en una tabla separada

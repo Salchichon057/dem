@@ -67,6 +67,15 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
+  // Debug log para producción
+  if (request.nextUrl.pathname.startsWith('/form')) {
+    console.log('🔍 [MIDDLEWARE] Form route detected:', {
+      pathname: request.nextUrl.pathname,
+      isPublicRoute,
+      hasAuth: !!data
+    });
+  }
+
   // Manejar la ruta raíz '/'
   if (request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone();

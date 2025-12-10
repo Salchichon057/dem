@@ -1,4 +1,3 @@
- 
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth-server'
 import type { Beneficiary, BeneficiaryFilters, CreateBeneficiaryInput } from '@/lib/types'
