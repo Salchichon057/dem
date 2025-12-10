@@ -3,6 +3,7 @@ import PublicFormWrapper from '@/components/form/PublicFormWrapper'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -10,20 +11,104 @@ interface PageProps {
 
 async function getPublicForm(slug: string) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/public/forms/${slug}`, {
-      cache: 'no-store'
-    })
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     
-    if (!response.ok) {
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+
+    console.log('🔍 [PUBLIC PAGE] Fetching form by slug:', slug)
+
+    const { data: formWithSections, error: formError } = await supabase
+      .from('form_templates')
+      .select(`
+        id,
+        name,
+        description,
+        slug,
+        is_public,
+        is_active,
+        section_location,
+        version,
+        created_by,
+        created_at,
+        updated_at,
+        form_sections (
+          id,
+          title,
+          description,
+          order_index,
+          form_template_id,
+          questions (
+            id,
+            form_template_id,
+            section_id,
+            question_type_id,
+            title,
+            help_text,
+            is_required,
+            order_index,
+            config,
+            created_at,
+            updated_at,
+            question_types (
+              id,
+              code,
+              name,
+              description
+            )
+          )
+        )
+      `)
+      .eq('slug', slug)
+      .eq('is_public', true)
+      .eq('is_active', true)
+      .single()
+
+    if (formError || !formWithSections) {
+      console.error('❌ [PUBLIC PAGE] Form not found:', formError)
       return null
     }
-    
-    // La API ya devuelve el form directamente (no wrapeado en { form: ... })
-    const formData = await response.json()
-    return formData
+
+    console.log('✅ [PUBLIC PAGE] Form found:', formWithSections.name)
+
+    const sections = formWithSections.form_sections || []
+    const allQuestions = sections.flatMap((section: any) => 
+      (section.questions || []).map((q: any) => ({
+        ...q,
+        section_id: section.id
+      }))
+    )
+
+    return {
+      id: formWithSections.id,
+      slug: formWithSections.slug,
+      name: formWithSections.name,
+      description: formWithSections.description,
+      version: formWithSections.version,
+      is_active: formWithSections.is_active,
+      is_public: formWithSections.is_public,
+      section_location: formWithSections.section_location,
+      created_by: formWithSections.created_by,
+      created_at: formWithSections.created_at,
+      updated_at: formWithSections.updated_at,
+      sections: sections.map((section: any) => ({
+        id: section.id,
+        form_template_id: section.form_template_id,
+        title: section.title,
+        description: section.description,
+        order_index: section.order_index,
+        created_at: section.created_at,
+        questions: section.questions || []
+      })),
+      questions: allQuestions
+    }
   } catch (error) {
-    console.error('Error fetching public form:', error)
+    console.error('❌ [PUBLIC PAGE] Error fetching form:', error)
     return null
   }
 }
