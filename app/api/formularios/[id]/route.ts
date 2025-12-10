@@ -255,21 +255,136 @@ export async function PUT(
       )
     }
 
-    // Eliminar secciones y preguntas antiguas
-    await supabase
-      .from('questions')
-      .delete()
-      .eq('form_template_id', id)
-
-    await supabase
+    // SMART DIFF: En lugar de eliminar todo y recrear, hacemos un diff inteligente
+    // 1. Obtener secciones y preguntas actuales de la BD
+    const { data: existingSections, error: fetchSectionsError } = await supabase
       .from('form_sections')
-      .delete()
+      .select(`
+        id,
+        title,
+        description,
+        order_index,
+        questions (
+          id,
+          question_type_id,
+          title,
+          help_text,
+          is_required,
+          order_index,
+          config
+        )
+      `)
       .eq('form_template_id', id)
 
-    // Crear nuevas secciones y preguntas
-    if (body.sections && body.sections.length > 0) {
-      for (const section of body.sections) {
-        const { data: newSection, error: sectionError } = await supabase
+    if (fetchSectionsError) {
+      throw new Error(`Error al obtener secciones existentes: ${fetchSectionsError.message}`)
+    }
+
+    const existingSectionsMap = new Map(
+      (existingSections || []).map((s: { id: string }) => [s.id, s])
+    )
+    const incomingSections = body.sections || []
+    const incomingSectionsMap = new Map(
+      incomingSections
+        .filter((s: { id?: string }) => s.id)
+        .map((s: { id: string }) => [s.id, s])
+    )
+
+    // 2. Procesar secciones: UPDATE existentes, INSERT nuevas, DELETE eliminadas
+    for (const section of incomingSections) {
+      if (section.id && existingSectionsMap.has(section.id)) {
+        // UPDATE: Sección existente
+        const { error: updateSectionError } = await supabase
+          .from('form_sections')
+          .update({
+            title: section.title,
+            description: section.description,
+            order_index: section.order_index
+          })
+          .eq('id', section.id)
+
+        if (updateSectionError) {
+          throw new Error(`Error al actualizar sección ${section.id}: ${updateSectionError.message}`)
+        }
+
+        // Procesar preguntas de esta sección
+        const existingSection = existingSectionsMap.get(section.id) as { questions?: { id: string }[] }
+        const existingQuestions = existingSection.questions || []
+        const existingQuestionsMap = new Map(
+          existingQuestions.map((q: { id: string }) => [q.id, q])
+        )
+        const incomingQuestions = section.questions || []
+        const incomingQuestionsMap = new Map(
+          incomingQuestions
+            .filter((q: { id?: string }) => q.id)
+            .map((q: { id: string }) => [q.id, q])
+        )
+
+        // UPDATE o INSERT preguntas
+        for (const question of incomingQuestions) {
+          if (question.id && existingQuestionsMap.has(question.id)) {
+            // UPDATE: Pregunta existente
+            const { error: updateQuestionError } = await supabase
+              .from('questions')
+              .update({
+                question_type_id: question.question_type_id,
+                title: question.title,
+                help_text: question.help_text,
+                is_required: question.is_required,
+                order_index: question.order_index,
+                config: question.config || {}
+              })
+              .eq('id', question.id)
+
+            if (updateQuestionError) {
+              throw new Error(`Error al actualizar pregunta ${question.id}: ${updateQuestionError.message}`)
+            }
+          } else {
+            // INSERT: Pregunta nueva
+            const { error: insertQuestionError } = await supabase
+              .from('questions')
+              .insert({
+                form_template_id: id,
+                section_id: section.id,
+                question_type_id: question.question_type_id,
+                title: question.title,
+                help_text: question.help_text,
+                is_required: question.is_required,
+                order_index: question.order_index,
+                config: question.config || {}
+              })
+
+            if (insertQuestionError) {
+              throw new Error(`Error al insertar pregunta: ${insertQuestionError.message}`)
+            }
+          }
+        }
+
+        // DELETE preguntas que ya no existen en incoming
+        for (const existingQuestion of existingQuestions) {
+          if (!incomingQuestionsMap.has(existingQuestion.id)) {
+            const { error: deleteQuestionError } = await supabase
+              .from('questions')
+              .delete()
+              .eq('id', existingQuestion.id)
+
+            if (deleteQuestionError) {
+              return NextResponse.json(
+                { 
+                  error: 'No se puede eliminar una pregunta con respuestas asociadas',
+                  details: 'La pregunta que intentas eliminar tiene respuestas de usuarios. Para proteger los datos, no se puede eliminar.',
+                  questionId: existingQuestion.id,
+                  technicalDetails: deleteQuestionError.message
+                },
+                { status: 409 }
+              )
+            }
+          }
+        }
+
+      } else {
+        // INSERT: Sección nueva
+        const { data: newSection, error: insertSectionError } = await supabase
           .from('form_sections')
           .insert({
             form_template_id: id,
@@ -280,11 +395,11 @@ export async function PUT(
           .select()
           .single()
 
-        if (sectionError || !newSection) {
-          throw new Error(`Error al crear sección: ${sectionError?.message}`)
+        if (insertSectionError || !newSection) {
+          throw new Error(`Error al crear sección: ${insertSectionError?.message}`)
         }
 
-        // Crear preguntas de esta sección
+        // INSERT todas las preguntas de la nueva sección
         if (section.questions && section.questions.length > 0) {
           const questionsToInsert = section.questions.map((q: { question_type_id: string; title: string; help_text?: string; is_required: boolean; order_index: number; config?: Record<string, unknown> }) => ({
             form_template_id: id,
@@ -304,6 +419,28 @@ export async function PUT(
           if (questionsError) {
             throw new Error(`Error al crear preguntas: ${questionsError.message}`)
           }
+        }
+      }
+    }
+
+    // DELETE secciones que ya no existen en incoming
+    for (const existingSection of (existingSections || [])) {
+      if (!incomingSectionsMap.has(existingSection.id)) {
+        const { error: deleteSectionError } = await supabase
+          .from('form_sections')
+          .delete()
+          .eq('id', existingSection.id)
+
+        if (deleteSectionError) {
+          return NextResponse.json(
+            { 
+              error: 'No se puede eliminar una sección con preguntas asociadas',
+              details: 'La sección que intentas eliminar tiene preguntas. Elimina primero las preguntas o asegúrate de que no tengan respuestas.',
+              sectionId: existingSection.id,
+              technicalDetails: deleteSectionError.message
+            },
+            { status: 409 }
+          )
         }
       }
     }

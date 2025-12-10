@@ -134,14 +134,13 @@ export async function GET(
         error: 'Error al obtener preguntas del formulario',
         details: questionsError.message 
       }, { status: 500 })
+    }
+
     if (!questions || questions.length === 0) {
       console.log('⚠️ [PAGINATED] No se encontraron preguntas para el formulario:', formId, 'section:', formTemplate.section_location)
       
       // CASO ESPECIAL: Voluntariado - las preguntas no están en la tabla questions
       // pero las respuestas SÍ están en volunteer_answers con question_ids hardcodeados
-      if (formTemplate.section_location === 'voluntariado') {
-        console.log('🔧 [PAGINATED] Detectado voluntariado, usando estructura híbrida')
-        console.log('📋 [PAGINATED] Submissions a procesar:', submissions.length)
       if (formTemplate.section_location === 'voluntariado') {
         console.log('🔧 [PAGINATED] Usando estructura híbrida de voluntariado (answers + extras)')
         
