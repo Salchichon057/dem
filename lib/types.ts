@@ -299,6 +299,7 @@ export interface BeneficiaryStats {
   by_department_details: Record<string, DepartmentDetails>
   by_program: Record<string, number>
   average_age: number
+  by_bag?: Record<string, number>
 }
 
 // ============================================

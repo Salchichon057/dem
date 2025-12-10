@@ -15,7 +15,7 @@ import {
   TooltipItem,
 } from 'chart.js'
 import { Doughnut, Bar } from 'react-chartjs-2'
-import { Card, Grid, Metric, Text, Flex, Title as TremorTitle } from '@tremor/react'
+import { Grid, Metric, Text, Flex, Title as TremorTitle } from '@tremor/react'
 import GuatemalaMap from './guatemala-map'
 import BeneficiariesSummaryTable from './beneficiaries-summary-table'
 
@@ -176,6 +176,57 @@ export default function BeneficiariesCharts() {
     },
   }
 
+  // Datos para gráfico de bolsas
+  const bagData = Object.entries(stats.by_bag || {})
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+
+  const bagChartData = {
+    labels: bagData.map((item) => item.name),
+    datasets: [
+      {
+        label: 'Beneficiarios',
+        data: bagData.map((item) => item.value),
+        backgroundColor: '#f59e0b',
+        hoverBackgroundColor: '#d97706',
+        borderRadius: 6,
+        barThickness: 40,
+      },
+    ],
+  }
+
+  const bagChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y' as const,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1f2937',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: function (context: TooltipItem<'bar'>) {
+            return `${context.parsed.x} beneficiarios`
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: { color: '#e5e7eb' },
+        ticks: { font: { size: 12 } },
+      },
+      y: {
+        grid: { display: false },
+        ticks: { font: { size: 12 } },
+      },
+    },
+  }
+
   // Datos para gráfico de departamentos (top 10)
   const departmentData = Object.entries(stats.by_department || {})
     .map(([name, value]) => ({ name, value }))
@@ -231,24 +282,25 @@ export default function BeneficiariesCharts() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Gráficos y Estadísticas</h2>
-        <p className="text-muted-foreground">Resumen visual de beneficiarios</p>
-      </div>
+    
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold">Gráficos y Estadísticas</h2>
+          <p className="text-muted-foreground">Resumen visual de beneficiarios</p>
+        </div>
 
-      {/* Summary Cards */}
-      <Grid numItemsSm={2} numItemsLg={4} className="gap-6">
-        <Card>
+        {/* Summary Cards */}
+        <Grid numItemsSm={2} numItemsLg={4} className="gap-6">
+        <div className="border border-black rounded-md p-6">
           <Flex alignItems="start">
             <div className="truncate">
               <Text>Total Beneficiarios</Text>
               <Metric>{stats.total}</Metric>
             </div>
           </Flex>
-        </Card>
+        </div>
 
-        <Card>
+        <div className="border border-black rounded-md p-6">
           <Flex alignItems="start">
             <div className="truncate">
               <Text>Activos</Text>
@@ -256,9 +308,9 @@ export default function BeneficiariesCharts() {
               <Text className="text-xs text-gray-500">{activePercentage}% del total</Text>
             </div>
           </Flex>
-        </Card>
+        </div>
 
-        <Card>
+        <div className="border border-black rounded-md p-6">
           <Flex alignItems="start">
             <div className="truncate">
               <Text>Inactivos</Text>
@@ -266,9 +318,9 @@ export default function BeneficiariesCharts() {
               <Text className="text-xs text-gray-500">{inactivePercentage}% del total</Text>
             </div>
           </Flex>
-        </Card>
+        </div>
 
-        <Card>
+        <div className="border border-black rounded-md p-6">
           <Flex alignItems="start">
             <div className="truncate">
               <Text>Edad Promedio</Text>
@@ -276,52 +328,63 @@ export default function BeneficiariesCharts() {
               <Text className="text-xs text-gray-500">años</Text>
             </div>
           </Flex>
-        </Card>
+        </div>
       </Grid>
 
       {/* Maps and Charts Grid */}
       <Grid numItemsLg={2} className="gap-6">
         {/* Guatemala Map */}
-        <Card>
+        <div className="border border-black rounded-md p-6">
           <TremorTitle>Beneficiarios por Departamento</TremorTitle>
           <Text>Mapa interactivo de Guatemala</Text>
           <GuatemalaMap data={stats.by_department || {}} />
-        </Card>
+        </div>
 
         {/* Gender Distribution Chart */}
-        <Card>
+        <div className="border border-black rounded-md p-6">
           <TremorTitle>Distribución por Género</TremorTitle>
           <Text>Proporción de beneficiarios por género</Text>
           <div className="mt-6" style={{ height: '350px' }}>
             <Doughnut data={genderChartData} options={genderChartOptions} />
           </div>
-        </Card>
+        </div>
       </Grid>
 
       {/* Bar Charts Grid */}
       <Grid numItemsLg={2} className="gap-6">
         {/* Programs Bar Chart */}
-        <Card>
+        <div className="border border-black rounded-md p-6">
           <TremorTitle>Población por Programas</TremorTitle>
           <Text>Distribución de beneficiarios por tipo de programa</Text>
           <div className="mt-6" style={{ height: '400px' }}>
             <Bar data={programChartData} options={programChartOptions} />
           </div>
-        </Card>
+        </div>
 
         {/* Departments Bar Chart */}
-        <Card>
+        <div className="border border-black rounded-md p-6">
           <TremorTitle>Ranking por Departamento</TremorTitle>
           <Text>Departamentos con más beneficiarios</Text>
           <div className="mt-6" style={{ height: '400px' }}>
             <Bar data={departmentChartData} options={departmentChartOptions} />
           </div>
-        </Card>
+        </div>
       </Grid>
 
-      {/* Summary Table */}
-      <BeneficiariesSummaryTable stats={stats} />
-    </div>
+      {/* Bags Chart */}
+      {stats.by_bag && Object.keys(stats.by_bag).length > 0 && bagData.length > 0 && (
+        <div className="border border-black rounded-md p-6">
+          <TremorTitle>Distribución por Bolsa</TremorTitle>
+          <Text>Beneficiarios agrupados por tipo de bolsa</Text>
+          <div className="mt-6" style={{ height: '400px' }}>
+            <Bar data={bagChartData} options={bagChartOptions} />
+          </div>
+        </div>
+      )}
+
+        {/* Summary Table */}
+        <BeneficiariesSummaryTable stats={stats} />
+      </div>
   )
 }
 

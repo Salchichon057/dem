@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
           by_department: {},
           by_department_details: {},
           by_program: {},
-          average_age: 0
+          average_age: 0,
+          by_bag: {}
         } as BeneficiaryStats
       })
     }
@@ -89,6 +90,13 @@ export async function GET(request: NextRequest) {
     const total_age = beneficiaries.reduce((sum, b) => sum + b.age, 0)
     const average_age = Math.round(total_age / total)
 
+    // Por bolsas
+    const by_bag: Record<string, number> = {}
+    beneficiaries.forEach(b => {
+      const bagValue = b.bag || 'Sin asignar'
+      by_bag[bagValue] = (by_bag[bagValue] || 0) + 1
+    })
+
     const stats: BeneficiaryStats = {
       total,
       active,
@@ -100,7 +108,8 @@ export async function GET(request: NextRequest) {
       by_department,
       by_department_details,
       by_program,
-      average_age
+      average_age,
+      by_bag
     }
 
     return NextResponse.json({ stats })
