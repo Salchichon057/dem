@@ -23,9 +23,10 @@ import Modal from '@/components/ui/Modal'
 import type { QuestionType } from '@/lib/types'
 
 interface BuilderQuestion {
+  id?: string // ID real de la BD (cuando se está editando)
   tempId: string // ID temporal mientras se construye
   title: string
-  help_text?: string
+  help_text?: string | null
   is_required: boolean
   order_index: number
   question_type_id: string
@@ -34,9 +35,10 @@ interface BuilderQuestion {
 }
 
 interface BuilderSection {
+  id?: string // ID real de la BD (cuando se está editando)
   tempId: string // ID temporal mientras se construye
   title: string
-  description?: string
+  description?: string | null
   order_index: number
   questions: BuilderQuestion[]
 }
@@ -49,20 +51,20 @@ interface FormBuilderProps {
   onCancel?: () => void // ← Callback para cuando se cancela
   initialData?: {
     name: string
-    description?: string
+    description?: string | null
     slug: string
     is_public: boolean
     section_location?: string | null
     sections: Array<{
-      id: number
+      id: string // UUID de la BD
       title: string
-      description?: string
+      description?: string | null
       order_index: number
       questions: Array<{
-        id: number
+        id: string // UUID de la BD
         question_type_id: string
         title: string
-        help_text?: string
+        help_text?: string | null
         is_required: boolean
         order_index: number
         config: Record<string, any>
@@ -131,11 +133,13 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
             // Cargar secciones y preguntas
             if (form.sections && form.sections.length > 0) {
               const convertedSections: BuilderSection[] = form.sections.map((section: any) => ({
+                id: section.id, // ← PRESERVAR ID REAL de la sección
                 tempId: `section-${section.id}`,
                 title: section.title || '',
                 description: section.description || '',
                 order_index: section.order_index || 0,
                 questions: (section.questions || []).map((q: any) => ({
+                  id: q.id, // ← PRESERVAR ID REAL de la pregunta
                   tempId: `question-${q.id}`,
                   title: q.title || '',
                   help_text: q.help_text || '',
@@ -166,11 +170,13 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       const convertedSections: BuilderSection[] = initialData.sections.map(section => ({
+        id: section.id.toString(), // ← PRESERVAR ID REAL de la sección
         tempId: `section-${section.id}`,
         title: section.title,
         description: section.description,
         order_index: section.order_index,
         questions: section.questions.map(q => ({
+          id: q.id.toString(), // ← PRESERVAR ID REAL de la pregunta
           tempId: `question-${q.id}`,
           title: q.title,
           help_text: q.help_text,
@@ -454,10 +460,12 @@ export default function FormBuilder({ mode = 'create', formId, sectionLocation, 
         is_public: isPublic,
         section_location: sectionLocation as any, // Cast temporal para compatibilidad
         sections: sections.map(s => ({
+          ...(s.id && { id: s.id }), // ← INCLUIR ID si existe (modo edit)
           title: s.title,
           description: s.description || null,
           order_index: s.order_index,
           questions: s.questions.map(q => ({
+            ...(q.id && { id: q.id }), // ← INCLUIR ID si existe (modo edit)
             title: q.title,
             help_text: q.help_text || null,
             is_required: q.is_required,

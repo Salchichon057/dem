@@ -26,7 +26,7 @@ interface FormsListProps {
   locationName?: string
   onViewForm?: (form: FormTemplateWithQuestions) => void
   onCreateForm?: () => void
-  onEditForm?: (formId: string) => void
+  onEditForm: (formId: string) => void // ← Ahora es requerido
 }
 
 export default function FormsList({ sectionLocation, locationName, onViewForm, onCreateForm, onEditForm }: FormsListProps) {
@@ -393,23 +393,13 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
 
                   {/* Botón Editar - Solo si no tiene respuestas */}
                   {!hasResponses ? (
-                    onEditForm ? (
-                      <button
-                        onClick={() => onEditForm(form.id)}
-                        title="Editar formulario"
-                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </button>
-                    ) : (
-                      <Link
-                        href={`/dashboard/formularios/${form.id}/edit?section=${sectionLocation}`}
-                        title="Editar formulario"
-                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </Link>
-                    )
+                    <button
+                      onClick={() => onEditForm(form.id)}
+                      title="Editar formulario"
+                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                    >
+                      <Edit className="w-5 h-5" />
+                    </button>
                   ) : (
                     <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed inline-flex items-center justify-center" title="No se puede editar (tiene respuestas)">
                       <Edit className="w-5 h-5" />

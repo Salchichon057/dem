@@ -3,9 +3,10 @@
 import type { QuestionType } from '@/lib/types'
 
 interface BuilderQuestion {
+  id?: string
   tempId: string
   title: string
-  help_text?: string
+  help_text?: string | null
   is_required: boolean
   order_index: number
   question_type_id: string
