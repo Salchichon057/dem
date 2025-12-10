@@ -144,18 +144,22 @@ export async function countSubmissionsByFormIds(
   const supabase = createClient()
   const { submissions } = getSubmissionTables(sectionLocation)
   
-  const { data, error } = await supabase
-    .from(submissions)
-    .select('form_template_id')
-    .in('form_template_id', formTemplateIds)
+  const counts: Record<string, number> = {}
   
-  if (error) throw error
-  
-  // Contar manualmente los submissions por form_template_id
-  const counts = (data || []).reduce((acc, sub) => {
-    acc[sub.form_template_id] = (acc[sub.form_template_id] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  // Contar submissions para cada form_template_id individualmente
+  // Esto evita el límite de 1000 registros de Supabase
+  for (const formId of formTemplateIds) {
+    const { count, error } = await supabase
+      .from(submissions)
+      .select('*', { count: 'exact', head: true })
+      .eq('form_template_id', formId)
+    
+    if (!error && count !== null) {
+      counts[formId] = count
+    } else {
+      counts[formId] = 0
+    }
+  }
   
   return counts
 }

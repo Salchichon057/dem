@@ -29,6 +29,9 @@ export async function GET(request: Request, { params }: Params) {
       case '00e49c23-1f8a-45e0-947e-2c9bcdca0898':
         viewName = 'vw_form_00e49c23_statistics'
         break
+      case 'f036d9ff-e51a-46ca-8744-6f8187966f5b':
+        viewName = 'vw_form_f036d9ff_statistics'
+        break
       default:
         return NextResponse.json({
           error: 'Statistics view not configured for this form',

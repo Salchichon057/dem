@@ -361,6 +361,17 @@ export interface VolunteerStats {
   }>
 }
 
+export interface VolunteerFormStats {
+  total_volunteers: number
+  by_type: Record<string, number>
+  by_shift: Record<string, number>
+  average_hours: number
+  volunteers_with_benefit: number
+  total_agricultural_pounds: number
+  total_viveres_bags: number
+  total_amount_q: number
+}
+
 // ============================================
 // BOARD EXTRAS (AUDIT TRACKING) TYPES
 // ============================================
