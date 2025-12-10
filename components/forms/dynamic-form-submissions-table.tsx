@@ -43,11 +43,13 @@ interface SubmissionRow {
 interface DynamicFormSubmissionsTableProps {
   sectionLocation: string
   sectionTitle: string
+  onFormSelect?: (formId: string | null) => void
 }
 
 export default function DynamicFormSubmissionsTable({ 
   sectionLocation,
-  sectionTitle 
+  sectionTitle,
+  onFormSelect
 }: DynamicFormSubmissionsTableProps) {
   // Use custom hook for data management
   const {
@@ -496,7 +498,13 @@ export default function DynamicFormSubmissionsTable({
       {/* Form selector and search */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Form selector */}
-        <Select value={selectedFormId} onValueChange={setSelectedFormId}>
+        <Select 
+          value={selectedFormId} 
+          onValueChange={(value) => {
+            setSelectedFormId(value)
+            onFormSelect?.(value === 'none' ? null : value)
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Selecciona un formulario" />
           </SelectTrigger>

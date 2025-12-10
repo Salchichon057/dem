@@ -1,12 +1,7 @@
 "use client"
 
-import DynamicFormSubmissionsTable from "@/components/forms/dynamic-form-submissions-table"
+import OrganizationsSection from "@/components/forms/organizations-section"
 
 export function OrganizacionesEstadisticaSection() {
-  return (
-    <DynamicFormSubmissionsTable
-      sectionLocation="organizaciones"
-      sectionTitle="Organizaciones"
-    />
-  )
+  return <OrganizationsSection />
 }
