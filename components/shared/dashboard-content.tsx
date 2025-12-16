@@ -193,7 +193,7 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
       case "voluntariado-formularios":
         return "Voluntariado - Formularios"
       case "voluntariado-tablero":
-        return "Voluntariado - Status de Hallazgos"
+        return "Voluntariado - Consolidado"
       
       // Configuración y Perfil
       case "perfil":

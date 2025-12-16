@@ -86,7 +86,7 @@ export default function OrganizationsCharts({ formId }: OrganizationsChartsProps
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalBeneficiaries.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{(stats.totalBeneficiaries || 0).toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Personas atendidas</p>
           </CardContent>
         </Card>
@@ -97,7 +97,7 @@ export default function OrganizationsCharts({ formId }: OrganizationsChartsProps
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalFamilies.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{(stats.totalFamilies || 0).toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Total de familias</p>
           </CardContent>
         </Card>
@@ -108,8 +108,8 @@ export default function OrganizationsCharts({ formId }: OrganizationsChartsProps
             <Baby className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pregnant + stats.lactating}</div>
-            <p className="text-xs text-muted-foreground">{stats.pregnant} gestantes, {stats.lactating} lactantes</p>
+            <div className="text-2xl font-bold">{(stats.pregnant || 0) + (stats.lactating || 0)}</div>
+            <p className="text-xs text-muted-foreground">{stats.pregnant || 0} gestantes, {stats.lactating || 0} lactantes</p>
           </CardContent>
         </Card>
       </div>

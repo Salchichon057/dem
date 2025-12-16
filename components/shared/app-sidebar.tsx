@@ -164,7 +164,7 @@ const menuItems = [
       },
       {
         id: "voluntariado-tablero",
-        title: "Status de Hallazgos",
+        title: "Consolidado",
         icon: FileText,
       },
     ],

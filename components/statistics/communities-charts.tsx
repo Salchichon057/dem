@@ -88,7 +88,7 @@ export default function CommunitiesCharts() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalBeneficiaries.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{(stats.totalBeneficiaries || 0).toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Personas atendidas</p>
           </CardContent>
         </Card>
@@ -99,8 +99,8 @@ export default function CommunitiesCharts() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalFamilies.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">{stats.familiesInRa.toLocaleString()} en RA</p>
+            <div className="text-2xl font-bold">{(stats.totalFamilies || 0).toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{(stats.familiesInRa || 0).toLocaleString()} en RA</p>
           </CardContent>
         </Card>
 
