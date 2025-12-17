@@ -1,5 +1,7 @@
 export * from './supabase/types'
 export * from './types/community'
+export * from './utils/extras.utils'
+export * from './utils/phone.utils'
 
 // Enum para los tipos de sección de formularios
 export enum FormSectionType {
@@ -12,14 +14,15 @@ export enum FormSectionType {
 }
 
 // Mapper: section_location -> tabla de submissions correspondiente
-export const SUBMISSION_TABLES_MAP: Record<FormSectionType, { submissions: string; answers: string }> = {
+export const SUBMISSION_TABLES_MAP: Record<FormSectionType, { submissions: string; answers: string; extras?: string }> = {
   [FormSectionType.ORGANIZACIONES]: {
     submissions: 'organizations_submissions',
     answers: 'organizations_answers'
   },
   [FormSectionType.AUDITORIAS]: {
     submissions: 'audits_submissions',
-    answers: 'audits_answers'
+    answers: 'audits_answers',
+    extras: 'consolidated_board_extras'
   },
   [FormSectionType.PERFIL_COMUNITARIO]: {
     submissions: 'community_profile_submissions',
@@ -27,7 +30,8 @@ export const SUBMISSION_TABLES_MAP: Record<FormSectionType, { submissions: strin
   },
   [FormSectionType.VOLUNTARIADO]: {
     submissions: 'volunteer_submissions',
-    answers: 'volunteer_answers'
+    answers: 'volunteer_answers',
+    extras: 'volunteer_extras'
   },
   [FormSectionType.COMUNIDADES]: {
     submissions: 'communities_submissions',

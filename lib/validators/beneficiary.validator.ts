@@ -83,7 +83,7 @@ export const createBeneficiarySchema = z.object({
     .or(z.literal('')),
 
   personal_number: z.string()
-    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
+    .regex(/^[2-7]\d{3}-?\d{4}$/, 'Debe ser 8 dígitos (primer dígito 2-7)')
     .optional()
     .or(z.literal('')),
 
@@ -94,7 +94,12 @@ export const createBeneficiarySchema = z.object({
     .or(z.literal('')),
 
   community_number: z.string()
-    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
+    .regex(/^[2-7]\d{3}-?\d{4}$/, 'Debe ser 8 dígitos (primer dígito 2-7)')
+    .optional()
+    .or(z.literal('')),
+
+  bag: z.string()
+    .max(50, 'El número de bolsa no puede exceder 50 caracteres')
     .optional()
     .or(z.literal(''))
 })
@@ -183,7 +188,7 @@ export const updateBeneficiarySchema = z.object({
     .or(z.literal('')),
 
   personal_number: z.string()
-    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
+    .regex(/^[2-7]\d{7}$/, 'Debe ser 8 dígitos (primer dígito 2-7)')
     .optional()
     .or(z.literal('')),
 
@@ -194,7 +199,12 @@ export const updateBeneficiarySchema = z.object({
     .or(z.literal('')),
 
   community_number: z.string()
-    .regex(/^[2-7]\d{3}-?\d{4}$/, 'El número debe tener 8 dígitos (formato: XXXX-XXXX o XXXXXXXX)')
+    .regex(/^[2-7]\d{7}$/, 'Debe ser 8 dígitos (primer dígito 2-7)')
+    .optional()
+    .or(z.literal('')),
+
+  bag: z.string()
+    .max(50, 'El número de bolsa no puede exceder 50 caracteres')
     .optional()
     .or(z.literal(''))
 }).partial()

@@ -40,14 +40,14 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabase
         .from("consolidated_board_extras")
         .update({
-          traffic_light: traffic_light || null,
-          recommendations: recommendations || null,
-          follow_up_given: follow_up_given || null,
-          follow_up_date: follow_up_date || null,
-          concluded_result_red_or_no: concluded_result_red_or_no || null,
-          solutions: solutions || null,
-          preliminary_report: preliminary_report || null,
-          full_report: full_report || null,
+          traffic_light: traffic_light ?? null,
+          recommendations: recommendations ?? null,
+          follow_up_given: follow_up_given ?? null,
+          follow_up_date: follow_up_date ?? null,
+          concluded_result_red_or_no: concluded_result_red_or_no ?? null,
+          solutions: solutions ?? null,
+          preliminary_report: preliminary_report ?? null,
+          full_report: full_report ?? null,
           updated_at: new Date().toISOString(),
         })
         .eq("submission_id", submission_id)
@@ -65,14 +65,14 @@ export async function POST(request: NextRequest) {
         .from("consolidated_board_extras")
         .insert({
           submission_id,
-          traffic_light: traffic_light || null,
-          recommendations: recommendations || null,
-          follow_up_given: follow_up_given || null,
-          follow_up_date: follow_up_date || null,
-          concluded_result_red_or_no: concluded_result_red_or_no || null,
-          solutions: solutions || null,
-          preliminary_report: preliminary_report || null,
-          full_report: full_report || null,
+          traffic_light: traffic_light ?? null,
+          recommendations: recommendations ?? null,
+          follow_up_given: follow_up_given ?? null,
+          follow_up_date: follow_up_date ?? null,
+          concluded_result_red_or_no: concluded_result_red_or_no ?? null,
+          solutions: solutions ?? null,
+          preliminary_report: preliminary_report ?? null,
+          full_report: full_report ?? null,
         })
         .select()
         .single()

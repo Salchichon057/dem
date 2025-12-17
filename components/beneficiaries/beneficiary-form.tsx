@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch'
 import { Beneficiary, CreateBeneficiaryInput, UpdateBeneficiaryInput } from '@/lib/types'
 import { getDepartamentos, getMunicipiosByDepartamento } from '@/lib/data/guatemala-helper'
 import { validateBeneficiary } from '@/lib/validators/beneficiary.validator'
+import { formatGuatemalaPhone, cleanPhoneNumber, validateGuatemalaPhone } from '@/lib/utils/phone.utils'
 import { toast } from 'sonner'
 import { Loader2, X, Image as ImageIcon } from 'lucide-react'
 import { uploadBeneficiaryPhoto, getFileUrl } from '@/lib/storage/handler'
@@ -77,30 +78,6 @@ export default function BeneficiaryForm({
   const [departments, setDepartments] = useState<string[]>([])
   const [municipalities, setMunicipalities] = useState<string[]>([])
 
-  // Helper function to format phone numbers (Guatemala format: XXXX-XXXX)
-  const formatPhoneNumber = (value: string): string => {
-    // Remove all non-digit characters
-    const digits = value.replace(/\D/g, '')
-    
-    // Limit to 8 digits
-    const limitedDigits = digits.slice(0, 8)
-    
-    // Add hyphen after 4th digit if there are more than 4 digits
-    if (limitedDigits.length > 4) {
-      return `${limitedDigits.slice(0, 4)}-${limitedDigits.slice(4)}`
-    }
-    
-    return limitedDigits
-  }
-
-  // Validate phone number format (Guatemala)
-  const validatePhoneNumber = (value: string): boolean => {
-    if (!value) return true // Empty is valid (optional field)
-    const digitsOnly = value.replace(/\D/g, '')
-    // Must be 8 digits and start with 2-7
-    return /^[2-7]\d{7}$/.test(digitsOnly)
-  }
-
   // Load departments on mount
   useEffect(() => {
     setDepartments(getDepartamentos())
@@ -125,7 +102,7 @@ export default function BeneficiaryForm({
       setDpi(beneficiary.dpi || '')
       setProgram(beneficiary.program)
       setPhotoUrl(beneficiary.photo_url || '')
-      setAdmissionDate(beneficiary.admission_date.split('T')[0]) // Format for input[type="date"]
+      setAdmissionDate(beneficiary.admission_date.split('T')[0])
       setIsActive(beneficiary.is_active)
       setDepartment(beneficiary.department)
       setMunicipality(beneficiary.municipality)
@@ -133,9 +110,9 @@ export default function BeneficiaryForm({
       setAddress(beneficiary.address || '')
       setGoogleMapsUrl(beneficiary.google_maps_url || '')
       setPersonalContact(beneficiary.personal_contact || '')
-      setPersonalNumber(beneficiary.personal_number || '')
+      setPersonalNumber(beneficiary.personal_number ? formatGuatemalaPhone(beneficiary.personal_number) : '')
       setCommunityContact(beneficiary.community_contact || '')
-      setCommunityNumber(beneficiary.community_number || '')
+      setCommunityNumber(beneficiary.community_number ? formatGuatemalaPhone(beneficiary.community_number) : '')
       setBag(beneficiary.bag || '')
     } else {
       resetForm()
@@ -251,9 +228,9 @@ export default function BeneficiaryForm({
         address: address || '',
         google_maps_url: googleMapsUrl || '',
         personal_contact: personalContact || '',
-        personal_number: personalNumber || '',
+        personal_number: personalNumber ? cleanPhoneNumber(personalNumber) : '',
         community_contact: communityContact || '',
-        community_number: communityNumber || '',
+        community_number: communityNumber ? cleanPhoneNumber(communityNumber) : '',
         bag: bag || '',
       }
 
@@ -698,11 +675,11 @@ export default function BeneficiaryForm({
                   id="personalNumber"
                   value={personalNumber}
                   onChange={(e) => {
-                    const formatted = formatPhoneNumber(e.target.value)
+                    const formatted = formatGuatemalaPhone(e.target.value)
                     setPersonalNumber(formatted)
                   }}
                   onBlur={() => {
-                    if (personalNumber && !validatePhoneNumber(personalNumber)) {
+                    if (personalNumber && !validateGuatemalaPhone(personalNumber)) {
                       setValidationErrors(prev => ({
                         ...prev,
                         personal_number: 'Formato inválido. Debe ser 8 dígitos: XXXX-XXXX'
@@ -758,11 +735,11 @@ export default function BeneficiaryForm({
                   id="communityNumber"
                   value={communityNumber}
                   onChange={(e) => {
-                    const formatted = formatPhoneNumber(e.target.value)
+                    const formatted = formatGuatemalaPhone(e.target.value)
                     setCommunityNumber(formatted)
                   }}
                   onBlur={() => {
-                    if (communityNumber && !validatePhoneNumber(communityNumber)) {
+                    if (communityNumber && !validateGuatemalaPhone(communityNumber)) {
                       setValidationErrors(prev => ({
                         ...prev,
                         community_number: 'Formato inválido. Debe ser 8 dígitos: XXXX-XXXX'
