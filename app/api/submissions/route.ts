@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     // Crear las respuestas en la tabla correspondiente
     const createdAnswers = await createAnswers(sectionLocation, answersData)
 
-    // Auto-crear extras si el formulario tiene configuración
+    // Auto-crear extras vacíos si el formulario tiene configuración
     const { autoCreateExtras } = await import('@/lib/utils/auto-create-extras')
     await autoCreateExtras(form_template_id, submission.id, answersData)
 
