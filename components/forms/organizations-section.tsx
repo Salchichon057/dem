@@ -13,7 +13,7 @@ type ViewMode = 'table' | 'charts' | 'edit-submission'
 export default function OrganizationsSection() {
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null)
-  const { editState, startEdit, isEditing } = useFormSubmissionEdit()
+  const { editState, startEdit, cancelEdit, isEditing } = useFormSubmissionEdit()
 
   const handleEditSubmission = (formId: string, submissionId: string) => {
     console.log('Edit submission clicked:', { formId, submissionId })
@@ -22,6 +22,7 @@ export default function OrganizationsSection() {
   }
 
   const handleBackToTable = () => {
+    cancelEdit()
     setViewMode('table')
   }
 

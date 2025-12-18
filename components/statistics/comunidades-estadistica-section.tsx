@@ -11,7 +11,7 @@ type ViewMode = 'list' | 'edit-submission'
 
 export function ComunidadesEstadisticaSection() {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
-  const { editState, startEdit, isEditing } = useFormSubmissionEdit()
+  const { editState, startEdit, cancelEdit, isEditing } = useFormSubmissionEdit()
 
   const handleEditSubmission = (formId: string, submissionId: string) => {
     console.log('Edit submission clicked:', { formId, submissionId })
@@ -20,6 +20,7 @@ export function ComunidadesEstadisticaSection() {
   }
 
   const handleBackToList = () => {
+    cancelEdit()
     setViewMode('list')
   }
 
