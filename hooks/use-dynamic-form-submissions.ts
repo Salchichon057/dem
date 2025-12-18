@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 interface FormOption {
   id: string
   name: string
+  slug: string
 }
 
 interface ColumnDefinition {

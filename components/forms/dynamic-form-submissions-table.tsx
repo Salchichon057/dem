@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Search, Eye, Settings2, FileText, Image as ImageIcon, Table as TableIcon } from 'lucide-react'
+import { Search, Eye, Settings2, FileText, Image as ImageIcon, Table as TableIcon, Pencil } from 'lucide-react'
 import DateFilter from '@/components/shared/date-filter'
 import {
   Popover,
@@ -44,12 +44,14 @@ interface DynamicFormSubmissionsTableProps {
   sectionLocation: string
   sectionTitle: string
   onFormSelect?: (formId: string | null) => void
+  onEditSubmission?: (formId: string, submissionId: string) => void
 }
 
 export default function DynamicFormSubmissionsTable({ 
   sectionLocation,
   sectionTitle,
-  onFormSelect
+  onFormSelect,
+  onEditSubmission
 }: DynamicFormSubmissionsTableProps) {
   // Use custom hook for data management
   const {
@@ -647,6 +649,18 @@ export default function DynamicFormSubmissionsTable({
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          title="Editar respuestas"
+                          onClick={() => {
+                            if (onEditSubmission && selectedFormId) {
+                              onEditSubmission(selectedFormId, row.submission_id)
+                            }
+                          }}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -759,6 +773,8 @@ export default function DynamicFormSubmissionsTable({
         onOpenFilePreview={(fileUrl, fileName) => setFilePreviewModal({ open: true, fileUrl, fileName })}
         onOpenGridPreview={(gridData, questionTitle) => setGridPreviewModal({ open: true, gridData, questionTitle })}
       />
+
+
     </div>
   )
 }

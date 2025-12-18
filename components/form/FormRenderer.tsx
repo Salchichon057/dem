@@ -12,7 +12,10 @@ import { useUser } from '@/hooks/use-user'
 interface FormRendererProps {
   form: FormTemplateWithQuestions
   onSuccess?: () => void
-  isPublic?: boolean // Indica si es un formulario público (sin autenticación)
+  isPublic?: boolean
+  initialAnswers?: Record<string, unknown>
+  submissionId?: string
+  isEditMode?: boolean
 }
 
 // Mapeo de FormSectionType a las keys de STORAGE_BUCKETS
@@ -25,9 +28,16 @@ const SECTION_TO_BUCKET_KEY: Record<FormSectionType, keyof typeof STORAGE_BUCKET
   'voluntariado': 'FORM_VOLUNTARIADO',
 }
 
-export default function FormRenderer({ form, onSuccess, isPublic = false }: FormRendererProps) {
+export default function FormRenderer({ 
+  form, 
+  onSuccess, 
+  isPublic = false,
+  initialAnswers = {},
+  submissionId,
+  isEditMode = false
+}: FormRendererProps) {
   const { user } = useUser()
-  const [answers, setAnswers] = useState<Record<string, unknown>>({})
+  const [answers, setAnswers] = useState<Record<string, unknown>>(initialAnswers)
   const [isPending, startTransition] = useTransition()
   const [currentSection, setCurrentSection] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -266,43 +276,69 @@ export default function FormRenderer({ form, onSuccess, isPublic = false }: Form
         const finalAnswers = { ...answers, ...uploadedPaths }
 
         // PASO 3: Preparar el payload
-        const payload = {
-          form_template_id: form.id,
-          isPublic: isPublic, // 🔥 Indicar si es público para que el backend valide y use user_id null
-          answers: Object.entries(finalAnswers).map(([questionId, answerValue]) => ({
-            question_id: questionId,
-            answer_value: {
-              value: answerValue
-            }
-          }))
-        }
+        if (isEditMode && submissionId) {
+          const updatePayload = {
+            answers: Object.entries(finalAnswers).map(([questionId, answerValue]) => ({
+              question_id: questionId,
+              answer_value: {
+                value: answerValue
+              }
+            }))
+          }
 
-        console.log('📤 [FORM RENDERER] Enviando formulario:', {
-          form_id: form.id,
-          form_name: form.name,
-          isPublic,
-          answersCount: payload.answers.length,
-          currentUser: user?.email || 'No user'
-        })
-        
-        // Siempre usar /api/submissions (maneja tanto públicos como privados)
-        const response = await fetch('/api/submissions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include', // Incluir cookies para autenticación
-          body: JSON.stringify(payload)
-        })
+          const response = await fetch(`/api/submissions/${form.id}/${submissionId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(updatePayload)
+          })
 
-        const result = await response.json()
-        if (result.success) {
-          // Limpiar archivos pendientes
-          setPendingFiles({})
-          setShowSuccessModal(true)
+          const result = await response.json()
+          if (result.success) {
+            setShowSuccessModal(true)
+          } else {
+            setErrorMessage(result.error || 'Ha ocurrido un error al actualizar el formulario')
+            setShowErrorModal(true)
+          }
         } else {
-          setErrorMessage(result.error || 'Ha ocurrido un error al enviar el formulario')
-          setShowErrorModal(true)
+          const payload = {
+            form_template_id: form.id,
+            isPublic: isPublic,
+            answers: Object.entries(finalAnswers).map(([questionId, answerValue]) => ({
+              question_id: questionId,
+              answer_value: {
+                value: answerValue
+              }
+            }))
+          }
+
+          console.log('📤 [FORM RENDERER] Enviando formulario:', {
+            form_id: form.id,
+            form_name: form.name,
+            isPublic,
+            answersCount: payload.answers.length,
+            currentUser: user?.email || 'No user'
+          })
+          
+          const response = await fetch('/api/submissions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+          })
+
+          const result = await response.json()
+          if (result.success) {
+            setPendingFiles({})
+            setShowSuccessModal(true)
+          } else {
+            setErrorMessage(result.error || 'Ha ocurrido un error al enviar el formulario')
+            setShowErrorModal(true)
+          }
         }
       } catch {
         setErrorMessage('Error de conexión. Por favor, intenta de nuevo.')
@@ -983,7 +1019,7 @@ export default function FormRenderer({ form, onSuccess, isPublic = false }: Form
             ) : (
               <>
                 <i className="fas fa-paper-plane"></i>
-                <span>Enviar Formulario</span>
+                <span>{isEditMode ? 'Guardar Cambios' : 'Enviar Formulario'}</span>
               </>
             )}
           </button>
@@ -1001,7 +1037,7 @@ export default function FormRenderer({ form, onSuccess, isPublic = false }: Form
             resetForm()
           }
         }}
-        message="Tu formulario ha sido enviado exitosamente. Gracias por tu tiempo."
+        message={isEditMode ? "Tus cambios han sido guardados exitosamente." : "Tu formulario ha sido enviado exitosamente. Gracias por tu tiempo."}
         confirmText={isPublic ? "Cerrar" : "Volver al Panel"}
       />
       

@@ -26,10 +26,11 @@ interface FormsListProps {
   locationName?: string
   onViewForm?: (form: FormTemplateWithQuestions) => void
   onCreateForm?: () => void
-  onEditForm: (formId: string) => void // ← Ahora es requerido
+  onEditForm: (formId: string) => void
+  onViewSubmissions?: () => void
 }
 
-export default function FormsList({ sectionLocation, locationName, onViewForm, onCreateForm, onEditForm }: FormsListProps) {
+export default function FormsList({ sectionLocation, locationName, onViewForm, onCreateForm, onEditForm, onViewSubmissions }: FormsListProps) {
   const [forms, setForms] = useState<FormTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -256,23 +257,35 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
           </p>
         </div>
 
-        {onCreateForm ? (
-          <button
-            onClick={onCreateForm}
-            className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Formulario
-          </button>
-        ) : (
-          <Link
-            href={`/dashboard/formularios/new?section=${sectionLocation}`}
-            className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Formulario
-          </Link>
-        )}
+        <div className="flex gap-3">
+          {onCreateForm ? (
+            <button
+              onClick={onCreateForm}
+              className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Nuevo Formulario
+            </button>
+          ) : (
+            <Link
+              href={`/dashboard/formularios/new?section=${sectionLocation}`}
+              className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Nuevo Formulario
+            </Link>
+          )}
+          
+          {onViewSubmissions && (
+            <button
+              onClick={onViewSubmissions}
+              className="px-6 py-3 rounded-lg flex items-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-purple-600 hover:text-purple-600 transition-all"
+            >
+              <FileText className="w-5 h-5" />
+              Ver Formularios Enviados
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Buscador */}
