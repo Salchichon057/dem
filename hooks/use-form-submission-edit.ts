@@ -25,13 +25,22 @@ export function useFormSubmissionEdit() {
       setEditState(prev => ({ ...prev, loading: true }))
 
       try {
+        console.log('Loading submission:', { formId: editState.formId, submissionId: editState.submissionId })
         const response = await fetch(`/api/submissions/${editState.formId}/${editState.submissionId}`)
         const data = await response.json()
 
-        if (response.ok && data.submission) {
+        console.log('Submission response:', { status: response.ok, data })
+
+        if (!response.ok) {
+          console.error('Error response:', data)
+          setEditState(prev => ({ ...prev, loading: false }))
+          return
+        }
+
+        if (data.form && data.answers) {
           const form: FormTemplateWithQuestions = {
-            ...data.submission.form_templates,
-            questions: data.answers.map((ans: { questions: unknown }) => ans.questions)
+            ...data.form,
+            questions: data.answers.map((ans: { questions: unknown }) => ans.questions).filter(Boolean)
           }
 
           const initialAnswers: Record<string, unknown> = {}
@@ -39,12 +48,17 @@ export function useFormSubmissionEdit() {
             initialAnswers[answer.question_id] = answer.answer_value?.value
           })
 
+          console.log('Parsed form and answers:', { form, initialAnswers })
+
           setEditState(prev => ({
             ...prev,
             form,
             initialAnswers,
             loading: false
           }))
+        } else {
+          console.error('Invalid data structure:', data)
+          setEditState(prev => ({ ...prev, loading: false }))
         }
       } catch (error) {
         console.error('Error loading submission:', error)
