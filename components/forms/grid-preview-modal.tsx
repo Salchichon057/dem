@@ -1,6 +1,7 @@
 'use client'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useUserPermissions } from '@/hooks/use-user-permissions'
 import {
   Table,
   TableBody,
@@ -30,6 +31,7 @@ export default function GridPreviewModal({
   gridData,
   questionTitle,
 }: GridPreviewModalProps) {
+  const { canExport } = useUserPermissions();
   
   const handleExportToExcel = () => {
     if (!gridData.rows.length) {
@@ -66,16 +68,18 @@ export default function GridPreviewModal({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span className="flex-1">{questionTitle}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportToExcel}
-              title="Exportar tabla a Excel"
-              className="ml-4"
-            >
-              <FileSpreadsheet className="w-4 h-4 mr-2" />
-              Exportar Excel
-            </Button>
+            {canExport() && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportToExcel}
+                title="Exportar tabla a Excel"
+                className="ml-4"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Exportar Excel
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
 

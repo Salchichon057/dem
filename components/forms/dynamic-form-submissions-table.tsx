@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useUserPermissions } from '@/hooks/use-user-permissions'
 import {
   Select,
   SelectContent,
@@ -53,6 +54,8 @@ export default function DynamicFormSubmissionsTable({
   onFormSelect,
   onEditSubmission
 }: DynamicFormSubmissionsTableProps) {
+  const { canExport } = useUserPermissions()
+  
   // Use custom hook for data management
   const {
     forms,
@@ -349,12 +352,14 @@ export default function DynamicFormSubmissionsTable({
         <div className="flex items-center gap-2">
           {selectedFormId !== 'none' && filteredData.length > 0 && (
             <>
-              <ExportExcelButton
-                filteredData={filteredData}
-                columns={columns}
-                visibleColumns={visibleColumns}
-                formName={formName}
-              />
+              {canExport() && (
+                <ExportExcelButton
+                  filteredData={filteredData}
+                  columns={columns}
+                  visibleColumns={visibleColumns}
+                  formName={formName}
+                />
+              )}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="gap-2">

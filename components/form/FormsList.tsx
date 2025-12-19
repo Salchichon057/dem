@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Eye, Edit, Trash2, Loader2, Search, Plus, AlertCircle, Inbox, Globe, Lock, Pause, FileText } from 'lucide-react'
 import { authFetch } from '@/lib/auth-fetch'
 import { FormSectionType, FormListResponse, FormTemplateWithQuestions } from '@/lib/types'
+import { useUserPermissions } from '@/hooks/use-user-permissions'
 import Modal from '@/components/ui/Modal'
 import PublicFormConfigModal from './PublicFormConfigModal'
 
@@ -36,6 +37,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loadingFormId, setLoadingFormId] = useState<string | null>(null)
+  const { canCreate, canEdit, canDelete } = useUserPermissions()
   
   // Estado para modal de configuración pública
   const [publicConfigModal, setPublicConfigModal] = useState<{
@@ -258,22 +260,24 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
         </div>
 
         <div className="flex gap-3">
-          {onCreateForm ? (
-            <button
-              onClick={onCreateForm}
-              className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Nuevo Formulario
-            </button>
-          ) : (
-            <Link
-              href={`/dashboard/formularios/new?section=${sectionLocation}`}
-              className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Nuevo Formulario
-            </Link>
+          {canCreate() && (
+            onCreateForm ? (
+              <button
+                onClick={onCreateForm}
+                className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Nuevo Formulario
+              </button>
+            ) : (
+              <Link
+                href={`/dashboard/formularios/new?section=${sectionLocation}`}
+                className="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Nuevo Formulario
+              </Link>
+            )
           )}
           
           {onViewSubmissions && (
@@ -406,13 +410,19 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
 
                   {/* Botón Editar - Solo si no tiene respuestas */}
                   {!hasResponses ? (
-                    <button
-                      onClick={() => onEditForm(form.id)}
-                      title="Editar formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </button>
+                    canEdit() ? (
+                      <button
+                        onClick={() => onEditForm(form.id)}
+                        title="Editar formulario"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                    ) : (
+                      <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed inline-flex items-center justify-center" title="Sin permisos de edición">
+                        <Edit className="w-5 h-5" />
+                      </div>
+                    )
                   ) : (
                     <div className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed inline-flex items-center justify-center" title="No se puede editar (tiene respuestas)">
                       <Edit className="w-5 h-5" />
@@ -420,28 +430,30 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
                   )}
 
                   {/* Botón Eliminar o Desactivar */}
-                  {!hasResponses ? (
-                    <button
-                      onClick={() => handleDelete(form.id, form.name)}
-                      title="Eliminar formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium col-span-2 inline-flex items-center justify-center gap-2"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                      <span>Eliminar</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleToggleActive(form.id, form.is_active, form.name)}
-                      title={form.is_active ? "Desactivar formulario" : "Activar formulario"}
-                      className={`px-4 py-2.5 bg-white border-2 rounded-lg transition-all text-sm font-medium col-span-2 inline-flex items-center justify-center gap-2 ${
-                        form.is_active 
-                          ? 'border-orange-300 text-orange-700 hover:border-orange-500 hover:bg-orange-50' 
-                          : 'border-green-300 text-green-700 hover:border-green-500 hover:bg-green-50'
-                      }`}
-                    >
-                      <Pause className="w-5 h-5" />
-                      <span>{form.is_active ? 'Desactivar' : 'Activar'}</span>
-                    </button>
+                  {canDelete() && (
+                    !hasResponses ? (
+                      <button
+                        onClick={() => handleDelete(form.id, form.name)}
+                        title="Eliminar formulario"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium col-span-2 inline-flex items-center justify-center gap-2"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                        <span>Eliminar</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleToggleActive(form.id, form.is_active, form.name)}
+                        title={form.is_active ? "Desactivar formulario" : "Activar formulario"}
+                        className={`px-4 py-2.5 bg-white border-2 rounded-lg transition-all text-sm font-medium col-span-2 inline-flex items-center justify-center gap-2 ${
+                          form.is_active 
+                            ? 'border-orange-300 text-orange-700 hover:border-orange-500 hover:bg-orange-50' 
+                            : 'border-green-300 text-green-700 hover:border-green-500 hover:bg-green-50'
+                        }`}
+                      >
+                        <Pause className="w-5 h-5" />
+                        <span>{form.is_active ? 'Desactivar' : 'Activar'}</span>
+                      </button>
+                    )
                   )}
                 </div>
               </div>

@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useUserPermissions } from '@/hooks/use-user-permissions'
 import {
   Select,
   SelectContent,
@@ -37,6 +38,7 @@ import { Label } from '@/components/ui/label'
 import DateFilter from '@/components/shared/date-filter'
 
 export default function BeneficiariesTable() {
+  const { canCreate, canEdit, canDelete, canExport } = useUserPermissions();
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([])
   const [allBeneficiaries, setAllBeneficiaries] = useState<Beneficiary[]>([]) // Para generar filtros dinámicos
   const [loading, setLoading] = useState(true)
@@ -320,10 +322,12 @@ export default function BeneficiariesTable() {
           <p className="text-muted-foreground">Total: {total} beneficiarios</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleDownloadExcel} className="gap-2">
-            <FileSpreadsheet className="w-4 h-4" />
-            Exportar Excel
-          </Button>
+          {canExport() && (
+            <Button variant="outline" onClick={handleDownloadExcel} className="gap-2">
+              <FileSpreadsheet className="w-4 h-4" />
+              Exportar Excel
+            </Button>
+          )}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="icon" title="Configurar columnas">
@@ -438,10 +442,12 @@ export default function BeneficiariesTable() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button className="gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white" onClick={handleAdd}>
-            <Plus className="w-4 h-4" />
-            Agregar Beneficiario
-          </Button>
+          {canCreate() && (
+            <Button className="gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white" onClick={handleAdd}>
+              <Plus className="w-4 h-4" />
+              Agregar Beneficiario
+            </Button>
+          )}
         </div>
       </div>
 
@@ -650,22 +656,26 @@ export default function BeneficiariesTable() {
                       <Button variant="ghost" size="icon" title="Ver detalles">
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Editar"
-                        onClick={() => handleEdit(beneficiary)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Eliminar"
-                        onClick={() => handleDelete(beneficiary.id, beneficiary.name)}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
+                      {canEdit() && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Editar"
+                          onClick={() => handleEdit(beneficiary)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canDelete() && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Eliminar"
+                          onClick={() => handleDelete(beneficiary.id, beneficiary.name)}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useUserPermissions } from '@/hooks/use-user-permissions'
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ interface VolunteersResponse {
 }
 
 export default function VolunteersTable() {
+  const { canCreate, canEdit } = useUserPermissions();
   const [volunteers, setVolunteers] = useState<Volunteer[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -231,10 +233,12 @@ export default function VolunteersTable() {
             </SelectContent>
           </Select>
 
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Agregar Voluntario
-          </Button>
+          {canCreate() && (
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Agregar Voluntario
+            </Button>
+          )}
         </div>
         
         {/* Date Filter */}
@@ -316,9 +320,11 @@ export default function VolunteersTable() {
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                        {canEdit() && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

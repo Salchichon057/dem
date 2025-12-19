@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
 import {
   Select,
   SelectContent,
@@ -48,6 +49,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function CommunitiesTable() {
+  const { canCreate, canEdit, canDelete, canExport } = useUserPermissions();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -253,26 +255,30 @@ export default function CommunitiesTable() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            onClick={handleExport}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Exportar Excel
-          </Button>
-          <Button
-            onClick={() => {
-              setSelectedCommunity(null);
-              setShowCrudForm(true);
-            }}
-            size="sm"
-            className="gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-          >
-            <Plus className="w-4 h-4" />
-            Agregar Comunidad
-          </Button>
+          {canExport() && (
+            <Button
+              onClick={handleExport}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Exportar Excel
+            </Button>
+          )}
+          {canCreate() && (
+            <Button
+              onClick={() => {
+                setSelectedCommunity(null);
+                setShowCrudForm(true);
+              }}
+              size="sm"
+              className="gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <Plus className="w-4 h-4" />
+              Agregar Comunidad
+            </Button>
+          )}
         </div>
       </div>
 
@@ -661,24 +667,28 @@ export default function CommunitiesTable() {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title="Editar"
-                        onClick={() => handleEdit(community)}
-                        className="bg-white"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title="Eliminar"
-                        onClick={() => setCommunityToDelete(community)}
-                        className="hover:text-destructive bg-white"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {canEdit() && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Editar"
+                          onClick={() => handleEdit(community)}
+                          className="bg-white"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canDelete() && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Eliminar"
+                          onClick={() => setCommunityToDelete(community)}
+                          className="hover:text-destructive bg-white"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

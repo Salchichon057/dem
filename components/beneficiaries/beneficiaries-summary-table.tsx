@@ -3,6 +3,7 @@
 import { BeneficiaryStats } from '@/lib/types'
 import { FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useUserPermissions } from '@/hooks/use-user-permissions'
 import { exportToExcel, type ExcelColumn } from '@/lib/utils/excel-export'
 import { toast } from 'sonner'
 import {
@@ -20,6 +21,8 @@ interface SummaryTableProps {
 }
 
 export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) {
+  const { canExport } = useUserPermissions();
+  
   // Validar que tenemos datos
   if (!stats || !stats.by_department_details || !stats.by_program) {
     return (
@@ -130,10 +133,12 @@ export default function BeneficiariesSummaryTable({ stats }: SummaryTableProps) 
           <Title>Tabla de Resumen por Departamento</Title>
           <Text>Datos consolidados de beneficiarios</Text>
         </div>
-        <Button onClick={handleDownloadExcel} className="gap-2">
-          <FileSpreadsheet className="w-4 h-4" />
-          Exportar Excel
-        </Button>
+        {canExport() && (
+          <Button onClick={handleDownloadExcel} className="gap-2">
+            <FileSpreadsheet className="w-4 h-4" />
+            Exportar Excel
+          </Button>
+        )}
       </div>
 
       <div className="overflow-x-auto w-full">

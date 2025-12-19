@@ -7,10 +7,11 @@ import { useUserRole } from "@/hooks/use-user-role"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Shield, Loader2, Check, X, AlertTriangle, KeyRound } from "lucide-react"
+import { Shield, Loader2, Check, X, AlertTriangle, KeyRound, Settings2 } from "lucide-react"
 import { ConfirmDialog } from "./confirm-dialog"
 import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ManageSectionPermissionsDialog } from "./manage-section-permissions-dialog"
 
 interface UserWithRole {
   id: string
@@ -39,6 +40,7 @@ export function AdminUsersSection() {
   const [roleDialog, setRoleDialog] = useState<{ open: boolean; user: UserWithRole | null; newRoleId: string | null }>({ open: false, user: null, newRoleId: null })
   const [deactivateDialog, setDeactivateDialog] = useState<{ open: boolean; user: UserWithRole | null }>({ open: false, user: null })
   const [resetPasswordDialog, setResetPasswordDialog] = useState<{ open: boolean; user: UserWithRole | null }>({ open: false, user: null })
+  const [sectionPermissionsDialog, setSectionPermissionsDialog] = useState<{ open: boolean; user: UserWithRole | null }>({ open: false, user: null })
   const { userData } = useUserRole()
 
   useEffect(() => {
@@ -315,6 +317,17 @@ export function AdminUsersSection() {
                     <div className="flex items-center justify-end gap-2">
                       {canEdit && (
                         <>
+                          {(user.role.name === 'editor' || user.role.name === 'viewer') && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSectionPermissionsDialog({ open: true, user })}
+                              disabled={isUpdating}
+                              title="Gestionar Secciones"
+                            >
+                              <Settings2 className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -416,6 +429,15 @@ export function AdminUsersSection() {
         confirmText="Resetear Contraseña"
         onConfirm={handleResetPassword}
         variant="default"
+      />
+
+      <ManageSectionPermissionsDialog
+        open={sectionPermissionsDialog.open}
+        onOpenChange={(open) => !open && setSectionPermissionsDialog({ open: false, user: null })}
+        userId={sectionPermissionsDialog.user?.id || ''}
+        userName={sectionPermissionsDialog.user?.name || sectionPermissionsDialog.user?.email || ''}
+        userRole={sectionPermissionsDialog.user?.role.name as 'admin' | 'editor' | 'viewer'}
+        onSuccess={fetchData}
       />
     </div>
   )

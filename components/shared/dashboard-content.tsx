@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { useUserPermissions } from "@/hooks/use-user-permissions"
 import { FormulariosSection } from "@/components/forms/formularios-section"
 import { PerfilSection } from "@/components/settings/perfil-section"
 import { ConfiguracionSection } from "@/components/settings/configuracion-section"
@@ -24,10 +25,24 @@ import { VoluntariadoEstadisticaSection } from "@/components/statistics/voluntar
 import { PimcoEstadisticaSection } from "@/components/statistics/pimco-estadistica-section"
 import { AdminPanelSection } from "@/components/admin/admin-panel-section"
 import Image from "next/image"
-import { Construction, FileText } from "lucide-react"
+import { Construction, FileText, ShieldAlert } from "lucide-react"
 
 interface DashboardContentProps {
   activeSection: string
+}
+
+// Componente para acceso denegado
+const AccessDenied = () => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center bg-white rounded-lg shadow-sm border border-red-200">
+      <div className="w-24 h-24 bg-linear-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mb-6">
+        <ShieldAlert className="w-12 h-12 text-red-600" />
+      </div>
+      <h2 className="text-3xl font-bold text-gray-800 mb-3">Acceso Denegado</h2>
+      <p className="text-gray-600 text-lg mb-2">No tienes permisos para acceder a esta sección</p>
+      <p className="text-gray-500 text-sm">Contacta al administrador si necesitas acceso</p>
+    </div>
+  )
 }
 
 // Componente para secciones en desarrollo
@@ -65,6 +80,7 @@ const UnderConstruction = ({ title, variant = 'coming-soon' }: { title: string; 
 export function DashboardContent({ activeSection }: DashboardContentProps) {
   const supabase = createClient()
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const { canViewSection, loading: permissionsLoading } = useUserPermissions()
 
   useEffect(() => {
     const getUser = async () => {
@@ -81,6 +97,11 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
   }, [supabase.auth])
 
   const renderSection = () => {
+    // Verificar permisos para la sección
+    if (!permissionsLoading && !canViewSection(activeSection)) {
+      return <AccessDenied />
+    }
+
     switch (activeSection) {
       // PIMCO - Perfil Comunitario
       case "pimco-comunidades":
