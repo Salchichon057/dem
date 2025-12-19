@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useUserPermissions } from "@/hooks/use-user-permissions"
+import type { SectionKey } from "@/lib/types/permissions"
 import { FormulariosSection } from "@/components/forms/formularios-section"
 import { PerfilSection } from "@/components/settings/perfil-section"
 import { ConfiguracionSection } from "@/components/settings/configuracion-section"
@@ -97,8 +98,11 @@ export function DashboardContent({ activeSection }: DashboardContentProps) {
   }, [supabase.auth])
 
   const renderSection = () => {
-    // Verificar permisos para la sección
-    if (!permissionsLoading && !canViewSection(activeSection)) {
+    // Secciones que no requieren verificación de permisos (accesibles para todos los usuarios autenticados)
+    const publicSections = ['perfil', 'configuracion']
+    
+    // Verificar permisos para la sección solo si no es pública
+    if (!permissionsLoading && !publicSections.includes(activeSection) && !canViewSection(activeSection as SectionKey)) {
       return <AccessDenied />
     }
 
