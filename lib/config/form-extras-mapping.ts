@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FormSectionType } from '@/lib/types'
 import { getAnswerValue, calculateHoursDifference } from '@/lib/utils/auto-create-extras'
 
 export interface ExtraFieldMapping {
@@ -10,7 +9,7 @@ export interface ExtraFieldMapping {
 
 export interface FormExtrasConfig {
   formTemplateId: string
-  sectionLocation: FormSectionType
+  sectionLocation: string
   extrasTable: string
   fieldMappings: ExtraFieldMapping[]
   defaultValues?: Record<string, any | ((answers: any[]) => any)>
@@ -19,7 +18,7 @@ export interface FormExtrasConfig {
 export const FORM_EXTRAS_MAPPINGS: Record<string, FormExtrasConfig> = {
   'f036d9ff-e51a-46ca-8744-6f8187966f5b': {
     formTemplateId: 'f036d9ff-e51a-46ca-8744-6f8187966f5b',
-    sectionLocation: FormSectionType.VOLUNTARIADO,
+    sectionLocation: 'voluntariado',
     extrasTable: 'volunteer_extras',
     fieldMappings: [],
     defaultValues: {
@@ -35,7 +34,7 @@ export const FORM_EXTRAS_MAPPINGS: Record<string, FormExtrasConfig> = {
   
   '5bd783b6-e52c-48de-ab3b-9e7ae8538bd2': {
     formTemplateId: '5bd783b6-e52c-48de-ab3b-9e7ae8538bd2',
-    sectionLocation: FormSectionType.AUDITORIAS,
+    sectionLocation: 'auditorias',
     extrasTable: 'consolidated_board_extras',
     fieldMappings: [],
     defaultValues: {

@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth-server'
 import { createClient } from '@supabase/supabase-js'
-import { FormSectionType } from '@/lib/types'
+// import { FormSectionType } from '@/lib/types' // Temporalmente comentado para debug
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Usando anon key
@@ -30,9 +30,10 @@ export async function GET(req: NextRequest) {
     const sectionLocation = searchParams.get('section_location') || searchParams.get('section')
 
     // Validar que sea un tipo válido si se proporciona
-    if (sectionLocation && !Object.values(FormSectionType).includes(sectionLocation as FormSectionType)) {
+    const validSections = ['perfil-comunitario', 'organizaciones', 'auditorias', 'comunidades', 'voluntariado', 'abrazando-leyendas']
+    if (sectionLocation && !validSections.includes(sectionLocation)) {
       return NextResponse.json(
-        { error: `Tipo de sección inválido. Debe ser uno de: ${Object.values(FormSectionType).join(', ')}` },
+        { error: `Tipo de sección inválido. Debe ser uno de: ${validSections.join(', ')}` },
         { status: 400 }
       )
     }
@@ -82,10 +83,12 @@ export async function GET(req: NextRequest) {
       )
     }
     // Obtener conteo de submissions para cada formulario usando el helper
-    const formIds = (forms || []).map(f => f.id)
+    // const formIds = (forms || []).map(f => f.id)
     
-    let submissionCounts: Record<string, number> = {}
+    const submissionCounts: Record<string, number> = {}
     
+    // Temporalmente deshabilitado para debug
+    /* 
     if (formIds.length > 0) {
       try {
         // Usar el helper que distribuye las queries según section_location
@@ -94,6 +97,7 @@ export async function GET(req: NextRequest) {
       } catch {
       }
     }
+    */
 
     const formsWithCount = (forms || []).map(form => ({
       ...form,
@@ -131,9 +135,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Validar que sea un tipo válido
-    if (!Object.values(FormSectionType).includes(section_location as FormSectionType)) {
+    if (!['perfil-comunitario', 'organizaciones', 'auditorias', 'comunidades', 'voluntariado', 'abrazando-leyendas'].includes(section_location)) {
       return NextResponse.json(
-        { error: `Tipo de sección inválido. Debe ser uno de: ${Object.values(FormSectionType).join(', ')}` },
+        { error: `Tipo de sección inválido. Debe ser uno de: ${['perfil-comunitario', 'organizaciones', 'auditorias', 'comunidades', 'voluntariado', 'abrazando-leyendas'].join(', ')}` },
         { status: 400 }
       )
     }
@@ -257,9 +261,9 @@ export async function PUT(req: NextRequest) {
     }
 
     // Validar tipo de sección si se proporciona
-    if (section_location && !Object.values(FormSectionType).includes(section_location as FormSectionType)) {
+    if (section_location && !['perfil-comunitario', 'organizaciones', 'auditorias', 'comunidades', 'voluntariado', 'abrazando-leyendas'].includes(section_location)) {
       return NextResponse.json(
-        { error: `Tipo de sección inválido. Debe ser uno de: ${Object.values(FormSectionType).join(', ')}` },
+        { error: `Tipo de sección inválido. Debe ser uno de: ${['perfil-comunitario', 'organizaciones', 'auditorias', 'comunidades', 'voluntariado', 'abrazando-leyendas'].join(', ')}` },
         { status: 400 }
       )
     }
@@ -341,6 +345,7 @@ export async function DELETE(req: NextRequest) {
     )
   }
 }
+
 
 
 

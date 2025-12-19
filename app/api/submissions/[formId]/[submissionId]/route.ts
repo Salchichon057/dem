@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth-server'
-import { FormSectionType } from '@/lib/types'
+// import { FormSectionType } from '@/lib/types' // Temporalmente deshabilitado
 import { getSubmissionTables } from '@/lib/supabase/submissions'
 
 export async function GET(
@@ -25,7 +25,12 @@ export async function GET(
       return NextResponse.json({ error: 'Formulario no encontrado' }, { status: 404 })
     }
 
-    const sectionLocation = form.section_location as FormSectionType
+    if (!form.section_location) {
+      console.error('Form has no section_location:', form)
+      return NextResponse.json({ error: 'Formulario sin section_location' }, { status: 400 })
+    }
+
+    const sectionLocation = form.section_location as string
     const { submissions: submissionsTable, answers: answersTable } = getSubmissionTables(sectionLocation)
 
     const { data: submission, error: submissionError } = await supabase
@@ -104,7 +109,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Formulario no encontrado' }, { status: 404 })
     }
 
-    const sectionLocation = form.section_location as FormSectionType
+    if (!form.section_location) {
+      console.error('Form has no section_location in PUT:', form)
+      return NextResponse.json({ error: 'Formulario sin section_location' }, { status: 400 })
+    }
+
+    const sectionLocation = form.section_location as string
     const { submissions: submissionsTable, answers: answersTable } = getSubmissionTables(sectionLocation)
 
     // Actualizar el timestamp del submission

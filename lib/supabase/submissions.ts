@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/client'
-import { FormSectionType, SUBMISSION_TABLES_MAP } from '@/lib/types'
+import { SUBMISSION_TABLES_MAP } from '@/lib/types'
 
 /**
  * Helper para manejar submissions en las tablas correctas según section_location
- * Usa el enum FormSectionType y el mapper SUBMISSION_TABLES_MAP
+ * Usa el mapper SUBMISSION_TABLES_MAP
  */
 
 interface SubmissionData {
@@ -24,7 +24,7 @@ interface AnswerData {
 /**
  * Obtiene los nombres de las tablas según el section_location
  */
-export function getSubmissionTables(sectionLocation: FormSectionType) {
+export function getSubmissionTables(sectionLocation: string) {
   const tables = SUBMISSION_TABLES_MAP[sectionLocation]
   
   if (!tables) {
@@ -38,7 +38,7 @@ export function getSubmissionTables(sectionLocation: FormSectionType) {
  * Crea una nueva submission en la tabla correspondiente
  */
 export async function createSubmission(
-  sectionLocation: FormSectionType,
+  sectionLocation: string,
   data: SubmissionData
 ) {
   const supabase = createClient()
@@ -58,7 +58,7 @@ export async function createSubmission(
  * Crea múltiples answers en la tabla correspondiente
  */
 export async function createAnswers(
-  sectionLocation: FormSectionType,
+  sectionLocation: string,
   answers: AnswerData[]
 ) {
   const supabase = createClient()
@@ -79,7 +79,7 @@ export async function createAnswers(
  * Obtiene submissions de un formulario específico
  */
 export async function getSubmissionsByFormId(
-  sectionLocation: FormSectionType,
+  sectionLocation: string,
   formTemplateId: string
 ) {
   const supabase = createClient()
@@ -99,7 +99,7 @@ export async function getSubmissionsByFormId(
  * Obtiene las respuestas de una submission específica
  */
 export async function getAnswersBySubmissionId(
-  sectionLocation: FormSectionType,
+  sectionLocation: string,
   submissionId: string
 ) {
   const supabase = createClient()
@@ -118,7 +118,7 @@ export async function getAnswersBySubmissionId(
  * Cuenta submissions para un formulario específico
  */
 export async function countSubmissionsByFormId(
-  sectionLocation: FormSectionType,
+  sectionLocation: string,
   formTemplateId: string
 ): Promise<number> {
   const supabase = createClient()
@@ -138,7 +138,7 @@ export async function countSubmissionsByFormId(
  * Retorna un objeto con form_template_id como key y count como value
  */
 export async function countSubmissionsByFormIds(
-  sectionLocation: FormSectionType,
+  sectionLocation: string,
   formTemplateIds: string[]
 ): Promise<Record<string, number>> {
   const supabase = createClient()
@@ -164,7 +164,7 @@ export async function countSubmissionsByFormIds(
  * Elimina una submission y sus respuestas (CASCADE automático por FK)
  */
 export async function deleteSubmission(
-  sectionLocation: FormSectionType,
+  sectionLocation: string,
   submissionId: string
 ) {
   const supabase = createClient()
@@ -213,7 +213,7 @@ export async function getAllSubmissionsCounts(
   for (const [sectionLocation, ids] of Object.entries(formsBySection)) {
     try {
       const sectionCounts = await countSubmissionsByFormIds(
-        sectionLocation as FormSectionType,
+        sectionLocation,
         ids
       )
       

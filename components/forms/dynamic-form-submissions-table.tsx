@@ -54,7 +54,7 @@ export default function DynamicFormSubmissionsTable({
   onFormSelect,
   onEditSubmission
 }: DynamicFormSubmissionsTableProps) {
-  const { canExport } = useUserPermissions()
+  const { canExport, canEdit } = useUserPermissions()
   
   // Use custom hook for data management
   const {
@@ -654,18 +654,20 @@ export default function DynamicFormSubmissionsTable({
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          title="Editar respuestas"
-                          onClick={() => {
-                            if (onEditSubmission && selectedFormId) {
-                              onEditSubmission(selectedFormId, row.submission_id)
-                            }
-                          }}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
+                        {canEdit() && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Editar respuestas"
+                            onClick={() => {
+                              if (onEditSubmission && selectedFormId) {
+                                onEditSubmission(selectedFormId, row.submission_id)
+                              }
+                            }}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

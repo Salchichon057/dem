@@ -37,7 +37,7 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loadingFormId, setLoadingFormId] = useState<string | null>(null)
-  const { canCreate, canEdit, canDelete } = useUserPermissions()
+  const { canCreate, canEdit, canDelete, canFillForm } = useUserPermissions()
   
   // Estado para modal de configuración pública
   const [publicConfigModal, setPublicConfigModal] = useState<{
@@ -384,28 +384,37 @@ export default function FormsList({ sectionLocation, locationName, onViewForm, o
 
                 {/* Acciones */}
                 <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-200">
-                  {/* Botón Ver */}
-                  {onViewForm ? (
-                    <button
-                      onClick={() => handleViewForm(form.id)}
-                      disabled={loadingFormId === form.id}
-                      title="Ver formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loadingFormId === form.id ? (
-                        <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                      ) : (
-                        <Eye className="w-5 h-5 mx-auto" />
-                      )}
-                    </button>
+                  {/* Botón Ver/Responder - Solo Admin y Editor */}
+                  {canFillForm() ? (
+                    onViewForm ? (
+                      <button
+                        onClick={() => handleViewForm(form.id)}
+                        disabled={loadingFormId === form.id}
+                        title="Responder formulario"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loadingFormId === form.id ? (
+                          <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                        ) : (
+                          <Eye className="w-5 h-5 mx-auto" />
+                        )}
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/dashboard/formularios/${form.id}/view`}
+                        title="Responder formulario"
+                        className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </Link>
+                    )
                   ) : (
-                    <Link
-                      href={`/dashboard/formularios/${form.id}/view`}
-                      title="Ver formulario"
-                      className="px-4 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 transition-all text-center text-sm font-medium inline-flex items-center justify-center"
+                    <div 
+                      className="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 text-gray-400 rounded-lg text-center text-sm font-medium cursor-not-allowed inline-flex items-center justify-center" 
+                      title="Sin permisos para responder formularios"
                     >
                       <Eye className="w-5 h-5" />
-                    </Link>
+                    </div>
                   )}
 
                   {/* Botón Editar - Solo si no tiene respuestas */}

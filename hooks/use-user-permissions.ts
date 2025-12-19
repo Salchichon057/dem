@@ -12,6 +12,7 @@ interface UseUserPermissionsReturn {
   canDelete: () => boolean
   canExport: () => boolean
   canManageUsers: () => boolean
+  canFillForm: () => boolean
   canViewSection: (sectionKey: SectionKey) => boolean
   isAdmin: boolean
 }
@@ -68,7 +69,11 @@ export function useUserPermissions(): UseUserPermissionsReturn {
   const canManageUsers = () => {
     return userPermissions?.role.permissions.users.manage ?? false
   }
-
+  const canFillForm = () => {
+    // Admin y Editor pueden responder formularios, Viewer solo ver
+    const roleName = userPermissions?.role.name as 'admin' | 'editor' | 'viewer' | null
+    return roleName === 'admin' || roleName === 'editor'
+  }
   const canViewSection = (sectionKey: SectionKey): boolean => {
     if (!userPermissions) return false
     
@@ -91,6 +96,7 @@ export function useUserPermissions(): UseUserPermissionsReturn {
     permissions: userPermissions?.role.permissions ?? null,
     allowedSections: userPermissions?.allowedSections ?? [],
     canCreate,
+    canFillForm,
     canEdit,
     canDelete,
     canExport,

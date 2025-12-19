@@ -1,54 +1,52 @@
-import { FormSectionType } from '@/lib/types'
-
 export interface ExtrasTableConfig {
   tableName: string
   hasExtras: boolean
   apiEndpoint?: string
 }
 
-export const EXTRAS_TABLES_MAP: Record<FormSectionType, ExtrasTableConfig> = {
-  [FormSectionType.AUDITORIAS]: {
+export const EXTRAS_TABLES_MAP: Record<string, ExtrasTableConfig> = {
+  'auditorias': {
     tableName: 'consolidated_board_extras',
     hasExtras: true,
     apiEndpoint: '/api/board-extras',
   },
-  [FormSectionType.VOLUNTARIADO]: {
+  'voluntariado': {
     tableName: 'volunteer_extras',
     hasExtras: true,
     apiEndpoint: '/api/volunteer-extras',
   },
-  [FormSectionType.ORGANIZACIONES]: {
+  'organizaciones': {
     tableName: '',
     hasExtras: false,
   },
-  [FormSectionType.PERFIL_COMUNITARIO]: {
+  'perfil-comunitario': {
     tableName: '',
     hasExtras: false,
   },
-  [FormSectionType.COMUNIDADES]: {
+  'comunidades': {
     tableName: '',
     hasExtras: false,
   },
-  [FormSectionType.ABRAZANDO_LEYENDAS]: {
+  'abrazando-leyendas': {
     tableName: '',
     hasExtras: false,
   },
 }
 
-export function getExtrasConfig(sectionLocation: FormSectionType): ExtrasTableConfig {
+export function getExtrasConfig(sectionLocation: string): ExtrasTableConfig {
   return EXTRAS_TABLES_MAP[sectionLocation]
 }
 
-export function hasExtrasTable(sectionLocation: FormSectionType): boolean {
+export function hasExtrasTable(sectionLocation: string): boolean {
   return EXTRAS_TABLES_MAP[sectionLocation]?.hasExtras ?? false
 }
 
-export function getExtrasTableName(sectionLocation: FormSectionType): string | null {
+export function getExtrasTableName(sectionLocation: string): string | null {
   const config = EXTRAS_TABLES_MAP[sectionLocation]
   return config?.hasExtras ? config.tableName : null
 }
 
-export function getExtrasApiEndpoint(sectionLocation: FormSectionType): string | null {
+export function getExtrasApiEndpoint(sectionLocation: string): string | null {
   const config = EXTRAS_TABLES_MAP[sectionLocation]
   return config?.hasExtras ? config.apiEndpoint ?? null : null
 }

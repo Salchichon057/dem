@@ -7,6 +7,7 @@ import DynamicFormSubmissionsTable from '@/components/forms/dynamic-form-submiss
 import OrganizationsCharts from '@/components/statistics/organizations-charts'
 import FormRenderer from "@/components/form/FormRenderer"
 import { useFormSubmissionEdit } from "@/hooks/use-form-submission-edit"
+import { useUserPermissions } from '@/hooks/use-user-permissions'
 
 type ViewMode = 'table' | 'charts' | 'edit-submission'
 
@@ -14,8 +15,10 @@ export default function OrganizationsSection() {
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null)
   const { editState, startEdit, cancelEdit, isEditing } = useFormSubmissionEdit()
+  const { canEdit } = useUserPermissions()
 
   const handleEditSubmission = (formId: string, submissionId: string) => {
+    if (!canEdit) return
     console.log('Edit submission clicked:', { formId, submissionId })
     startEdit(formId, submissionId)
     setViewMode('edit-submission')

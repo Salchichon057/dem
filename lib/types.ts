@@ -3,7 +3,7 @@ export * from './types/community'
 export * from './utils/extras.utils'
 export * from './utils/phone.utils'
 
-// Enum para los tipos de sección de formularios
+// Enum para los tipos de sección de formularios  
 export enum FormSectionType {
   PERFIL_COMUNITARIO = 'perfil-comunitario',
   ORGANIZACIONES = 'organizaciones',
@@ -14,30 +14,30 @@ export enum FormSectionType {
 }
 
 // Mapper: section_location -> tabla de submissions correspondiente
-export const SUBMISSION_TABLES_MAP: Record<FormSectionType, { submissions: string; answers: string; extras?: string }> = {
-  [FormSectionType.ORGANIZACIONES]: {
+export const SUBMISSION_TABLES_MAP: Record<string, { submissions: string; answers: string; extras?: string }> = {
+  'organizaciones': {
     submissions: 'organizations_submissions',
     answers: 'organizations_answers'
   },
-  [FormSectionType.AUDITORIAS]: {
+  'auditorias': {
     submissions: 'audits_submissions',
     answers: 'audits_answers',
     extras: 'consolidated_board_extras'
   },
-  [FormSectionType.PERFIL_COMUNITARIO]: {
+  'perfil-comunitario': {
     submissions: 'community_profile_submissions',
     answers: 'community_profile_answers'
   },
-  [FormSectionType.VOLUNTARIADO]: {
+  'voluntariado': {
     submissions: 'volunteer_submissions',
     answers: 'volunteer_answers',
     extras: 'volunteer_extras'
   },
-  [FormSectionType.COMUNIDADES]: {
+  'comunidades': {
     submissions: 'communities_submissions',
     answers: 'communities_answers'
   },
-  [FormSectionType.ABRAZANDO_LEYENDAS]: {
+  'abrazando-leyendas': {
     submissions: 'embracing_legends_submissions',
     answers: 'embracing_legends_answers'
   }
